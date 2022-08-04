@@ -6,3 +6,6 @@
 /.vs/ProjectEvaluation
 /excel-generator/.vs/excel-generator
 /excel-generator/obj
+*.xlsx
+/excel-generator/bin/Debug/net6.0
+/excel-generator/bin/Release/net6.0
