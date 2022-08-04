@@ -9,3 +9,4 @@
 *.xlsx
 /excel-generator/bin/Debug/net6.0
 /excel-generator/bin/Release/net6.0
+/.vs/excel-generator
