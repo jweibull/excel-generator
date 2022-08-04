@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/excel-generator/v17/.suo
+/.vs/ProjectEvaluation
+/excel-generator/.vs/excel-generator
+/excel-generator/obj
