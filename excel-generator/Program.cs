@@ -1,7 +1,7 @@
 ﻿using ExcelGenerator.Generators;
 ;
 
-var excelLib = new MinimalBoilerPlate();
+var excelLib = new MinimalBoilerPlateWithSax();
 
 string path = Directory.GetCurrentDirectory();
 path = Path.Combine(path, "..", "..", "..", "output");
