@@ -1,18 +1,17 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
-using Ap = DocumentFormat.OpenXml.ExtendedProperties;
-using Vt = DocumentFormat.OpenXml.VariantTypes;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
-using X15ac = DocumentFormat.OpenXml.Office2013.ExcelAc;
-using X14 = DocumentFormat.OpenXml.Office2010.Excel;
-using X15 = DocumentFormat.OpenXml.Office2013.Excel;
-using A = DocumentFormat.OpenXml.Drawing;
-using Thm15 = DocumentFormat.OpenXml.Office2013.Theme;
+using x14 = DocumentFormat.OpenXml.Office2010.Excel;
+using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 
 namespace ExcelGenerator.Generators;
 
 public class MinimalBoilerPlateWithSax
 {
+    public Dictionary<string, string> SharedStringsToIndex { get; set; } = new Dictionary<string, string>();
+    public int sharedStringsCount { get; set; } = 0;
+    public int sharedStringsUniqueCount { get; set; } = 0;
+
     public void CreatePackage(string filename)
     {
         using (var stream = new MemoryStream())
@@ -20,23 +19,37 @@ public class MinimalBoilerPlateWithSax
             using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
             {
                 // TestData
-                var data = new string[4] { "Header 1", "A", "B", "B" };
+                var data = new string[4] { "Header", "A", "B", "B" };
                 var fonts = new string[2] { "Calibri", "Calibri Light" };
                 var partId = 1;
-                string partIdString = string.Empty;
+                string sharedTableId = string.Empty;
+                string stylesPartId = string.Empty;
+                string sheetPartId = string.Empty;
+
                 document.AddWorkbookPart();
+                
                 if (document.WorkbookPart != null)
                 {
                     // Generate all Shared Strings that will be used in all the sheets
-                    var sharedStringsToIndex = GenerateSharedStringsTable(document.WorkbookPart, data);
-
-                    // Generate all Styles needed on every sheet in this workbook
-                    partIdString = "rId" + partId++;
-                    GenerateStylePart(document.WorkbookPart, partIdString, fonts);
+                    sharedStringsCount = 0;
+                    AddToSharedStringDictionary(data);
+                    sharedStringsUniqueCount = SharedStringsToIndex.Count;
 
                     // Generate a single sheet 
-                    partIdString = "rId" + partId++;
-                    GenerateWorkSheetData(document.WorkbookPart, partIdString, data, sharedStringsToIndex);
+                    sheetPartId = "rId" + partId++;
+                    stylesPartId = "rId" + partId++;
+                    sharedTableId = "rId" + partId++;
+
+                    // Generate all Styles needed on every sheet in this workbook
+                    WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
+                    WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
+                    TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
+                    SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
+
+                    GenerateStylePart(workbookStylesPart, stylesPartId, fonts);
+                    GenerateWorkSheetData(workSheetPart, data, sheetPartId);
+                    GenerateTableParts(sheetTablesPart, sheetPartId);
+                    GenerateSharedStringsTable(sharedStringTablePart, data, sharedTableId);
 
                     // Create the worksheet and sheets list to end the package
                     using (var writer = OpenXmlWriter.Create(document.WorkbookPart))
@@ -46,9 +59,9 @@ public class MinimalBoilerPlateWithSax
 
                         writer.WriteElement(new Sheet()
                         {
-                            Name = "Shared string table",
+                            Name = "Planilha1",
                             SheetId = 1,
-                            Id = partIdString
+                            Id = sheetPartId
                         });
 
                         // End Sheets
@@ -68,32 +81,17 @@ public class MinimalBoilerPlateWithSax
         }
     }
 
-    private Dictionary<string,string> GenerateSharedStringsTable(WorkbookPart workbookPart, string[] sharedStrings)
+    private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart, string[] sharedStrings, string sharedTableId)
     {
         // Run this for all strings in the workbook
         // string[] sharedStrings must contain all the strings in the project
 
-        var sharedStringsToIndex = new Dictionary<string, string>();
-        var totalCount = 0;
-        totalCount += AddToSharedStringDictionary(sharedStringsToIndex, sharedStrings);
-        var uniqueCount = sharedStringsToIndex.Count;
-
-        List<OpenXmlAttribute> attributes;
-        
-        SharedStringTablePart sharedStringTablePart = workbookPart.AddNewPart<SharedStringTablePart>();
-
         using (var writer = OpenXmlWriter.Create(sharedStringTablePart))
         {
-            var namespaceUri = string.Empty;
-
-            //write attributes
             // Change this based on real data count
-            attributes = new List<OpenXmlAttribute>();
-            attributes.Add(new OpenXmlAttribute("count", namespaceUri, totalCount.ToString()));
-            attributes.Add(new OpenXmlAttribute("uniqueCount", namespaceUri, uniqueCount.ToString()));
-            writer.WriteStartElement(new SharedStringTable(), attributes);
+            writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)sharedStringsCount, UniqueCount = (UInt32)sharedStringsUniqueCount });
 
-            foreach (var key in sharedStringsToIndex.Keys)
+            foreach (var key in SharedStringsToIndex.Keys)
             {
                 //write the row start element with the row index attribute
                 writer.WriteStartElement(new SharedStringItem());
@@ -110,62 +108,50 @@ public class MinimalBoilerPlateWithSax
 
             writer.Close();
         }
-        return sharedStringsToIndex;
     }
 
-    private int AddToSharedStringDictionary(Dictionary<string, string> sharedStringToIndex, string[] sharedStrings)
+    private void AddToSharedStringDictionary(string[] sharedStrings)
     {
         var count = 0;
         foreach (var item in sharedStrings)
         {
-            if (sharedStringToIndex.ContainsKey(item))
+            if (this.SharedStringsToIndex.ContainsKey(item))
             {
                 count++;
             }
             else
             {
                 count++;
-                sharedStringToIndex.Add(item, sharedStringToIndex.Count().ToString());
+                SharedStringsToIndex.Add(item, SharedStringsToIndex.Count().ToString());
             }
         }
-        return count;
+        sharedStringsCount += count;
     }
 
-    private void GenerateWorkSheetData(WorkbookPart workbookPart, string sheetPartId, string[] data, Dictionary<string, string> sharedStringsToIndex)
+    private void GenerateWorkSheetData(WorksheetPart workSheetPart, string[] data, string sheetPartId)
     {
         // Actual Cell Values from string table
-        WorksheetPart workSheetPart = workbookPart.AddNewPart<WorksheetPart>(sheetPartId);
-
-        var namespaceUri = string.Empty;
-        List<OpenXmlAttribute> attributes;
-
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
             writer.WriteStartElement(new Worksheet());
+
+            writer.WriteStartElement(new Columns() { });
+            writer.WriteElement(new Column() { Min = 1, Max = 1, Width=12, CustomWidth=true });
+            writer.WriteEndElement();
+
             writer.WriteStartElement(new SheetData());
 
             for (int rowNum = 1; rowNum <= data.Length; rowNum++)
             {
-                //create a new list of attributes
-                attributes = new List<OpenXmlAttribute>();
-                // add the row index attribute to the list
-                attributes.Add(new OpenXmlAttribute("r", namespaceUri, rowNum.ToString()));
                 //write the row start element with the row index attribute
-                writer.WriteStartElement(new Row(), attributes);
+                writer.WriteStartElement(new Row() { RowIndex = (UInt32)rowNum });
 
                 for (int columnNum = 1; columnNum <= 1; columnNum++)
                 {
-                    //reset the list of attributes
-                    attributes = new List<OpenXmlAttribute>();
-                    // add data type attribute - in this case inline string (you might want to look at the shared strings table)
-                    attributes.Add(new OpenXmlAttribute("t", namespaceUri, "s"));
-                    //add the cell reference attribute
-                    attributes.Add(new OpenXmlAttribute("r", namespaceUri, string.Format("{0}{1}", GetColumnName(columnNum), rowNum)));
-
                     //write the cell start element with the type and reference attributes
-                    writer.WriteStartElement(new Cell(), attributes);
+                    writer.WriteStartElement(new Cell() { CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum), DataType = CellValues.SharedString });
                     //write the cell value
-                    writer.WriteElement(new CellValue(sharedStringsToIndex[data[rowNum - 1]]));
+                    writer.WriteElement(new CellValue(SharedStringsToIndex[data[rowNum - 1]]));
 
                     // write the end cell element
                     writer.WriteEndElement();
@@ -177,48 +163,65 @@ public class MinimalBoilerPlateWithSax
 
             // write the end SheetData element
             writer.WriteEndElement();
+
+            writer.WriteStartElement(new TableParts() { Count = 1 });
+            writer.WriteElement(new TablePart() { Id = sheetPartId });
+            writer.WriteEndElement();
+
             // write the end Worksheet element
             writer.WriteEndElement();
             writer.Close();
         }
     }
 
-    private void GenerateStylePart(WorkbookPart workbookPart, string sheetPartId, string[] fonts)
+
+    // TODO create dictionaries to link fonts and fills etc to the CellFormatStyles element inside this method.
+    // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
+    // will be the third font added in fonts section, while the font with id "0" will be the first you added.
+    // Same goes for borders, fills, etc.
+    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, string stylesPartId, string[] fonts)
     {
-        //Hardcoded props
-        var fontSize = 11;
-        var fontFamily = 2; // Calibri family?
-        var theme = 1;
-        
-        WorkbookStylesPart workbookStylesPart = workbookPart.AddNewPart<WorkbookStylesPart>(sheetPartId);
-
-        var namespaceUri = string.Empty;
-        List<OpenXmlAttribute> attributes;
-
         using (var writer = OpenXmlWriter.Create(workbookStylesPart))
         {
-            
-
             writer.WriteStartElement(new Stylesheet());
 
             #region Fonts
+
+            //Hardcoded props
+            var fontSize = 11;
+            var fontFamily = 2; // Calibri family?
+            var theme = 1;
+
             //write the fonts sections
             //<Fonts>
             //  <Font>...props...</Font>
             //</Fonts>
-            attributes = new List<OpenXmlAttribute>();
-            attributes.Add(new OpenXmlAttribute("count", namespaceUri, fonts.Length.ToString()));
-            writer.WriteStartElement(new Fonts(), attributes);
+            writer.WriteStartElement(new Fonts() { Count = (UInt32)fonts.Length });
 
             foreach (var font in fonts)
             {
                 writer.WriteStartElement(new Font());
-                
+
                 writer.WriteElement(new FontSize() { Val = fontSize });
                 writer.WriteElement(new Color() { Theme = (UInt32)theme });
                 writer.WriteElement(new FontName() { Val = font });
                 writer.WriteElement(new FontFamily() { Val = fontFamily });
+
+                // Why is this here??? What's the diference between major and minor fonts
                 writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
+
+                //Close the single Font Tag
+                writer.WriteEndElement();
+
+                writer.WriteStartElement(new Font());
+
+                writer.WriteElement(new FontSize() { Val = fontSize });
+                writer.WriteElement(new Color() { Theme = (UInt32)theme });
+                writer.WriteElement(new FontName() { Val = font });
+                writer.WriteElement(new FontFamily() { Val = fontFamily });
+
+                // Why is this here??? What's the diference between major and minor fonts
+                writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Minor });
 
                 //Close the single Font Tag
                 writer.WriteEndElement();
@@ -226,9 +229,188 @@ public class MinimalBoilerPlateWithSax
 
             // End Fonts section
             writer.WriteEndElement();
+
             #endregion
 
+            #region Fills
+
+            //Hardcoded Props
+            var fills = new PatternValues[2] { PatternValues.None, PatternValues.Gray125 };
+
+            writer.WriteStartElement(new Fills() { Count = (UInt32)fills.Length });
+
+            foreach (var fill in fills)
+            {
+                writer.WriteStartElement(new Fill());
+
+                writer.WriteElement(new PatternFill() { PatternType = fill });
+
+                //Close the single Font Tag
+                writer.WriteEndElement();
+            }
+
+            // End Fills section
+            writer.WriteEndElement();
+
+            #endregion
+
+
+            #region Borders
+
+            //Hardcoded Props
+            var borderCount = 1;
+            // Start Borders section
+            writer.WriteStartElement(new Borders() { Count = (UInt32)borderCount });
+            //Start border element
+            writer.WriteStartElement(new Border());
+
+            writer.WriteElement(new LeftBorder());
+            writer.WriteElement(new RightBorder());
+            writer.WriteElement(new TopBorder());
+            writer.WriteElement(new BottomBorder());
+            writer.WriteElement(new DiagonalBorder());
+
+            //Close the boder
+            writer.WriteEndElement();
+            // End Borders section
+            writer.WriteEndElement();
+
+            #endregion
+
+            #region CellStyleXfs (Cell Style Formats)
+
+            // Creates a shared style table to apply to cells using an Id. 
+
+            //Hardcoded Props
+            var cellStyleXfsCount = 1;
+
+            //Start CellStyleXfs element
+            writer.WriteStartElement(new CellStyleFormats() { Count = (UInt32)cellStyleXfsCount });
+
+            writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)0, FillId = (UInt32)0, BorderId = (UInt32)0 });
+
+            // End CellStyleXfs section
+            writer.WriteEndElement();
+
+            #endregion
+
+            #region CellXfs (CellFormats)
+
+            //Hardcoded Props
+            var cellXfsCount = 2;
+
+            //Start CellStyleFormats section
+            writer.WriteStartElement(new CellFormats() { Count = (UInt32)cellXfsCount });
+
+            writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)0, FillId = (UInt32)0, BorderId = (UInt32)0 });
+            writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)1, FillId = (UInt32)0, BorderId = (UInt32)0, ApplyFont = true });
+
+            // End CellStyleFormats section
+            writer.WriteEndElement();
+
+            #endregion
+
+            #region CellStyles
+
+            //Hardcoded Props
+            var cellStylesCount = 1;
+
+            //Start CellStyleFormats element
+            writer.WriteStartElement(new CellStyles() { Count = (UInt32)cellStylesCount });
+
+            writer.WriteElement(new CellStyle() { Name = "Normal", FormatId = (UInt32)0, BuiltinId = (UInt32)0 });
+
+            // End CellStyles section
+            writer.WriteEndElement();
+
+            #endregion
+
+            #region Diferential formats
+
+            //Hardcoded Props
+            var diferentialFormatsCount = 1;
+
+            // Start diferential formats section
+            writer.WriteStartElement(new DifferentialFormats() { Count = (UInt32)diferentialFormatsCount });
+            // Start diferential format tag
+            writer.WriteStartElement(new DifferentialFormat());
+            // Start font tag
+            writer.WriteStartElement(new Font());
+
+            writer.WriteElement(new Bold() { Val = false });
+            writer.WriteElement(new Italic() { Val = false });
+            writer.WriteElement(new Strike() { Val = false });
+            writer.WriteElement(new Condense() { Val = false });
+            writer.WriteElement(new Extend() { Val = false });
+            writer.WriteElement(new Outline() { Val = false });
+            writer.WriteElement(new Shadow() { Val = false });
+            writer.WriteElement(new Underline() { Val = UnderlineValues.None });
+            // Superscript, Subscript and Baseline
+            writer.WriteElement(new VerticalTextAlignment() { Val = VerticalAlignmentRunValues.Baseline });
+            writer.WriteElement(new FontSize() { Val = 11 });
+            writer.WriteElement(new Color() { Theme = (UInt32)1 });
+            writer.WriteElement(new FontName() { Val = "Calibri Light" });
+            writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
+
+            // End font tag
+            writer.WriteEndElement();
+            // End diferential format tag
+            writer.WriteEndElement();
+            // End diferential formats section
+            writer.WriteEndElement();
+
+            #endregion
+
+            #region TableStyles
+
+            writer.WriteElement(new TableStyles() { Count = 0, DefaultTableStyle = "TableStyleMedium2", DefaultPivotStyle = "PivotStyleLight16" });
+
+            #endregion
+
+            #region Style Extensions List
+
+            //Start extensions list
+            writer.WriteStartElement(new StylesheetExtensionList());
+
+            var guid = "{" + Guid.NewGuid() + "}";
+            writer.WriteStartElement(new StylesheetExtension() { Uri = guid });
+            writer.WriteElement(new x14.SlicerStyles() { DefaultSlicerStyle = "SlicerStyleLight1" });
+            writer.WriteEndElement();
+
+            guid = "{" + Guid.NewGuid() + "}";
+            writer.WriteStartElement(new StylesheetExtension() { Uri = guid });
+            writer.WriteElement(new x15.TimelineStyles() { DefaultTimelineStyle = "TimeSlicerStyleLight1" });
+            writer.WriteEndElement();
+
+            // End extensions list
+            writer.WriteEndElement();
+
+            #endregion
+
+
             //End styleSsheet
+            writer.WriteEndElement();
+            writer.Close();
+        }
+    }
+
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId)
+    {
+        using (var writer = OpenXmlWriter.Create(sheetTablesPart))
+        {
+            var table = new Table() { Id = (UInt32Value)1U, Name = "Table", DisplayName = "Table", Reference = "A1:A4", TotalsRowShown = false, HeaderRowFormatId = (UInt32Value)0U };
+            // Start Table element
+            writer.WriteStartElement(table); 
+            
+            writer.WriteElement(new AutoFilter() { Reference = "A1:A4" });
+
+            writer.WriteStartElement(new TableColumns() { Count = (UInt32Value)1U });
+            writer.WriteElement(new TableColumn() { Id = (UInt32Value)1U, Name = "Header" });
+            writer.WriteEndElement();
+
+            writer.WriteElement(new TableStyleInfo() { Name = "TableStyleLight3", ShowFirstColumn = false, ShowLastColumn = false, ShowRowStripes = true, ShowColumnStripes = false });
+
+            //End Table
             writer.WriteEndElement();
             writer.Close();
         }

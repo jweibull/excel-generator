@@ -4,7 +4,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace ExcelGenerator.Generators;
 
-public class MinimalBoilerPlateWithTable
+public class MinimalBoilerPlateWithTableAddSax
 {
     // Creates a SpreadsheetDocument.
     public void CreatePackage(string filePath)
@@ -21,7 +21,7 @@ public class MinimalBoilerPlateWithTable
         WorkbookPart workbookPart1 = document.AddWorkbookPart();
         GenerateWorkbookPart1Content(workbookPart1);
 
-        WorkbookStylesPart workbookStylesPart1 = workbookPart1.AddNewPart<WorkbookStylesPart>("rId3");
+        WorkbookStylesPart workbookStylesPart1 = workbookPart1.AddNewPart<WorkbookStylesPart>("rId2");
         GenerateWorkbookStylesPart1Content(workbookStylesPart1);
 
         WorksheetPart worksheetPart1 = workbookPart1.AddNewPart<WorksheetPart>("rId1");
@@ -30,7 +30,7 @@ public class MinimalBoilerPlateWithTable
         TableDefinitionPart tableDefinitionPart1 = worksheetPart1.AddNewPart<TableDefinitionPart>("rId1");
         GenerateTableDefinitionPart1Content(tableDefinitionPart1);
 
-        SharedStringTablePart sharedStringTablePart1 = workbookPart1.AddNewPart<SharedStringTablePart>("rId4");
+        SharedStringTablePart sharedStringTablePart1 = workbookPart1.AddNewPart<SharedStringTablePart>("rId3");
         GenerateSharedStringTablePart1Content(sharedStringTablePart1);
 
         SetPackageProperties(document);
@@ -267,31 +267,48 @@ public class MinimalBoilerPlateWithTable
     // Generates content of sharedStringTablePart1.
     private void GenerateSharedStringTablePart1Content(SharedStringTablePart sharedStringTablePart1)
     {
-        SharedStringTable sharedStringTable1 = new SharedStringTable() { Count = (UInt32Value)3U, UniqueCount = (UInt32Value)3U };
+        
 
-        SharedStringItem sharedStringItem1 = new SharedStringItem();
-        Text text1 = new Text();
-        text1.Text = "Header";
+        using (var writer = OpenXmlWriter.Create(sharedStringTablePart1))
+        {
+            // Change this based on real data count
+            SharedStringTable sharedStringTable1 = new SharedStringTable() { Count = (UInt32Value)3U, UniqueCount = (UInt32Value)3U };
+            writer.WriteStartElement(sharedStringTable1);
 
-        sharedStringItem1.Append(text1);
 
-        SharedStringItem sharedStringItem2 = new SharedStringItem();
-        Text text2 = new Text();
-        text2.Text = "A";
+            //write the row start element with the row index attribute
+            writer.WriteStartElement(new SharedStringItem());
 
-        sharedStringItem2.Append(text2);
+            //write the text value
+            writer.WriteElement(new Text("Header"));
 
-        SharedStringItem sharedStringItem3 = new SharedStringItem();
-        Text text3 = new Text();
-        text3.Text = "B";
+            // write the end sharedItem element
+            writer.WriteEndElement();
 
-        sharedStringItem3.Append(text3);
+            //write the row start element with the row index attribute
+            writer.WriteStartElement(new SharedStringItem());
 
-        sharedStringTable1.Append(sharedStringItem1);
-        sharedStringTable1.Append(sharedStringItem2);
-        sharedStringTable1.Append(sharedStringItem3);
+            //write the text value
+            writer.WriteElement(new Text("A"));
 
-        sharedStringTablePart1.SharedStringTable = sharedStringTable1;
+            // write the end sharedItem element
+            writer.WriteEndElement();
+
+            //write the row start element with the row index attribute
+            writer.WriteStartElement(new SharedStringItem());
+
+            //write the text value
+            writer.WriteElement(new Text("B"));
+
+            // write the end sharedItem element
+            writer.WriteEndElement();
+
+
+            // write the end SharedStringTable element
+            writer.WriteEndElement();
+
+            writer.Close();
+        }
     }
 
     private void SetPackageProperties(OpenXmlPackage document)
@@ -300,5 +317,21 @@ public class MinimalBoilerPlateWithTable
         document.PackageProperties.LastModifiedBy = "Jon Karl Weibull";
     }
 
+    //A simple helper to get the column name from the column index. This is not well tested!
+    private string GetColumnName(int columnIndex)
+    {
+        int dividend = columnIndex;
+        string columnName = String.Empty;
+        int modifier;
+
+        while (dividend > 0)
+        {
+            modifier = (dividend - 1) % 26;
+            columnName = Convert.ToChar(65 + modifier).ToString() + columnName;
+            dividend = (int)((dividend - modifier) / 26);
+        }
+
+        return columnName;
+    }
 
 }
