@@ -1,7 +1,11 @@
-﻿using ExcelGenerator.Generators;
-;
+﻿using ExcelGenerator.ForBenchmarking;
 
-var excelLib = new MinimalBoilerPlateWithSax();
+using ExcelGenerator.Generators;
+
+
+//var excelLib = new MinimalBoilerPlateWithSax();
+var excelLib = new SAXBasedGenerator();
+
 
 string path = Directory.GetCurrentDirectory();
 path = Path.Combine(path, "..", "..", "..", "output");
