@@ -1,0 +1,136 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 1 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in C:\Users\jweibull\source\repos\excel-generator\excel-generator\bin\Release\net6.0\db5457b4-307c-40cd-a9f8-4b0473316c25
+// command took 1.38s and exited with 0
+// start dotnet  build -c Release --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in C:\Users\jweibull\source\repos\excel-generator\excel-generator\bin\Release\net6.0\db5457b4-307c-40cd-a9f8-4b0473316c25
+// command took 2.99s and exited with 0
+// ***** Done, took 00:00:04 (4.49 sec)   *****
+// Found 1 benchmarks:
+//   SAXBasedGenerator.Run: DefaultJob
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: SAXBasedGenerator.Run: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet db5457b4-307c-40cd-a9f8-4b0473316c25.dll --benchmarkName ExcelGenerator.ForBenchmarking.SAXBasedGenerator.Run --job Default --benchmarkId 0 in C:\Users\jweibull\source\repos\excel-generator\excel-generator\bin\Release\net6.0\db5457b4-307c-40cd-a9f8-4b0473316c25\bin\Release\net6.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 188000.00 ns, 188.0000 us/op
+WorkloadJitting  1: 1 op, 10635105600.00 ns, 10.6351 s/op
+
+WorkloadWarmup   1: 1 op, 10565722600.00 ns, 10.5657 s/op
+WorkloadWarmup   2: 1 op, 10438910200.00 ns, 10.4389 s/op
+WorkloadWarmup   3: 1 op, 10317421600.00 ns, 10.3174 s/op
+WorkloadWarmup   4: 1 op, 10324245500.00 ns, 10.3242 s/op
+WorkloadWarmup   5: 1 op, 10286803800.00 ns, 10.2868 s/op
+WorkloadWarmup   6: 1 op, 10298030300.00 ns, 10.2980 s/op
+WorkloadWarmup   7: 1 op, 10286263400.00 ns, 10.2863 s/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 10451939800.00 ns, 10.4519 s/op
+WorkloadActual   2: 1 op, 10335855900.00 ns, 10.3359 s/op
+WorkloadActual   3: 1 op, 10282269600.00 ns, 10.2823 s/op
+WorkloadActual   4: 1 op, 10254302400.00 ns, 10.2543 s/op
+WorkloadActual   5: 1 op, 10241784900.00 ns, 10.2418 s/op
+WorkloadActual   6: 1 op, 10207197400.00 ns, 10.2072 s/op
+WorkloadActual   7: 1 op, 10248680100.00 ns, 10.2487 s/op
+WorkloadActual   8: 1 op, 10276789200.00 ns, 10.2768 s/op
+WorkloadActual   9: 1 op, 10178581800.00 ns, 10.1786 s/op
+WorkloadActual  10: 1 op, 10214900600.00 ns, 10.2149 s/op
+WorkloadActual  11: 1 op, 10219698200.00 ns, 10.2197 s/op
+WorkloadActual  12: 1 op, 10249029900.00 ns, 10.2490 s/op
+WorkloadActual  13: 1 op, 10194622300.00 ns, 10.1946 s/op
+WorkloadActual  14: 1 op, 10282214100.00 ns, 10.2822 s/op
+WorkloadActual  15: 1 op, 10959615300.00 ns, 10.9596 s/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 10335855900.00 ns, 10.3359 s/op
+WorkloadResult   2: 1 op, 10282269600.00 ns, 10.2823 s/op
+WorkloadResult   3: 1 op, 10254302400.00 ns, 10.2543 s/op
+WorkloadResult   4: 1 op, 10241784900.00 ns, 10.2418 s/op
+WorkloadResult   5: 1 op, 10207197400.00 ns, 10.2072 s/op
+WorkloadResult   6: 1 op, 10248680100.00 ns, 10.2487 s/op
+WorkloadResult   7: 1 op, 10276789200.00 ns, 10.2768 s/op
+WorkloadResult   8: 1 op, 10178581800.00 ns, 10.1786 s/op
+WorkloadResult   9: 1 op, 10214900600.00 ns, 10.2149 s/op
+WorkloadResult  10: 1 op, 10219698200.00 ns, 10.2197 s/op
+WorkloadResult  11: 1 op, 10249029900.00 ns, 10.2490 s/op
+WorkloadResult  12: 1 op, 10194622300.00 ns, 10.1946 s/op
+WorkloadResult  13: 1 op, 10282214100.00 ns, 10.2822 s/op
+GC:  789 9 8 4143659352 1
+Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 12352 has exited with code 0.
+
+Mean = 10.245 s, StdErr = 0.012 s (0.12%), N = 13, StdDev = 0.043 s
+Min = 10.179 s, Q1 = 10.215 s, Median = 10.249 s, Q3 = 10.277 s, Max = 10.336 s
+IQR = 0.062 s, LowerFence = 10.122 s, UpperFence = 10.370 s
+ConfidenceInterval = [10.194 s; 10.296 s] (CI 99.9%), Margin = 0.051 s (0.50% of Mean)
+Skewness = 0.35, Kurtosis = 2.32, MValue = 2
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2022-09-08 10:26 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts\results\ExcelGenerator.ForBenchmarking.SAXBasedGenerator-report.csv
+  BenchmarkDotNet.Artifacts\results\ExcelGenerator.ForBenchmarking.SAXBasedGenerator-report-github.md
+  BenchmarkDotNet.Artifacts\results\ExcelGenerator.ForBenchmarking.SAXBasedGenerator-report.html
+
+// * Detailed results *
+SAXBasedGenerator.Run: DefaultJob
+Runtime = .NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 10.245 s, StdErr = 0.012 s (0.12%), N = 13, StdDev = 0.043 s
+Min = 10.179 s, Q1 = 10.215 s, Median = 10.249 s, Q3 = 10.277 s, Max = 10.336 s
+IQR = 0.062 s, LowerFence = 10.122 s, UpperFence = 10.370 s
+ConfidenceInterval = [10.194 s; 10.296 s] (CI 99.9%), Margin = 0.051 s (0.50% of Mean)
+Skewness = 0.35, Kurtosis = 2.32, MValue = 2
+-------------------- Histogram --------------------
+[10.155 s ; 10.360 s) | @@@@@@@@@@@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet=v0.13.2, OS=Windows 10 (10.0.19044.1889/21H2/November2021Update)
+Intel Core i7-7700 CPU 3.60GHz (Kaby Lake), 1 CPU, 8 logical and 4 physical cores
+.NET SDK=6.0.400
+  [Host]     : .NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2
+  DefaultJob : .NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2
+
+
+| Method |    Mean |   Error |  StdDev |        Gen0 |      Gen1 |      Gen2 | Allocated |
+|------- |--------:|--------:|--------:|------------:|----------:|----------:|----------:|
+|    Run | 10.25 s | 0.051 s | 0.043 s | 789000.0000 | 9000.0000 | 8000.0000 |   3.86 GB |
+
+// * Hints *
+Outliers
+  SAXBasedGenerator.Run: Default -> 2 outliers were removed (10.45 s, 10.96 s)
+
+// * Legends *
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Gen0      : GC Generation 0 collects per 1000 operations
+  Gen1      : GC Generation 1 collects per 1000 operations
+  Gen2      : GC Generation 2 collects per 1000 operations
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 s       : 1 Second (1 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:04:10 (250.66 sec), executed benchmarks: 1
+
+Global total time: 00:04:15 (255.54 sec), executed benchmarks: 1
+// * Artifacts cleanup *

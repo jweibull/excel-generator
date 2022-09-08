@@ -1,12 +1,37 @@
-﻿using DocumentFormat.OpenXml;
+﻿using BenchmarkDotNet.Attributes;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace ExcelGenerator.ForBenchmarking;
 
+[MemoryDiagnoser]
 public class SAXBasedGenerator
 {
-    public void CreatePackage(string filename)
+    [Benchmark]
+    public void SAX()
+    {
+        //string path = Directory.GetCurrentDirectory();
+        //path = Path.Combine(path, "..", "..", "output");
+        //for (int i = 0; i < 1; i++)
+        //{
+        //    var nameCounter = 1;
+        //    var baseFilename = "output";
+        //    var filename = baseFilename;
+        //    while (File.Exists(Path.Combine(path, filename + ".xlsx")))
+        //    {
+        //        filename = baseFilename + nameCounter++;
+        //    }
+        //    filename = Path.Combine(path, filename + ".xlsx");
+
+        //    CreatePackage();
+        //}
+
+        CreatePackage();
+    }
+
+
+    public void CreatePackage()
     {
         using (var stream = new MemoryStream())
         {
@@ -23,17 +48,24 @@ public class SAXBasedGenerator
                     writer.WriteStartElement(new Worksheet());
                     writer.WriteStartElement(new SheetData());
 
+                    var cell = new Cell();
+                    var value = new CellValue();
                     for (int rowNum = 1; rowNum <= 100000; rowNum++)
                     {
                         //write the row start element with the row index attribute
                         writer.WriteStartElement(new Row() { RowIndex = (uint)rowNum });
-
+                        
                         for (int columnNum = 1; columnNum <= 50; columnNum++)
                         {
                             //write the cell start element with the type and reference attributes
-                            writer.WriteStartElement(new Cell() { CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum), DataType = CellValues.String });
+                            //writer.WriteStartElement(new Cell() { CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum), DataType = CellValues.String });
+                            cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                            cell.DataType = CellValues.String;
+                            writer.WriteStartElement(cell);
                             //write the cell value
-                            writer.WriteElement(new CellValue(string.Format("This is Row {0}, Cell {1}", rowNum, columnNum)));
+                            //writer.WriteElement(new CellValue(string.Format("This is Row {0}, Cell {1}", rowNum, columnNum)));
+                            value.Text = string.Format("This is Row {0}, Column {1}", rowNum, columnNum);
+                            writer.WriteElement(value);
                             // write the end cell element
                             writer.WriteEndElement();
                         }
@@ -66,11 +98,9 @@ public class SAXBasedGenerator
 
                     writer.Close();
 
-                    document.SaveAs(filename);
+                    document.Save();
 
-                    //document.Save();
-
-                    //document.Close();
+                    document.Close();
 
                     //stream.Seek(0, SeekOrigin.Begin);
 

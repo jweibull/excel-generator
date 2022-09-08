@@ -1,28 +1,10 @@
-﻿using ExcelGenerator.ForBenchmarking;
+﻿using BenchmarkDotNet.Running;
+using ExcelGenerator.ForBenchmarking;
 
-using ExcelGenerator.Generators;
-
-
-//var excelLib = new MinimalBoilerPlateWithSax();
-var excelLib = new SAXBasedGenerator();
-
-
-string path = Directory.GetCurrentDirectory();
-path = Path.Combine(path, "..", "..", "..", "output");
-for (int i = 0; i < 1; i++)
-{
-    var nameCounter = 1;
-    var baseFilename = "output";
-    var filename = baseFilename;
-    while (File.Exists(Path.Combine(path, filename + ".xlsx")))
-    {
-        filename = baseFilename + nameCounter++;
-    }
-    filename = Path.Combine(path, filename + ".xlsx");
-
-    excelLib.CreatePackage(filename);
-}
-
+var summary1 = BenchmarkRunner.Run<ClosedXMLBasedGenerator>();
+var summary2 = BenchmarkRunner.Run<DOMBasedGenerator>();
+var summary3 = BenchmarkRunner.Run<SAXBasedGenerator>();
+var summary4 = BenchmarkRunner.Run<EPPlusFreeXMLBasedGenerator>();
 
 
 

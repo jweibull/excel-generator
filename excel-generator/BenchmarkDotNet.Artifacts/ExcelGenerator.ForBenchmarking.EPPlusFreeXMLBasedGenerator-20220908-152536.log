@@ -1,0 +1,140 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 1 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in C:\Users\jweibull\source\repos\excel-generator\excel-generator\bin\Release\net6.0\20e9ad93-dbfe-47fe-900d-2bf170f2dfbf
+// command took 1.62s and exited with 0
+// start dotnet  build -c Release --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in C:\Users\jweibull\source\repos\excel-generator\excel-generator\bin\Release\net6.0\20e9ad93-dbfe-47fe-900d-2bf170f2dfbf
+// command took 2.8s and exited with 0
+// ***** Done, took 00:00:04 (4.52 sec)   *****
+// Found 1 benchmarks:
+//   EPPlusFreeXMLBasedGenerator.EPPlusFree: DefaultJob
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// **************************
+// Benchmark: EPPlusFreeXMLBasedGenerator.EPPlusFree: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet 20e9ad93-dbfe-47fe-900d-2bf170f2dfbf.dll --benchmarkName ExcelGenerator.ForBenchmarking.EPPlusFreeXMLBasedGenerator.EPPlusFree --job Default --benchmarkId 0 in C:\Users\jweibull\source\repos\excel-generator\excel-generator\bin\Release\net6.0\20e9ad93-dbfe-47fe-900d-2bf170f2dfbf\bin\Release\net6.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2,AES,BMI1,BMI2,FMA,LZCNT,PCLMUL,POPCNT VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 201800.00 ns, 201.8000 us/op
+WorkloadJitting  1: 1 op, 23076236000.00 ns, 23.0762 s/op
+
+WorkloadWarmup   1: 1 op, 22191283700.00 ns, 22.1913 s/op
+WorkloadWarmup   2: 1 op, 22171856800.00 ns, 22.1719 s/op
+WorkloadWarmup   3: 1 op, 22158547300.00 ns, 22.1585 s/op
+WorkloadWarmup   4: 1 op, 21444909700.00 ns, 21.4449 s/op
+WorkloadWarmup   5: 1 op, 21144331100.00 ns, 21.1443 s/op
+WorkloadWarmup   6: 1 op, 21109801000.00 ns, 21.1098 s/op
+WorkloadWarmup   7: 1 op, 21241736100.00 ns, 21.2417 s/op
+WorkloadWarmup   8: 1 op, 21521358600.00 ns, 21.5214 s/op
+WorkloadWarmup   9: 1 op, 21247186500.00 ns, 21.2472 s/op
+WorkloadWarmup  10: 1 op, 21221516300.00 ns, 21.2215 s/op
+WorkloadWarmup  11: 1 op, 21062619500.00 ns, 21.0626 s/op
+WorkloadWarmup  12: 1 op, 21325925600.00 ns, 21.3259 s/op
+WorkloadWarmup  13: 1 op, 21222562100.00 ns, 21.2226 s/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 21236618600.00 ns, 21.2366 s/op
+WorkloadActual   2: 1 op, 21450558300.00 ns, 21.4506 s/op
+WorkloadActual   3: 1 op, 21354257700.00 ns, 21.3543 s/op
+WorkloadActual   4: 1 op, 21284747800.00 ns, 21.2847 s/op
+WorkloadActual   5: 1 op, 21250038400.00 ns, 21.2500 s/op
+WorkloadActual   6: 1 op, 21139039600.00 ns, 21.1390 s/op
+WorkloadActual   7: 1 op, 21191555700.00 ns, 21.1916 s/op
+WorkloadActual   8: 1 op, 21324692900.00 ns, 21.3247 s/op
+WorkloadActual   9: 1 op, 21065741500.00 ns, 21.0657 s/op
+WorkloadActual  10: 1 op, 21336259900.00 ns, 21.3363 s/op
+WorkloadActual  11: 1 op, 21305680000.00 ns, 21.3057 s/op
+WorkloadActual  12: 1 op, 21831655000.00 ns, 21.8317 s/op
+WorkloadActual  13: 1 op, 21588313500.00 ns, 21.5883 s/op
+WorkloadActual  14: 1 op, 21514969400.00 ns, 21.5150 s/op
+WorkloadActual  15: 1 op, 21598415800.00 ns, 21.5984 s/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 21236618600.00 ns, 21.2366 s/op
+WorkloadResult   2: 1 op, 21450558300.00 ns, 21.4506 s/op
+WorkloadResult   3: 1 op, 21354257700.00 ns, 21.3543 s/op
+WorkloadResult   4: 1 op, 21284747800.00 ns, 21.2847 s/op
+WorkloadResult   5: 1 op, 21250038400.00 ns, 21.2500 s/op
+WorkloadResult   6: 1 op, 21139039600.00 ns, 21.1390 s/op
+WorkloadResult   7: 1 op, 21191555700.00 ns, 21.1916 s/op
+WorkloadResult   8: 1 op, 21324692900.00 ns, 21.3247 s/op
+WorkloadResult   9: 1 op, 21065741500.00 ns, 21.0657 s/op
+WorkloadResult  10: 1 op, 21336259900.00 ns, 21.3363 s/op
+WorkloadResult  11: 1 op, 21305680000.00 ns, 21.3057 s/op
+WorkloadResult  12: 1 op, 21831655000.00 ns, 21.8317 s/op
+WorkloadResult  13: 1 op, 21588313500.00 ns, 21.5883 s/op
+WorkloadResult  14: 1 op, 21514969400.00 ns, 21.5150 s/op
+WorkloadResult  15: 1 op, 21598415800.00 ns, 21.5984 s/op
+GC:  674 206 11 5792706544 1
+Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 21180 has exited with code 0.
+
+Mean = 21.365 s, StdErr = 0.052 s (0.24%), N = 15, StdDev = 0.201 s
+Min = 21.066 s, Q1 = 21.243 s, Median = 21.325 s, Q3 = 21.483 s, Max = 21.832 s
+IQR = 0.239 s, LowerFence = 20.884 s, UpperFence = 21.842 s
+ConfidenceInterval = [21.150 s; 21.580 s] (CI 99.9%), Margin = 0.215 s (1.01% of Mean)
+Skewness = 0.67, Kurtosis = 2.68, MValue = 2
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2022-09-08 15:36 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: High performance)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts\results\ExcelGenerator.ForBenchmarking.EPPlusFreeXMLBasedGenerator-report.csv
+  BenchmarkDotNet.Artifacts\results\ExcelGenerator.ForBenchmarking.EPPlusFreeXMLBasedGenerator-report-github.md
+  BenchmarkDotNet.Artifacts\results\ExcelGenerator.ForBenchmarking.EPPlusFreeXMLBasedGenerator-report.html
+
+// * Detailed results *
+EPPlusFreeXMLBasedGenerator.EPPlusFree: DefaultJob
+Runtime = .NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2; GC = Concurrent Workstation
+Mean = 21.365 s, StdErr = 0.052 s (0.24%), N = 15, StdDev = 0.201 s
+Min = 21.066 s, Q1 = 21.243 s, Median = 21.325 s, Q3 = 21.483 s, Max = 21.832 s
+IQR = 0.239 s, LowerFence = 20.884 s, UpperFence = 21.842 s
+ConfidenceInterval = [21.150 s; 21.580 s] (CI 99.9%), Margin = 0.215 s (1.01% of Mean)
+Skewness = 0.67, Kurtosis = 2.68, MValue = 2
+-------------------- Histogram --------------------
+[21.060 s ; 21.939 s) | @@@@@@@@@@@@@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet=v0.13.2, OS=Windows 10 (10.0.19044.1889/21H2/November2021Update)
+Intel Core i7-7700 CPU 3.60GHz (Kaby Lake), 1 CPU, 8 logical and 4 physical cores
+.NET SDK=6.0.400
+  [Host]     : .NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2
+  DefaultJob : .NET 6.0.8 (6.0.822.36306), X64 RyuJIT AVX2
+
+
+|     Method |    Mean |   Error |  StdDev |        Gen0 |        Gen1 |       Gen2 | Allocated |
+|----------- |--------:|--------:|--------:|------------:|------------:|-----------:|----------:|
+| EPPlusFree | 21.36 s | 0.215 s | 0.201 s | 674000.0000 | 206000.0000 | 11000.0000 |   5.39 GB |
+
+// * Legends *
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Gen0      : GC Generation 0 collects per 1000 operations
+  Gen1      : GC Generation 1 collects per 1000 operations
+  Gen2      : GC Generation 2 collects per 1000 operations
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 s       : 1 Second (1 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:10:53 (653.27 sec), executed benchmarks: 1
+
+Global total time: 00:10:58 (658.13 sec), executed benchmarks: 1
+// * Artifacts cleanup *
