@@ -54,7 +54,7 @@ public class SAXBasedGenerator
                     {
                         //write the row start element with the row index attribute
                         writer.WriteStartElement(new Row() { RowIndex = (uint)rowNum });
-                        
+
                         for (int columnNum = 1; columnNum <= 50; columnNum++)
                         {
                             //write the cell start element with the type and reference attributes
@@ -101,6 +101,9 @@ public class SAXBasedGenerator
                     document.Save();
 
                     document.Close();
+                }
+            }
+        }
 
                     //stream.Seek(0, SeekOrigin.Begin);
 
@@ -118,9 +121,9 @@ public class SAXBasedGenerator
                     //        testDocument.Close();
                     //    }
                     //}
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
     }
 
 

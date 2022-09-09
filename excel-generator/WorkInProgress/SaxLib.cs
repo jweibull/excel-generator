@@ -6,11 +6,30 @@ using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 
 namespace ExcelGenerator.Generators;
 
-public class MinimalBoilerPlateWithSax
+public class SaxLib
 {
     public Dictionary<string, string> SharedStringsToIndex { get; set; } = new Dictionary<string, string>();
     public int sharedStringsCount { get; set; } = 0;
     public int sharedStringsUniqueCount { get; set; } = 0;
+
+    public void Run()
+    {
+        string path = Directory.GetCurrentDirectory();
+        path = Path.Combine(path, "..", "..", "..", "output");
+        for (int i = 0; i < 1; i++)
+        {
+            var nameCounter = 1;
+            var baseFilename = "output";
+            var filename = baseFilename;
+            while (File.Exists(Path.Combine(path, filename + ".xlsx")))
+            {
+                filename = baseFilename + nameCounter++;
+            }
+            filename = Path.Combine(path, filename + ".xlsx");
+
+            CreatePackage(filename);
+        }
+    }
 
     public void CreatePackage(string filename)
     {
@@ -144,12 +163,18 @@ public class MinimalBoilerPlateWithSax
             for (int rowNum = 1; rowNum <= data.Length; rowNum++)
             {
                 //write the row start element with the row index attribute
-                writer.WriteStartElement(new Row() { RowIndex = (UInt32)rowNum });
+                writer.WriteStartElement(new Row() { RowIndex = (UInt32) rowNum });
 
                 for (int columnNum = 1; columnNum <= 1; columnNum++)
                 {
                     //write the cell start element with the type and reference attributes
-                    writer.WriteStartElement(new Cell() { CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum), DataType = CellValues.SharedString });
+                    writer.WriteStartElement(new Cell() 
+                    { 
+                        CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum),
+                        DataType = CellValues.SharedString,
+                        // Font numbering from 0 to numFonts -1
+                        StyleIndex = (UInt32)1 
+                    });
                     //write the cell value
                     writer.WriteElement(new CellValue(SharedStringsToIndex[data[rowNum - 1]]));
 
@@ -407,7 +432,7 @@ public class MinimalBoilerPlateWithSax
             writer.WriteElement(new TableColumn() { Id = (UInt32Value)1U, Name = "Header" });
             writer.WriteEndElement();
 
-            writer.WriteElement(new TableStyleInfo() { Name = "TableStyleLight3", ShowFirstColumn = false, ShowLastColumn = false, ShowRowStripes = true, ShowColumnStripes = false });
+            writer.WriteElement(new TableStyleInfo() { Name = "TableStyleLight5", ShowFirstColumn = false, ShowLastColumn = false, ShowRowStripes = true, ShowColumnStripes = false });
 
             //End Table
             writer.WriteEndElement();
