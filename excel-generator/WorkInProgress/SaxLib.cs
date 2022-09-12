@@ -3,14 +3,22 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
 using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
+using ExcelGenerator.Excel;
+using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 
 namespace ExcelGenerator.Generators;
 
 public class SaxLib
 {
     public Dictionary<string, string> SharedStringsToIndex { get; set; } = new Dictionary<string, string>();
+    
     public int sharedStringsCount { get; set; } = 0;
+    
     public int sharedStringsUniqueCount { get; set; } = 0;
+
+    Dictionary<string, int> StyleFormats = new Dictionary<string, int>();
 
     public void Run()
     {
@@ -33,6 +41,21 @@ public class SaxLib
 
     public void CreatePackage(string filename)
     {
+        var serializer = new JsonSerializer();
+
+        Model? model;
+
+        using (StreamReader sr = new StreamReader("excel.json"))
+        using (var jsonTextReader = new JsonTextReader(sr))
+        {
+            model = serializer.Deserialize<Model>(jsonTextReader);
+        }
+
+        if (model == null)
+        {
+            throw new Exception("Model can not be null");
+        }
+
         using (var stream = new MemoryStream())
         {
             using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
@@ -65,9 +88,14 @@ public class SaxLib
                     TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
                     SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
 
+                    RetrieveFontsAndFormats(model);
+
                     GenerateStylePart(workbookStylesPart, stylesPartId, fonts);
+
                     GenerateWorkSheetData(workSheetPart, data, sheetPartId);
+
                     GenerateTableParts(sheetTablesPart, sheetPartId);
+
                     GenerateSharedStringsTable(sharedStringTablePart, data, sharedTableId);
 
                     // Create the worksheet and sheets list to end the package
@@ -129,6 +157,61 @@ public class SaxLib
         }
     }
 
+    private void RetrieveFontsAndFormats(Model model)
+    {
+        // TODO Write all fonts and styles here!!!
+
+        var fonts = new Dictionary<string, int>();
+        int font;
+        string styleKey;
+        string key;
+
+        //Run all tables looking for styles
+        foreach (var table in model.WorkbookModel.Tables)
+        {
+            key = table.Header.Style.Font.ToString() + table.Header.Style.FontSize.ToString();
+            fonts.TryAdd(key, fonts.Count - 1);
+
+            if (fonts.TryGetValue(key, out font))
+            {
+                //Headers will always be plain text
+                styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+                StyleFormats.TryAdd(styleKey, StyleFormats.Count - 1);
+            }
+
+            foreach (var column in table.Columns)
+            {
+                key = column.Style.Font.ToString() + column.Style.FontSize.ToString();
+                fonts.TryAdd(key, fonts.Count - 1);
+
+                if (fonts.TryGetValue(key, out font))
+                {
+                    // Columns can have diferent types, formats and fonts
+                    if (column.DataType == ExcelDataTypes.DataType.Text)
+                    {
+                        styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+                        StyleFormats.TryAdd(styleKey, StyleFormats.Count - 1);
+                    }
+                    else
+                    {
+                        // Add numFormat or CellStyle int CellStyles to xml and get index to add to the style class
+                        styleKey = key + column.DataType.ToString();
+                        StyleFormats.Add(styleKey, StyleFormats.Count - 1);
+                    }
+                }
+            }
+        }
+
+        //TODO Add Chart Fonts;
+
+        // Future Watermark Details
+        if (model.WorkbookModel.Watermark != null)
+        {
+            var key = model.WorkbookModel.Watermark.Font.ToString() + model.WorkbookModel.Watermark.FontSize.ToString();
+            fonts.TryAdd(key, ExcelFontDetail.GetFontStyles(model.WorkbookModel.Watermark.Font, model.WorkbookModel.Watermark.FontSize, fonts.Count - 1));
+        }
+    }
+
     private void AddToSharedStringDictionary(string[] sharedStrings)
     {
         var count = 0;
@@ -160,23 +243,25 @@ public class SaxLib
 
             writer.WriteStartElement(new SheetData());
 
+            Row row = new Row();
+            Cell cell = new Cell();
+            CellValue cellValue = new CellValue();
             for (int rowNum = 1; rowNum <= data.Length; rowNum++)
             {
                 //write the row start element with the row index attribute
-                writer.WriteStartElement(new Row() { RowIndex = (UInt32) rowNum });
+                row.RowIndex = (UInt32)rowNum;
+                writer.WriteStartElement(row);
 
                 for (int columnNum = 1; columnNum <= 1; columnNum++)
                 {
                     //write the cell start element with the type and reference attributes
-                    writer.WriteStartElement(new Cell() 
-                    { 
-                        CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum),
-                        DataType = CellValues.SharedString,
-                        // Font numbering from 0 to numFonts -1
-                        StyleIndex = (UInt32)1 
-                    });
+                    cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                    cell.DataType = CellValues.SharedString;
+                    cell.StyleIndex = (UInt32)1;
+                    writer.WriteStartElement(cell);
                     //write the cell value
-                    writer.WriteElement(new CellValue(SharedStringsToIndex[data[rowNum - 1]]));
+                    cellValue.Text = SharedStringsToIndex[data[rowNum - 1]];
+                    writer.WriteElement(cellValue);
 
                     // write the end cell element
                     writer.WriteEndElement();
@@ -231,22 +316,6 @@ public class SaxLib
                 writer.WriteElement(new Color() { Theme = (UInt32)theme });
                 writer.WriteElement(new FontName() { Val = font });
                 writer.WriteElement(new FontFamily() { Val = fontFamily });
-
-                // Why is this here??? What's the diference between major and minor fonts
-                writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
-
-                //Close the single Font Tag
-                writer.WriteEndElement();
-
-                writer.WriteStartElement(new Font());
-
-                writer.WriteElement(new FontSize() { Val = fontSize });
-                writer.WriteElement(new Color() { Theme = (UInt32)theme });
-                writer.WriteElement(new FontName() { Val = font });
-                writer.WriteElement(new FontFamily() { Val = fontFamily });
-
-                // Why is this here??? What's the diference between major and minor fonts
-                writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Minor });
 
                 //Close the single Font Tag
                 writer.WriteEndElement();
@@ -369,7 +438,7 @@ public class SaxLib
             writer.WriteElement(new Outline() { Val = false });
             writer.WriteElement(new Shadow() { Val = false });
             writer.WriteElement(new Underline() { Val = UnderlineValues.None });
-            // Superscript, Subscript and Baseline
+            // VerticalAlignmentRunValues = Superscript, Subscript and Baseline
             writer.WriteElement(new VerticalTextAlignment() { Val = VerticalAlignmentRunValues.Baseline });
             writer.WriteElement(new FontSize() { Val = 11 });
             writer.WriteElement(new Color() { Theme = (UInt32)1 });

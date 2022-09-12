@@ -6,7 +6,7 @@ using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 
 namespace ExcelGenerator.Generators;
 
-public class MinimalBoilerPlateWithSax
+public class MinimalBoilerPlateSax
 {
     public Dictionary<string, string> SharedStringsToIndex { get; set; } = new Dictionary<string, string>();
     public int sharedStringsCount { get; set; } = 0;
