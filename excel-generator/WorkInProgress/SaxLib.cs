@@ -5,8 +5,8 @@ using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using ExcelGenerator.Excel;
 using Newtonsoft.Json;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+using System.Globalization;
 
 namespace ExcelGenerator.Generators;
 
@@ -17,8 +17,6 @@ public class SaxLib
     public int sharedStringsCount { get; set; } = 0;
     
     public int sharedStringsUniqueCount { get; set; } = 0;
-
-    Dictionary<string, int> StyleFormats = new Dictionary<string, int>();
 
     public void Run()
     {
@@ -43,15 +41,15 @@ public class SaxLib
     {
         var serializer = new JsonSerializer();
 
-        Model? model;
+        ModelData? modelData;
 
-        using (StreamReader sr = new StreamReader("excel.json"))
+        using (StreamReader sr = new StreamReader(@"d:\excel.json"))
         using (var jsonTextReader = new JsonTextReader(sr))
         {
-            model = serializer.Deserialize<Model>(jsonTextReader);
+            modelData = serializer.Deserialize<ModelData>(jsonTextReader);
         }
 
-        if (model == null)
+        if (modelData == null)
         {
             throw new Exception("Model can not be null");
         }
@@ -78,25 +76,21 @@ public class SaxLib
                     sharedStringsUniqueCount = SharedStringsToIndex.Count;
 
                     // Generate a single sheet 
-                    sheetPartId = "rId" + partId++;
                     stylesPartId = "rId" + partId++;
                     sharedTableId = "rId" + partId++;
+                    sheetPartId = "rId" + partId++;
 
                     // Generate all Styles needed on every sheet in this workbook
                     WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
+                    SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
+                    GenerateStylePart(workbookStylesPart, stylesPartId, modelData, fonts);
+                    GenerateSharedStringsTable(sharedStringTablePart, data, sharedTableId);
+
                     WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
                     TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
-                    SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
-
-                    RetrieveFontsAndFormats(model);
-
-                    GenerateStylePart(workbookStylesPart, stylesPartId, fonts);
-
                     GenerateWorkSheetData(workSheetPart, data, sheetPartId);
-
                     GenerateTableParts(sheetTablesPart, sheetPartId);
-
-                    GenerateSharedStringsTable(sharedStringTablePart, data, sharedTableId);
+                    
 
                     // Create the worksheet and sheets list to end the package
                     using (var writer = OpenXmlWriter.Create(document.WorkbookPart))
@@ -154,61 +148,6 @@ public class SaxLib
             writer.WriteEndElement();
 
             writer.Close();
-        }
-    }
-
-    private void RetrieveFontsAndFormats(Model model)
-    {
-        // TODO Write all fonts and styles here!!!
-
-        var fonts = new Dictionary<string, int>();
-        int font;
-        string styleKey;
-        string key;
-
-        //Run all tables looking for styles
-        foreach (var table in model.WorkbookModel.Tables)
-        {
-            key = table.Header.Style.Font.ToString() + table.Header.Style.FontSize.ToString();
-            fonts.TryAdd(key, fonts.Count - 1);
-
-            if (fonts.TryGetValue(key, out font))
-            {
-                //Headers will always be plain text
-                styleKey = key + ExcelDataTypes.DataType.Text.ToString();
-                StyleFormats.TryAdd(styleKey, StyleFormats.Count - 1);
-            }
-
-            foreach (var column in table.Columns)
-            {
-                key = column.Style.Font.ToString() + column.Style.FontSize.ToString();
-                fonts.TryAdd(key, fonts.Count - 1);
-
-                if (fonts.TryGetValue(key, out font))
-                {
-                    // Columns can have diferent types, formats and fonts
-                    if (column.DataType == ExcelDataTypes.DataType.Text)
-                    {
-                        styleKey = key + ExcelDataTypes.DataType.Text.ToString();
-                        StyleFormats.TryAdd(styleKey, StyleFormats.Count - 1);
-                    }
-                    else
-                    {
-                        // Add numFormat or CellStyle int CellStyles to xml and get index to add to the style class
-                        styleKey = key + column.DataType.ToString();
-                        StyleFormats.Add(styleKey, StyleFormats.Count - 1);
-                    }
-                }
-            }
-        }
-
-        //TODO Add Chart Fonts;
-
-        // Future Watermark Details
-        if (model.WorkbookModel.Watermark != null)
-        {
-            var key = model.WorkbookModel.Watermark.Font.ToString() + model.WorkbookModel.Watermark.FontSize.ToString();
-            fonts.TryAdd(key, ExcelFontDetail.GetFontStyles(model.WorkbookModel.Watermark.Font, model.WorkbookModel.Watermark.FontSize, fonts.Count - 1));
         }
     }
 
@@ -284,13 +223,141 @@ public class SaxLib
         }
     }
 
+    private string AddFontToDictionary(
+        Dictionary<string, ExcelFontDetail> fonts, 
+        ExcelFonts.FontType font, 
+        int fontSize)
+    {
+        string key;
+        ExcelFontDetail fontDetail;
+
+        key = font.ToString() + fontSize.ToString();
+        if (!fonts.ContainsKey(key))
+        {
+            fontDetail = ExcelFontDetail.GetFontStyles(font, (UInt32)fonts.Count, fontSize);
+            fonts.Add(key, fontDetail);
+        }
+
+        return key;
+    }
+    
+    private void AddNumFormatToDictionary(Dictionary<string, UInt32> numFormats, string dataFormat)
+    {
+
+    }
+    private void AddStyleFormatToDictionary(
+        Dictionary<string, ExcelStyleFormat> styleFormats,
+        string styleKey,
+        UInt32 fontIdx, 
+        UInt32 numFormatIdx, 
+        UInt32 cellStyleIdx, 
+        UInt32 fillIdx, 
+        UInt32 borderIdx)
+    {
+        ExcelStyleFormat styleFormat;
+
+        if (!styleFormats.ContainsKey(styleKey))
+        {
+            styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)styleFormats.Count);
+            styleFormats.Add(styleKey, styleFormat);
+        }
+    }
 
     // TODO create dictionaries to link fonts and fills etc to the CellFormatStyles element inside this method.
     // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
     // will be the third font added in fonts section, while the font with id "0" will be the first you added.
     // Same goes for borders, fills, etc.
-    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, string stylesPartId, string[] fonts)
+    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, string stylesPartId, ModelData modelData, string[] hardCodedFonts )
     {
+        #region Fonts, NumFormats, CellXfs and CellStyles
+
+        // TODO Write all fonts and styles here!!!
+
+        var fonts = new Dictionary<string, ExcelFontDetail>();
+        var numFormats = new Dictionary<string, UInt32>();
+        var styleFormats = new Dictionary<string, ExcelStyleFormat>();
+        string styleKey;
+        string key;
+
+        //Run all tables looking for styles
+        foreach (var table in modelData.WorkbookModel.Tables)
+        {
+            key = AddFontToDictionary(fonts, table.Header.Style.Font, table.Header.Style.FontSize);
+                
+            styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+                
+            AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U);
+                
+            table.Header.AddStyleKey(styleKey);
+
+            foreach (var column in table.Columns)
+            {
+                key = AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize);
+                // Columns can have diferent types, formats and fonts
+                styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+                if (column.DataType == ExcelDataTypes.DataType.Text)
+                {
+                    AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U);
+                    column.AddStyleKey(styleKey);
+                }
+                else
+                {
+                    // Add numFormat or CellStyle to xml and get index to add to the style class
+                    styleKey = key + column.DataType.ToString();
+                    if (column.DataType == ExcelDataTypes.DataType.Number)
+                    {
+                            
+                        if (!string.IsNullOrEmpty(column.DataFormat))
+                        {
+                            numFormats.Add(column.DataFormat, (UInt32)numFormats.Count);
+                            styleKey = styleKey + column.DataFormat;
+                        }
+                            
+                    }
+                    else if (column.DataType == ExcelDataTypes.DataType.DateTime)
+                    {
+                        //DateTime dt = DateTime.Now;
+                        //double x = dt.ToOADate();
+                        string sysDateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+
+                    }
+                    else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
+                    {
+                        //styleFormats.TryAdd(styleKey, StyleFormats.Count);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        //TODO Add Chart Fonts;
+
+        // Future Watermark Details
+        //if (modelData.WorkbookModel.Watermark != null)
+        //{
+        //    key = modelData.WorkbookModel.Watermark.Font.ToString() + modelData.WorkbookModel.Watermark.FontSize.ToString();
+        //    if (fonts.ContainsKey(key))
+        //    {
+        //        font = fonts[key];
+        //    }
+        //    else
+        //    {
+        //        font = ExcelFontDetail.GetFontStyles(modelData.WorkbookModel.Watermark.Font, (UInt32)fonts.Count, modelData.WorkbookModel.Watermark.FontSize);
+        //        fonts.Add(key, font);
+        //    }
+        //    styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+        //    if (styleFormats.ContainsKey(key))
+        //    {
+        //        styleFormat = styleFormats[styleKey];
+        //    }
+        //    else
+        //    {
+        //        styleFormat = new ExcelStyleFormat((UInt32)font.FontIndex, 0U, 0U, 0U, 0U, (UInt32)styleFormats.Count);
+        //        styleFormats.Add(styleKey, styleFormat);
+        //    }
+        //}
+
         using (var writer = OpenXmlWriter.Create(workbookStylesPart))
         {
             writer.WriteStartElement(new Stylesheet());
@@ -306,9 +373,9 @@ public class SaxLib
             //<Fonts>
             //  <Font>...props...</Font>
             //</Fonts>
-            writer.WriteStartElement(new Fonts() { Count = (UInt32)fonts.Length });
+            writer.WriteStartElement(new Fonts() { Count = (UInt32)hardCodedFonts.Length });
 
-            foreach (var font in fonts)
+            foreach (var font in hardCodedFonts)
             {
                 writer.WriteStartElement(new Font());
 
@@ -317,8 +384,24 @@ public class SaxLib
                 writer.WriteElement(new FontName() { Val = font });
                 writer.WriteElement(new FontFamily() { Val = fontFamily });
 
+                // Why is this here??? What's the diference between major and minor fonts
+                //writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
+
                 //Close the single Font Tag
                 writer.WriteEndElement();
+
+                //writer.WriteStartElement(new Font());
+
+                //writer.WriteElement(new FontSize() { Val = fontSize });
+                //writer.WriteElement(new Color() { Theme = (UInt32)theme });
+                //writer.WriteElement(new FontName() { Val = font });
+                //writer.WriteElement(new FontFamily() { Val = fontFamily });
+
+                // Why is this here??? What's the diference between major and minor fonts
+                //writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Minor });
+
+                //Close the single Font Tag
+                //writer.WriteEndElement();
             }
 
             // End Fonts section
@@ -438,7 +521,7 @@ public class SaxLib
             writer.WriteElement(new Outline() { Val = false });
             writer.WriteElement(new Shadow() { Val = false });
             writer.WriteElement(new Underline() { Val = UnderlineValues.None });
-            // VerticalAlignmentRunValues = Superscript, Subscript and Baseline
+            // Superscript, Subscript and Baseline
             writer.WriteElement(new VerticalTextAlignment() { Val = VerticalAlignmentRunValues.Baseline });
             writer.WriteElement(new FontSize() { Val = 11 });
             writer.WriteElement(new Color() { Theme = (UInt32)1 });

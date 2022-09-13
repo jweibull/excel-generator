@@ -9,38 +9,45 @@ namespace ExcelGenerator.Excel;
 /// </summary>
 public class ExcelStyleFormat
 {
-    public ExcelStyleFormat(ExcelDataTypes.DataType dataType, string dataFormat, int styleIndex, int cellStyleIndex, ExcelFontDetail fontDetail)
+    public ExcelStyleFormat(UInt32 fontIdx, UInt32 numFormatIdx, UInt32 cellStyleIdx, UInt32 fillIdx, UInt32 borderIdx, UInt32 styleIndex)
     {
-        DataType = dataType;
+        FontIndex = fontIdx;
+        
+        NumFormatIndex = numFormatIdx;
+        CellStyleIndex = cellStyleIdx;
+        FillIndex = fillIdx;
+        BorderIndex = borderIdx;
         StyleIndex = styleIndex;
-        Format = dataFormat;
-        CellStyleIndex = cellStyleIndex;
-        FontDetail = fontDetail;
     }
 
     /// <summary>
     /// Datatype for the CellXfs style section
     /// </summary>
-    public ExcelDataTypes.DataType DataType { get; set; } = ExcelDataTypes.DataType.Text;
+    public UInt32 FontIndex { get; set; }
 
     /// <summary>
     /// Possible format string for number or date data types
     /// </summary>
-    public string Format { get; set; }
-
-    /// <summary>
-    /// Index of the CellFxs List inside the XML stylestable file
-    /// </summary>
-    public int StyleIndex{ get; set; } = -1;
+    public UInt32 NumFormatIndex { get; set; }
 
     /// <summary>
     /// Index of the CellStyle List inside the XML stylestable file. 
     /// Regularly will be 1 for Hyperlink and 0 for everything else. 
     /// </summary>
-    public int CellStyleIndex { get; set; } = -1;
+    public UInt32 CellStyleIndex { get; set; }
 
     /// <summary>
-    /// Font added 
+    /// Index of the Fill Style 
     /// </summary>
-    public ExcelFontDetail FontDetail { get; set; }
+    public UInt32 FillIndex { get; set; }
+
+    /// <summary>
+    /// Index for the Border Style
+    /// </summary>
+    public UInt32 BorderIndex { get; set; }
+
+    /// <summary>
+    /// Index of the CellFxs List inside the XML stylestable file
+    /// </summary>
+    public UInt32 StyleIndex { get; set; }
 }

@@ -31,4 +31,13 @@ public class Watermark
     /// Font size for writing the watermark
     /// </summary>
     public int FontSize { get; set; } = 40;
+    /// <summary>
+    /// Reserved Quick access Key Built from font, fontSize, data type and format
+    /// </summary>
+    public string StyleKey { get; private set; } = "";
+
+    public void AddStyleKey(string key)
+    {
+        StyleKey = key;
+    }
 }

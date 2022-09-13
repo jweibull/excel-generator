@@ -7,7 +7,7 @@ namespace ExcelGenerator.Excel;
 /// </summary>
 public class ExcelFontDetail
 { 
-    public ExcelFontDetail(string fontName, uint fontSize, uint fontFamily, uint theme, int fontIndex)
+    public ExcelFontDetail(string fontName, UInt32 fontSize, Int32 fontFamily, UInt32 theme, UInt32 fontIndex)
     {
         FontName = fontName;
         FontSize = fontSize;
@@ -29,7 +29,7 @@ public class ExcelFontDetail
     /// <summary>
     /// Font family number as defined by Excel Microsoft Arial, Calibri, Times are family 2
     /// </summary>
-    public UInt32 FontFamily { get; set; } = 2;
+    public Int32 FontFamily { get; set; } = 2;
 
     /// <summary>
     /// Theme for custom microsoft themes (Not table style theme) This is a diferent theme
@@ -39,9 +39,9 @@ public class ExcelFontDetail
     /// <summary>
     /// Index of the Font inside the XML stylestable file
     /// </summary>
-    public int FontIndex { get; set; } = -1;
+    public UInt32 FontIndex { get; set; }
 
-    public static ExcelFontDetail GetFontStyles(ExcelFonts.FontType font, int fontIndex, int? fontSize)
+    public static ExcelFontDetail GetFontStyles(ExcelFonts.FontType font, UInt32 fontIndex, int? fontSize)
     {
         var size = fontSize == null ? 11 : fontSize.Value;
         

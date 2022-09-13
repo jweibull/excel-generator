@@ -14,7 +14,7 @@ public class ExcelColumnModel
     /// <summary>
     /// Styles to be applied to this column's data
     /// </summary>
-    public ExcelStyleClasses Style { get; set; }
+    public ExcelStyleClasses Style { get; set; } = new ExcelStyleClasses();
     /// <summary>
     /// The data sets Data Type. Ex: "0" for Text, "1" for Number, "2" for DateTime, etc.
     /// </summary>
@@ -29,4 +29,13 @@ public class ExcelColumnModel
     /// Useful for large texts that often ocupy large portions the monitor's width.
     /// </summary>
     public int MaxWidth { get; set; } = -1;
+    /// <summary>
+    /// Reserved Quick access Key Built from font, fontSize, data type and format
+    /// </summary>
+    public string StyleKey { get; private set; } = string.Empty;
+
+    public void AddStyleKey(string key)
+    {
+        StyleKey = key;
+    }
 }

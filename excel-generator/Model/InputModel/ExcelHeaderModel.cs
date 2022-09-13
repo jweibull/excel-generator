@@ -1,4 +1,8 @@
-﻿namespace ExcelGenerator.Excel;
+﻿
+
+using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+
+namespace ExcelGenerator.Excel;
 
 /// <summary>
 /// Class representing a full header row, data and styling.
@@ -13,4 +17,14 @@ public class ExcelHeaderModel
     /// Styles to be applied to the header row
     /// </summary>
     public ExcelStyleClasses Style { get; set; }
+
+    /// <summary>
+    /// Reserved Quick access Key Built from font, fontSize, data type and format
+    /// </summary>
+    public string StyleKey { get; private set; } = "";
+
+    public void AddStyleKey(string key)
+    {
+        StyleKey = key;
+    }
 }
