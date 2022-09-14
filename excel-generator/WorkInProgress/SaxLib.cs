@@ -72,7 +72,8 @@ public class SaxLib
                 {
                     // Generate all Shared Strings that will be used in all the sheets
                     sharedStringsCount = 0;
-                    AddToSharedStringDictionary(data);
+                    AddToSharedStringDictionary(modelData.WorkbookModel.Tables[0].Header.Data);
+                    AddToSharedStringDictionary(modelData.WorkbookModel.Tables[0].Columns[0].Data);
                     sharedStringsUniqueCount = SharedStringsToIndex.Count;
 
                     // Generate a single sheet 
@@ -88,8 +89,8 @@ public class SaxLib
 
                     WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
                     TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
-                    GenerateWorkSheetData(workSheetPart, data, sheetPartId);
-                    GenerateTableParts(sheetTablesPart, sheetPartId);
+
+                    GenerateWorkSheetData(workSheetPart, modelData, sheetPartId, sheetTablesPart);
                     
 
                     // Create the worksheet and sheets list to end the package
@@ -169,11 +170,17 @@ public class SaxLib
         sharedStringsCount += count;
     }
 
-    private void GenerateWorkSheetData(WorksheetPart workSheetPart, string[] data, string sheetPartId)
+    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ModelData modelData, string sheetPartId, TableDefinitionPart sheetTablesPart)
     {
         // Actual Cell Values from string table
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
+            var allColumns = modelData.WorkbookModel.Tables[0].Columns;
+            var numColumns = allColumns.Count();
+            int numRows = allColumns.OrderBy(x => x.Data.Count()).Select(x => x.Data.Count()).LastOrDefault(0);
+
+            GenerateTableParts(sheetTablesPart, sheetPartId, modelData.WorkbookModel.Tables[0].Header, modelData.WorkbookModel.Tables[0].Theme, numRows);
+
             writer.WriteStartElement(new Worksheet());
 
             writer.WriteStartElement(new Columns() { });
@@ -185,21 +192,23 @@ public class SaxLib
             Row row = new Row();
             Cell cell = new Cell();
             CellValue cellValue = new CellValue();
-            for (int rowNum = 1; rowNum <= data.Length; rowNum++)
+            for (int rowNum = 1; rowNum <= numRows; rowNum++)
             {
                 //write the row start element with the row index attribute
                 row.RowIndex = (UInt32)rowNum;
                 writer.WriteStartElement(row);
 
-                for (int columnNum = 1; columnNum <= 1; columnNum++)
+                for (int columnNum = 1; columnNum <= numColumns; columnNum++)
                 {
+                    var currentColumn = allColumns[columnNum - 1];
                     //write the cell start element with the type and reference attributes
                     cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                    
                     cell.DataType = CellValues.SharedString;
-                    cell.StyleIndex = (UInt32)0;
+                    cell.StyleIndex = 0U;
                     writer.WriteStartElement(cell);
                     //write the cell value
-                    cellValue.Text = SharedStringsToIndex[data[rowNum - 1]];
+                    cellValue.Text = SharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 1]];
                     writer.WriteElement(cellValue);
 
                     // write the end cell element
@@ -615,21 +624,30 @@ public class SaxLib
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
     {
+        var numColumns = headers.Data.Count();
+
         using (var writer = OpenXmlWriter.Create(sheetTablesPart))
         {
-            var table = new Table() { Id = (UInt32Value)1U, Name = "Table", DisplayName = "Table", Reference = "A1:A4", TotalsRowShown = false, HeaderRowFormatId = (UInt32)0 };
-            // Start Table element
-            writer.WriteStartElement(table); 
-            
-            writer.WriteElement(new AutoFilter() { Reference = "A1:A4" });
+            var reference = "A1:" + GetColumnName(numColumns) + numRows.ToString();
 
-            writer.WriteStartElement(new TableColumns() { Count = (UInt32Value)1U });
-            writer.WriteElement(new TableColumn() { Id = (UInt32Value)1U, Name = "Header" });
+            var table = new Table() { Id = (UInt32)1U, Name = "Table", DisplayName = "Table", Reference = reference, TotalsRowShown = false, HeaderRowFormatId = (UInt32)0 };
+            // Start Table element
+            writer.WriteStartElement(table);
+
+            writer.WriteElement(new AutoFilter() { Reference = reference });
+
+            writer.WriteStartElement(new TableColumns() { Count = (UInt32)numColumns });
+
+            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+            {
+                writer.WriteElement(new TableColumn() { Id = (UInt32) columnNum, Name = headers.Data[columnNum - 1] });
+            }
+
             writer.WriteEndElement();
 
-            writer.WriteElement(new TableStyleInfo() { Name = "TableStyleLight5", ShowFirstColumn = false, ShowLastColumn = false, ShowRowStripes = true, ShowColumnStripes = false });
+            writer.WriteElement(new TableStyleInfo() { Name = ExcelThemes.GetTheme(theme), ShowFirstColumn = false, ShowLastColumn = false, ShowRowStripes = true, ShowColumnStripes = false });
 
             //End Table
             writer.WriteEndElement();
