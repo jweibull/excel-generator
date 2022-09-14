@@ -5,8 +5,8 @@ using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using ExcelGenerator.Excel;
 using Newtonsoft.Json;
-using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 using System.Globalization;
+using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 
 namespace ExcelGenerator.Generators;
 
@@ -196,7 +196,7 @@ public class SaxLib
                     //write the cell start element with the type and reference attributes
                     cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
                     cell.DataType = CellValues.SharedString;
-                    cell.StyleIndex = (UInt32)1;
+                    cell.StyleIndex = (UInt32)0;
                     writer.WriteStartElement(cell);
                     //write the cell value
                     cellValue.Text = SharedStringsToIndex[data[rowNum - 1]];
@@ -241,10 +241,24 @@ public class SaxLib
         return key;
     }
     
-    private void AddNumFormatToDictionary(Dictionary<string, UInt32> numFormats, string dataFormat)
+    private UInt32 AddNumFormatToDictionary(Dictionary<string, ExcelNumFormat> numFormats, string dataFormat)
     {
-
+        UInt32 numFormatId = 0;
+        
+        if (numFormats.ContainsKey(dataFormat))
+        {
+            numFormatId = numFormats[dataFormat].FormatId;
+        }
+        else
+        {
+            numFormatId = StyleContants.StartIndex + (UInt32)numFormats.Count;
+            ExcelNumFormat numFormat = new ExcelNumFormat(dataFormat, numFormatId);
+            numFormats.Add(dataFormat, numFormat);
+        }
+        
+        return numFormatId;
     }
+
     private void AddStyleFormatToDictionary(
         Dictionary<string, ExcelStyleFormat> styleFormats,
         string styleKey,
@@ -252,13 +266,17 @@ public class SaxLib
         UInt32 numFormatIdx, 
         UInt32 cellStyleIdx, 
         UInt32 fillIdx, 
-        UInt32 borderIdx)
+        UInt32 borderIdx,
+        bool applyNumFormat,
+        bool applyFont)
     {
         ExcelStyleFormat styleFormat;
 
         if (!styleFormats.ContainsKey(styleKey))
         {
             styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)styleFormats.Count);
+            styleFormat.ApplyFont = applyFont;
+            styleFormat.ApplyNumFormat = applyNumFormat;
             styleFormats.Add(styleKey, styleFormat);
         }
     }
@@ -274,7 +292,8 @@ public class SaxLib
         // TODO Write all fonts and styles here!!!
 
         var fonts = new Dictionary<string, ExcelFontDetail>();
-        var numFormats = new Dictionary<string, UInt32>();
+        var numFormats = new Dictionary<string, ExcelNumFormat>();
+        var hyperlinkFormats = new Dictionary<string, UInt32>();
         var styleFormats = new Dictionary<string, ExcelStyleFormat>();
         string styleKey;
         string key;
@@ -286,7 +305,7 @@ public class SaxLib
                 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 
-            AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U);
+            AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
                 
             table.Header.AddStyleKey(styleKey);
 
@@ -297,33 +316,48 @@ public class SaxLib
                 styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 if (column.DataType == ExcelDataTypes.DataType.Text)
                 {
-                    AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U);
+                    AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
                     column.AddStyleKey(styleKey);
                 }
                 else
                 {
                     // Add numFormat or CellStyle to xml and get index to add to the style class
                     styleKey = key + column.DataType.ToString();
+                    
                     if (column.DataType == ExcelDataTypes.DataType.Number)
                     {
-                            
                         if (!string.IsNullOrEmpty(column.DataFormat))
                         {
-                            numFormats.Add(column.DataFormat, (UInt32)numFormats.Count);
-                            styleKey = styleKey + column.DataFormat;
-                        }
-                            
+                            var numFormatId = AddNumFormatToDictionary(numFormats, column.DataFormat);
+                            styleKey = styleKey + numFormatId.ToString();
+                            AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
+                            column.AddStyleKey(styleKey);
+                        }   
+                    }
+                    else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
+                    {
+                        styleKey = key + column.DataType.ToString();
+                        hyperlinkFormats.TryAdd(key, fonts[key].FontIndex);
+                        AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 1U, 0U, 0U, false, false);
+                        column.AddStyleKey(styleKey);
                     }
                     else if (column.DataType == ExcelDataTypes.DataType.DateTime)
                     {
                         //DateTime dt = DateTime.Now;
                         //double x = dt.ToOADate();
-                        string sysDateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-
-                    }
-                    else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
-                    {
-                        //styleFormats.TryAdd(styleKey, StyleFormats.Count);
+                        string sysDateFormat;
+                        if (string.IsNullOrEmpty(column.DataFormat))
+                        {
+                            sysDateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+                        }
+                        else
+                        {
+                            sysDateFormat = column.DataFormat;
+                        }
+                        var numFormatId = AddNumFormatToDictionary(numFormats, sysDateFormat);
+                        styleKey = styleKey + numFormatId.ToString();
+                        AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
+                        column.AddStyleKey(styleKey);
                     }
                 }
             }
@@ -334,74 +368,47 @@ public class SaxLib
         //TODO Add Chart Fonts;
 
         // Future Watermark Details
-        //if (modelData.WorkbookModel.Watermark != null)
-        //{
-        //    key = modelData.WorkbookModel.Watermark.Font.ToString() + modelData.WorkbookModel.Watermark.FontSize.ToString();
-        //    if (fonts.ContainsKey(key))
-        //    {
-        //        font = fonts[key];
-        //    }
-        //    else
-        //    {
-        //        font = ExcelFontDetail.GetFontStyles(modelData.WorkbookModel.Watermark.Font, (UInt32)fonts.Count, modelData.WorkbookModel.Watermark.FontSize);
-        //        fonts.Add(key, font);
-        //    }
-        //    styleKey = key + ExcelDataTypes.DataType.Text.ToString();
-        //    if (styleFormats.ContainsKey(key))
-        //    {
-        //        styleFormat = styleFormats[styleKey];
-        //    }
-        //    else
-        //    {
-        //        styleFormat = new ExcelStyleFormat((UInt32)font.FontIndex, 0U, 0U, 0U, 0U, (UInt32)styleFormats.Count);
-        //        styleFormats.Add(styleKey, styleFormat);
-        //    }
-        //}
+        if (modelData.WorkbookModel.Watermark != null)
+        {
+            key = AddFontToDictionary(fonts, modelData.WorkbookModel.Watermark.Font, modelData.WorkbookModel.Watermark.FontSize);
+
+            styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+
+            AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
+
+            modelData.WorkbookModel.Watermark.AddStyleKey(styleKey);
+        }
 
         using (var writer = OpenXmlWriter.Create(workbookStylesPart))
         {
             writer.WriteStartElement(new Stylesheet());
 
-            #region Fonts
+            #region NumFormats
 
-            //Hardcoded props
-            var fontSize = 11;
-            var fontFamily = 2; // Calibri family?
-            var theme = 1;
+            //TODO add numformat fields here for numbering and Dates
+
+            #endregion
+
+            #region Fonts
 
             //write the fonts sections
             //<Fonts>
             //  <Font>...props...</Font>
             //</Fonts>
-            writer.WriteStartElement(new Fonts() { Count = (UInt32)hardCodedFonts.Length });
+            //writer.WriteStartElement(new Fonts() { Count = (UInt32)hardCodedFonts.Length });
+            writer.WriteStartElement(new Fonts() { Count = (UInt32)fonts.Count });
 
-            foreach (var font in hardCodedFonts)
+            foreach (var font in fonts.Values)
             {
                 writer.WriteStartElement(new Font());
 
-                writer.WriteElement(new FontSize() { Val = fontSize });
-                writer.WriteElement(new Color() { Theme = (UInt32)theme });
-                writer.WriteElement(new FontName() { Val = font });
-                writer.WriteElement(new FontFamily() { Val = fontFamily });
-
-                // Why is this here??? What's the diference between major and minor fonts
-                //writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
+                writer.WriteElement(new FontSize() { Val = font.FontSize });
+                writer.WriteElement(new Color() { Theme = font.Theme });
+                writer.WriteElement(new FontName() { Val = font.FontName });
+                writer.WriteElement(new FontFamily() { Val = font.FontFamily });
 
                 //Close the single Font Tag
                 writer.WriteEndElement();
-
-                //writer.WriteStartElement(new Font());
-
-                //writer.WriteElement(new FontSize() { Val = fontSize });
-                //writer.WriteElement(new Color() { Theme = (UInt32)theme });
-                //writer.WriteElement(new FontName() { Val = font });
-                //writer.WriteElement(new FontFamily() { Val = fontFamily });
-
-                // Why is this here??? What's the diference between major and minor fonts
-                //writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Minor });
-
-                //Close the single Font Tag
-                //writer.WriteEndElement();
             }
 
             // End Fonts section
@@ -457,30 +464,66 @@ public class SaxLib
 
             // Creates a shared style table to apply to cells using an Id. 
 
-            //Hardcoded Props
-            var cellStyleXfsCount = 1;
-
+            var cellStyleXfsCount = hyperlinkFormats.Count + 1;
             //Start CellStyleXfs element
             writer.WriteStartElement(new CellStyleFormats() { Count = (UInt32)cellStyleXfsCount });
-
+            //Hardcoded base CellFormat
             writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)0, FillId = (UInt32)0, BorderId = (UInt32)0 });
 
+            foreach(var fontIndex in hyperlinkFormats.Values)
+            {
+                writer.WriteElement(new CellFormat()
+                {
+                    NumberFormatId = (UInt32)0,
+                    FontId = fontIndex,
+                    FillId = (UInt32)0,
+                    BorderId = (UInt32)0,
+                    ApplyNumberFormat = false,
+                    ApplyFill = false,
+                    ApplyBorder = false,
+                    ApplyAlignment = false,
+                    ApplyProtection = false
+                });
+            }
+            
             // End CellStyleXfs section
             writer.WriteEndElement();
 
             #endregion
 
             #region CellXfs (CellFormats)
-
-            //Hardcoded Props
-            var cellXfsCount = 2;
+            
+            // Add all alignment and apply numberformat features
+            
+            var cellXfsCount = styleFormats.Count() + 1;
 
             //Start CellStyleFormats section
             writer.WriteStartElement(new CellFormats() { Count = (UInt32)cellXfsCount });
 
             writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)0, FillId = (UInt32)0, BorderId = (UInt32)0 });
-            writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)1, FillId = (UInt32)0, BorderId = (UInt32)0, ApplyFont = true });
 
+            foreach (var styleFormat in styleFormats.Values)
+            {
+                writer.WriteStartElement(new CellFormat() 
+                { 
+                    NumberFormatId = styleFormat.NumFormatIndex,
+                    FontId = styleFormat.FontIndex, 
+                    FillId = (UInt32)0, 
+                    BorderId = (UInt32)0, 
+                    ApplyFont = styleFormat.ApplyFont,
+                    ApplyNumberFormat = styleFormat.ApplyNumFormat,
+                    ApplyAlignment = true,
+                    
+                });
+                writer.WriteElement(new Alignment() 
+                {
+                    Horizontal = HorizontalAlignmentValues.Left,
+                    Vertical = VerticalAlignmentValues.Center, 
+                    WrapText = true 
+                });
+                //End CellXf
+                writer.WriteEndElement();
+            }
             // End CellStyleFormats section
             writer.WriteEndElement();
 
@@ -488,14 +531,16 @@ public class SaxLib
 
             #region CellStyles
 
-            //Hardcoded Props
-            var cellStylesCount = 1;
+            var cellStylesCount = hyperlinkFormats.Count() + 1;
 
             //Start CellStyleFormats element
             writer.WriteStartElement(new CellStyles() { Count = (UInt32)cellStylesCount });
 
             writer.WriteElement(new CellStyle() { Name = "Normal", FormatId = (UInt32)0, BuiltinId = (UInt32)0 });
-
+            if (hyperlinkFormats.Count() > 0)
+            {
+                writer.WriteElement(new CellStyle() { Name = "Hyperlink", FormatId = (UInt32)1, BuiltinId = (UInt32)8 });
+            }
             // End CellStyles section
             writer.WriteEndElement();
 

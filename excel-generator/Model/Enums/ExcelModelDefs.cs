@@ -1,7 +1,20 @@
-﻿namespace ExcelGenerator.ExcelDefs;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace ExcelGenerator.ExcelDefs;
 
 public static class ExcelModelDefs
 {
+    public static class StyleContants
+    {
+        public static UInt32 StartIndex
+        {
+            get
+            {
+                return 164;
+            }
+        }
+    }
+
     public static class ExcelSheetTypes
     {
         public enum Type
@@ -157,10 +170,8 @@ public static class ExcelModelDefs
             Text = 0,
             Number = 1,
             DateTime = 2,
-            Boolean = 3,
-            TimeSpan = 4,
-            HyperLink = 5,
-            AutoDetect = 6
+            HyperLink = 3,
+            AutoDetect = 4
         }
     }
 

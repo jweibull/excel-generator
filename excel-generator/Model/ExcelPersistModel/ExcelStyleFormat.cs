@@ -47,6 +47,16 @@ public class ExcelStyleFormat
     public UInt32 BorderIndex { get; set; }
 
     /// <summary>
+    /// This flag is false basically for Hyperlinks and default cells
+    /// </summary>
+    public bool ApplyFont { get; set; } = true;
+
+    /// <summary>
+    /// This flag is true if this style has a NumberFormat added to it
+    /// </summary>
+    public bool ApplyNumFormat { get; set; } = false;
+
+    /// <summary>
     /// Index of the CellFxs List inside the XML stylestable file
     /// </summary>
     public UInt32 StyleIndex { get; set; }

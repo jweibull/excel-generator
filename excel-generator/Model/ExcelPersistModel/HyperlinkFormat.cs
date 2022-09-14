@@ -5,21 +5,20 @@ namespace ExcelGenerator.Excel;
 /// <summary>
 /// Class describing a Font as it is written inside the XML file.
 /// </summary>
-public class ExcelNumFormat
+public class HyperlinkFormat
 { 
-    public ExcelNumFormat(string formatCode, UInt32 formatId)
+    public HyperlinkFormat(UInt32 fontIdx)
     {
-        FormatCode = formatCode;
-        FormatId = formatId;
+        FontIndex = fontIdx;
     }
 
     /// <summary>
     /// FontName as in Excel font list
     /// </summary>
-    public string FormatCode { get; set; } = string.Empty;
+    public UInt32 CellStyleId { get; set; }
 
     /// <summary>
     /// Index of the Font inside the XML stylestable file
     /// </summary>
-    public UInt32 FormatId { get; set; }
+    public UInt32 FontIndex { get; set; }
 }
