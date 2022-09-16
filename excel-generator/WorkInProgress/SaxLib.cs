@@ -59,8 +59,6 @@ public class SaxLib
             using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
             {
                 // TestData
-                var data = new string[4] { "Header", "A", "B", "B" };
-                var fonts = new string[2] { "Calibri", "Calibri Light" };
                 var partId = 1;
                 string sharedTableId = string.Empty;
                 string stylesPartId = string.Empty;
@@ -84,8 +82,8 @@ public class SaxLib
                     // Generate all Styles needed on every sheet in this workbook
                     WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
                     SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
-                    GenerateStylePart(workbookStylesPart, stylesPartId, modelData, fonts);
-                    GenerateSharedStringsTable(sharedStringTablePart, data, sharedTableId);
+                    GenerateStylePart(workbookStylesPart, stylesPartId, modelData);
+                    GenerateSharedStringsTable(sharedStringTablePart, sharedTableId);
 
                     WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
                     TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
@@ -123,7 +121,7 @@ public class SaxLib
         }
     }
 
-    private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart, string[] sharedStrings, string sharedTableId)
+    private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart, string sharedTableId)
     {
         // Run this for all strings in the workbook
         // string[] sharedStrings must contain all the strings in the project
@@ -175,14 +173,18 @@ public class SaxLib
         // Actual Cell Values from string table
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
+            var headers = modelData.WorkbookModel.Tables[0].Header;
             var allColumns = modelData.WorkbookModel.Tables[0].Columns;
             var numColumns = allColumns.Count();
-            int numRows = allColumns.OrderBy(x => x.Data.Count()).Select(x => x.Data.Count()).LastOrDefault(0);
+            //+1 is for the headers
+            int numRows = allColumns.OrderBy(x => x.Data.Count()).Select(x => x.Data.Count()).LastOrDefault(0) + 1;
 
             GenerateTableParts(sheetTablesPart, sheetPartId, modelData.WorkbookModel.Tables[0].Header, modelData.WorkbookModel.Tables[0].Theme, numRows);
 
             writer.WriteStartElement(new Worksheet());
+            
 
+            //Alinhar com o Table generation
             writer.WriteStartElement(new Columns() { });
             writer.WriteElement(new Column() { Min = 1, Max = 1, Width=12, CustomWidth=true });
             writer.WriteEndElement();
@@ -192,7 +194,30 @@ public class SaxLib
             Row row = new Row();
             Cell cell = new Cell();
             CellValue cellValue = new CellValue();
-            for (int rowNum = 1; rowNum <= numRows; rowNum++)
+            
+            //Add header row
+            row.RowIndex = 1U;
+            writer.WriteStartElement(row);
+
+            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+            {
+                //write the cell start element with the type and reference attributes
+                cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1U);
+
+                cell.DataType = CellValues.SharedString;
+                //cell.StyleIndex = 0U;
+                writer.WriteStartElement(cell);
+                //write the cell value
+                cellValue.Text = SharedStringsToIndex[headers.Data[columnNum - 1]];
+                writer.WriteElement(cellValue);
+
+                // write the end cell element
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+
+            for (int rowNum = 2; rowNum <= numRows; rowNum++)
             {
                 //write the row start element with the row index attribute
                 row.RowIndex = (UInt32)rowNum;
@@ -205,10 +230,10 @@ public class SaxLib
                     cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
                     
                     cell.DataType = CellValues.SharedString;
-                    cell.StyleIndex = 0U;
+                    cell.StyleIndex = 2U;
                     writer.WriteStartElement(cell);
                     //write the cell value
-                    cellValue.Text = SharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 1]];
+                    cellValue.Text = SharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
                     writer.WriteElement(cellValue);
 
                     // write the end cell element
@@ -294,7 +319,7 @@ public class SaxLib
     // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
     // will be the third font added in fonts section, while the font with id "0" will be the first you added.
     // Same goes for borders, fills, etc.
-    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, string stylesPartId, ModelData modelData, string[] hardCodedFonts )
+    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, string stylesPartId, ModelData modelData )
     {
         #region Fonts, NumFormats, CellXfs and CellStyles
 
@@ -314,7 +339,7 @@ public class SaxLib
                 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 
-            AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
+            AddStyleFormatToDictionary(styleFormats, styleKey, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
                 
             table.Header.AddStyleKey(styleKey);
 
@@ -576,11 +601,18 @@ public class SaxLib
             writer.WriteElement(new Shadow() { Val = false });
             writer.WriteElement(new Underline() { Val = UnderlineValues.None });
             // Superscript, Subscript and Baseline
-            writer.WriteElement(new VerticalTextAlignment() { Val = VerticalAlignmentRunValues.Baseline });
+            //writer.WriteElement(new VerticalTextAlignment() { Val = VerticalAlignmentRunValues.Baseline });
             writer.WriteElement(new FontSize() { Val = 11 });
             writer.WriteElement(new Color() { Theme = (UInt32)1 });
             writer.WriteElement(new FontName() { Val = "Calibri Light" });
             writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
+
+            writer.WriteElement(new Alignment()
+            {
+                Horizontal = HorizontalAlignmentValues.Left,
+                Vertical = VerticalAlignmentValues.Center,
+                WrapText = true
+            });
 
             // End font tag
             writer.WriteEndElement();
@@ -642,7 +674,7 @@ public class SaxLib
 
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                writer.WriteElement(new TableColumn() { Id = (UInt32) columnNum, Name = headers.Data[columnNum - 1] });
+                writer.WriteElement(new TableColumn() { Id = (UInt32)columnNum, Name = headers.Data[columnNum - 1], DataFormatId = 0U });
             }
 
             writer.WriteEndElement();
