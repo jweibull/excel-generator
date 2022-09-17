@@ -12,11 +12,13 @@ namespace ExcelGenerator.Generators;
 
 public class SaxLib
 {
-    public Dictionary<string, string> SharedStringsToIndex { get; set; } = new Dictionary<string, string>();
-    
-    public int sharedStringsCount { get; set; } = 0;
-    
-    public int sharedStringsUniqueCount { get; set; } = 0;
+    private readonly Dictionary<string, string> _sharedStringsToIndex = new Dictionary<string, string>();
+
+    private int _sharedStringsCount;
+
+    private int _sharedStringsUniqueCount;
+
+    private readonly Dictionary<string, UInt32> _styleIndexes = new Dictionary<string, UInt32>();
 
     public void Run()
     {
@@ -51,7 +53,7 @@ public class SaxLib
 
         if (modelData == null)
         {
-            throw new Exception("Model can not be null");
+            throw new Exception("Model should not be null");
         }
 
         using (var stream = new MemoryStream())
@@ -69,10 +71,10 @@ public class SaxLib
                 if (document.WorkbookPart != null)
                 {
                     // Generate all Shared Strings that will be used in all the sheets
-                    sharedStringsCount = 0;
+                    _sharedStringsCount = 0;
                     AddToSharedStringDictionary(modelData.WorkbookModel.Tables[0].Header.Data);
                     AddToSharedStringDictionary(modelData.WorkbookModel.Tables[0].Columns[0].Data);
-                    sharedStringsUniqueCount = SharedStringsToIndex.Count;
+                    _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
 
                     // Generate a single sheet 
                     stylesPartId = "rId" + partId++;
@@ -99,7 +101,7 @@ public class SaxLib
 
                         writer.WriteElement(new Sheet()
                         {
-                            Name = "Planilha1",
+                            Name = modelData.WorkbookModel.Tables[0].Name,
                             SheetId = 1,
                             Id = sheetPartId
                         });
@@ -129,9 +131,9 @@ public class SaxLib
         using (var writer = OpenXmlWriter.Create(sharedStringTablePart))
         {
             // Change this based on real data count
-            writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)sharedStringsCount, UniqueCount = (UInt32)sharedStringsUniqueCount });
+            writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)_sharedStringsCount, UniqueCount = (UInt32)_sharedStringsUniqueCount });
 
-            foreach (var key in SharedStringsToIndex.Keys)
+            foreach (var key in _sharedStringsToIndex.Keys)
             {
                 //write the row start element with the row index attribute
                 writer.WriteStartElement(new SharedStringItem());
@@ -155,17 +157,17 @@ public class SaxLib
         var count = 0;
         foreach (var item in sharedStrings)
         {
-            if (this.SharedStringsToIndex.ContainsKey(item))
+            if (this._sharedStringsToIndex.ContainsKey(item))
             {
                 count++;
             }
             else
             {
                 count++;
-                SharedStringsToIndex.Add(item, SharedStringsToIndex.Count().ToString());
+                _sharedStringsToIndex.Add(item, _sharedStringsToIndex.Count().ToString());
             }
         }
-        sharedStringsCount += count;
+        _sharedStringsCount += count;
     }
 
     private void GenerateWorkSheetData(WorksheetPart workSheetPart, ModelData modelData, string sheetPartId, TableDefinitionPart sheetTablesPart)
@@ -182,12 +184,15 @@ public class SaxLib
             GenerateTableParts(sheetTablesPart, sheetPartId, modelData.WorkbookModel.Tables[0].Header, modelData.WorkbookModel.Tables[0].Theme, numRows);
 
             writer.WriteStartElement(new Worksheet());
-            
+
 
             //Alinhar com o Table generation
-            writer.WriteStartElement(new Columns() { });
-            writer.WriteElement(new Column() { Min = 1, Max = 1, Width=12, CustomWidth=true });
-            writer.WriteEndElement();
+            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+            {
+                writer.WriteStartElement(new Columns() { });
+                writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = allColumns[columnNum - 1].MaxWidth, CustomWidth = true });
+                writer.WriteEndElement();
+            }
 
             writer.WriteStartElement(new SheetData());
 
@@ -205,10 +210,10 @@ public class SaxLib
                 cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1U);
 
                 cell.DataType = CellValues.SharedString;
-                //cell.StyleIndex = 0U;
+                cell.StyleIndex = _styleIndexes[headers.StyleKey];
                 writer.WriteStartElement(cell);
                 //write the cell value
-                cellValue.Text = SharedStringsToIndex[headers.Data[columnNum - 1]];
+                cellValue.Text = _sharedStringsToIndex[headers.Data[columnNum - 1]];
                 writer.WriteElement(cellValue);
 
                 // write the end cell element
@@ -230,10 +235,10 @@ public class SaxLib
                     cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
                     
                     cell.DataType = CellValues.SharedString;
-                    cell.StyleIndex = 2U;
+                    cell.StyleIndex = _styleIndexes[currentColumn.StyleKey];
                     writer.WriteStartElement(cell);
                     //write the cell value
-                    cellValue.Text = SharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
+                    cellValue.Text = _sharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
                     writer.WriteElement(cellValue);
 
                     // write the end cell element
@@ -252,6 +257,55 @@ public class SaxLib
             writer.WriteEndElement();
 
             // write the end Worksheet element
+            writer.WriteEndElement();
+            writer.Close();
+        }
+    }
+
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
+    {
+        var numColumns = headers.Data.Count();
+
+        using (var writer = OpenXmlWriter.Create(sheetTablesPart))
+        {
+            var reference = "A1:" + GetColumnName(numColumns) + numRows.ToString();
+
+            var table = new Table()
+            {
+                Id = (UInt32)1U,
+                Name = "Table",
+                DisplayName = "Table",
+                Reference = reference,
+                TotalsRowShown = false,
+            };
+            // Start Table element
+            writer.WriteStartElement(table);
+
+            writer.WriteElement(new AutoFilter() { Reference = reference });
+
+            writer.WriteStartElement(new TableColumns() { Count = (UInt32)numColumns });
+
+            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+            {
+                writer.WriteElement(new TableColumn()
+                {
+                    Id = (UInt32)columnNum,
+                    Name = headers.Data[columnNum - 1]
+                });
+            }
+
+            writer.WriteEndElement();
+
+            writer.WriteElement(new TableStyleInfo()
+            {
+                Name = ExcelThemes.GetTheme(theme),
+                ShowFirstColumn = false,
+                ShowLastColumn = false,
+                ShowRowStripes = true,
+                ShowColumnStripes = false
+            });
+
+            //End Table
             writer.WriteEndElement();
             writer.Close();
         }
@@ -277,7 +331,7 @@ public class SaxLib
     
     private UInt32 AddNumFormatToDictionary(Dictionary<string, ExcelNumFormat> numFormats, string dataFormat)
     {
-        UInt32 numFormatId = 0;
+        UInt32 numFormatId;
         
         if (numFormats.ContainsKey(dataFormat))
         {
@@ -308,10 +362,11 @@ public class SaxLib
 
         if (!styleFormats.ContainsKey(styleKey))
         {
-            styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)styleFormats.Count);
+            styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)styleFormats.Count + 1);
             styleFormat.ApplyFont = applyFont;
             styleFormat.ApplyNumFormat = applyNumFormat;
             styleFormats.Add(styleKey, styleFormat);
+            _styleIndexes.Add(styleKey, styleFormat.StyleIndex);
         }
     }
 
@@ -585,37 +640,10 @@ public class SaxLib
             //Hardcoded Props
             var diferentialFormatsCount = 1;
 
-            // Start diferential formats section
+            // Start diferential formats section Although empty it is a needed part of the Stylesheet
             writer.WriteStartElement(new DifferentialFormats() { Count = (UInt32)diferentialFormatsCount });
             // Start diferential format tag
             writer.WriteStartElement(new DifferentialFormat());
-            // Start font tag
-            writer.WriteStartElement(new Font());
-
-            writer.WriteElement(new Bold() { Val = false });
-            writer.WriteElement(new Italic() { Val = false });
-            writer.WriteElement(new Strike() { Val = false });
-            writer.WriteElement(new Condense() { Val = false });
-            writer.WriteElement(new Extend() { Val = false });
-            writer.WriteElement(new Outline() { Val = false });
-            writer.WriteElement(new Shadow() { Val = false });
-            writer.WriteElement(new Underline() { Val = UnderlineValues.None });
-            // Superscript, Subscript and Baseline
-            //writer.WriteElement(new VerticalTextAlignment() { Val = VerticalAlignmentRunValues.Baseline });
-            writer.WriteElement(new FontSize() { Val = 11 });
-            writer.WriteElement(new Color() { Theme = (UInt32)1 });
-            writer.WriteElement(new FontName() { Val = "Calibri Light" });
-            writer.WriteElement(new FontScheme() { Val = FontSchemeValues.Major });
-
-            writer.WriteElement(new Alignment()
-            {
-                Horizontal = HorizontalAlignmentValues.Left,
-                Vertical = VerticalAlignmentValues.Center,
-                WrapText = true
-            });
-
-            // End font tag
-            writer.WriteEndElement();
             // End diferential format tag
             writer.WriteEndElement();
             // End diferential formats section
@@ -651,37 +679,6 @@ public class SaxLib
 
 
             //End styleSsheet
-            writer.WriteEndElement();
-            writer.Close();
-        }
-    }
-
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
-    {
-        var numColumns = headers.Data.Count();
-
-        using (var writer = OpenXmlWriter.Create(sheetTablesPart))
-        {
-            var reference = "A1:" + GetColumnName(numColumns) + numRows.ToString();
-
-            var table = new Table() { Id = (UInt32)1U, Name = "Table", DisplayName = "Table", Reference = reference, TotalsRowShown = false, HeaderRowFormatId = (UInt32)0 };
-            // Start Table element
-            writer.WriteStartElement(table);
-
-            writer.WriteElement(new AutoFilter() { Reference = reference });
-
-            writer.WriteStartElement(new TableColumns() { Count = (UInt32)numColumns });
-
-            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-            {
-                writer.WriteElement(new TableColumn() { Id = (UInt32)columnNum, Name = headers.Data[columnNum - 1], DataFormatId = 0U });
-            }
-
-            writer.WriteEndElement();
-
-            writer.WriteElement(new TableStyleInfo() { Name = ExcelThemes.GetTheme(theme), ShowFirstColumn = false, ShowLastColumn = false, ShowRowStripes = true, ShowColumnStripes = false });
-
-            //End Table
             writer.WriteEndElement();
             writer.Close();
         }
