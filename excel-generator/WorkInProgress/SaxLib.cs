@@ -65,6 +65,8 @@ public class SaxLib
                 string sharedTableId = string.Empty;
                 string stylesPartId = string.Empty;
                 string sheetPartId = string.Empty;
+                List<string> sheetPartIds = new List<string>();
+                var numSheets = modelData.WorkbookModel.Tables.Count();
 
                 document.AddWorkbookPart();
                 
@@ -72,26 +74,39 @@ public class SaxLib
                 {
                     // Generate all Shared Strings that will be used in all the sheets
                     _sharedStringsCount = 0;
-                    AddToSharedStringDictionary(modelData.WorkbookModel.Tables[0].Header.Data);
-                    AddToSharedStringDictionary(modelData.WorkbookModel.Tables[0].Columns[0].Data);
+                    foreach (var table in modelData.WorkbookModel.Tables)
+                    {
+                        AddToSharedStringDictionary(table.Header.Data);
+                        foreach (var column in table.Columns)
+                        {
+                            AddToSharedStringDictionary(column.Data);
+                        }
+                    }
                     _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
 
                     // Generate a single sheet 
                     stylesPartId = "rId" + partId++;
                     sharedTableId = "rId" + partId++;
-                    sheetPartId = "rId" + partId++;
-
+                    
                     // Generate all Styles needed on every sheet in this workbook
                     WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
                     SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
                     GenerateStylePart(workbookStylesPart, stylesPartId, modelData);
                     GenerateSharedStringsTable(sharedStringTablePart, sharedTableId);
 
-                    WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
-                    TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
+                    for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
+                    {
+                        sheetPartId = "rId" + partId++;
+                        sheetPartIds.Add(sheetPartId);
+                        WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
+                        TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
 
-                    GenerateWorkSheetData(workSheetPart, modelData, sheetPartId, sheetTablesPart);
-                    
+                        var sheetModel = modelData.WorkbookModel.Tables[sheetNum - 1];
+                        var allColumns = sheetModel.Columns;
+                        int numRows = allColumns.OrderBy(x => x.Data.Count()).Select(x => x.Data.Count()).LastOrDefault(0) + 1;
+                        GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId, sheetTablesPart);
+                        GenerateTableParts(sheetTablesPart, sheetPartId, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
+                    }
 
                     // Create the worksheet and sheets list to end the package
                     using (var writer = OpenXmlWriter.Create(document.WorkbookPart))
@@ -99,12 +114,15 @@ public class SaxLib
                         writer.WriteStartElement(new Workbook());
                         writer.WriteStartElement(new Sheets());
 
-                        writer.WriteElement(new Sheet()
+                        for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
                         {
-                            Name = modelData.WorkbookModel.Tables[0].Name,
-                            SheetId = 1,
-                            Id = sheetPartId
-                        });
+                            writer.WriteElement(new Sheet()
+                            {
+                                Name = modelData.WorkbookModel.Tables[sheetNum - 1].Name,
+                                SheetId = (UInt32)sheetNum,
+                                Id = sheetPartIds[sheetNum - 1]
+                            });
+                        }
 
                         // End Sheets
                         writer.WriteEndElement();
@@ -170,21 +188,15 @@ public class SaxLib
         _sharedStringsCount += count;
     }
 
-    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ModelData modelData, string sheetPartId, TableDefinitionPart sheetTablesPart)
+    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, ExcelColumnModel[] allColumns, int numRows, string sheetPartId, TableDefinitionPart sheetTablesPart)
     {
         // Actual Cell Values from string table
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
-            var headers = modelData.WorkbookModel.Tables[0].Header;
-            var allColumns = modelData.WorkbookModel.Tables[0].Columns;
+            var headers = sheetModel.Header;
             var numColumns = allColumns.Count();
-            //+1 is for the headers
-            int numRows = allColumns.OrderBy(x => x.Data.Count()).Select(x => x.Data.Count()).LastOrDefault(0) + 1;
-
-            GenerateTableParts(sheetTablesPart, sheetPartId, modelData.WorkbookModel.Tables[0].Header, modelData.WorkbookModel.Tables[0].Theme, numRows);
-
+                        
             writer.WriteStartElement(new Worksheet());
-
 
             //Alinhar com o Table generation
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
@@ -262,7 +274,7 @@ public class SaxLib
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId, UInt32 tableId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
     {
         var numColumns = headers.Data.Count();
 
@@ -272,9 +284,9 @@ public class SaxLib
 
             var table = new Table()
             {
-                Id = (UInt32)1U,
-                Name = "Table",
-                DisplayName = "Table",
+                Id = tableId,
+                Name = "Table" + tableId.ToString(),
+                DisplayName = "Table" + tableId.ToString(),
                 Reference = reference,
                 TotalsRowShown = false,
             };
