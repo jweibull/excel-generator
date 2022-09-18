@@ -20,6 +20,8 @@ public class SaxLib
 
     private readonly Dictionary<string, UInt32> _styleIndexes = new Dictionary<string, UInt32>();
 
+    private readonly Dictionary<string, double> _oleADates = new Dictionary<string, double>();
+
     public void Run()
     {
         string path = Directory.GetCurrentDirectory();
@@ -62,6 +64,7 @@ public class SaxLib
             {
                 // TestData
                 var partId = 1;
+                var linksId = 1;
                 string sharedTableId = string.Empty;
                 string stylesPartId = string.Empty;
                 string sheetPartId = string.Empty;
@@ -79,7 +82,18 @@ public class SaxLib
                         AddToSharedStringDictionary(table.Header.Data);
                         foreach (var column in table.Columns)
                         {
-                            AddToSharedStringDictionary(column.Data);
+                            if (column.DataType == ExcelDataTypes.DataType.Text || column.DataType == ExcelDataTypes.DataType.HyperLink)
+                            {
+                                AddToSharedStringDictionary(column.Data);
+                            }
+                            else if (column.DataType == ExcelDataTypes.DataType.DateTime)
+                            {
+                                if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
+                                {
+                                    column.DataType = ExcelDataTypes.DataType.Text;
+                                    AddToSharedStringDictionary(column.Data);
+                                }
+                            }
                         }
                     }
                     _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
@@ -102,10 +116,20 @@ public class SaxLib
                         TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
 
                         var sheetModel = modelData.WorkbookModel.Tables[sheetNum - 1];
+
                         var allColumns = sheetModel.Columns;
-                        int numRows = allColumns.OrderBy(x => x.Data.Count()).Select(x => x.Data.Count()).LastOrDefault(0) + 1;
+                        
+                        var linkColumns = allColumns.Where(x => x.DataType == ExcelDataTypes.DataType.HyperLink).ToList();
+                        foreach (var linkColumn in linkColumns)
+                        {
+                            linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
+                        }
+
+                        int numRows = allColumns.Select(x => x.Data.Count()).Max() + 1;
+
                         GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId, sheetTablesPart);
                         GenerateTableParts(sheetTablesPart, sheetPartId, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
+                        
                     }
 
                     // Create the worksheet and sheets list to end the package
@@ -141,6 +165,21 @@ public class SaxLib
         }
     }
 
+    private int GenerateHyperlinkParts(WorksheetPart workSheetPart, ExcelColumnModel linkColumn, int partIdSequencer)
+    {
+        var linkIds = new List<string>();
+        string url;
+        foreach (var link in linkColumn.Data)
+        {
+            var id = "lId" + partIdSequencer++;
+            url = link.Substring(0, 7) == @"http://" ? link : @"http://" + link;
+            workSheetPart.AddHyperlinkRelationship(new Uri(url, UriKind.Absolute), true, id);
+            linkIds.Add(id);
+        }
+        linkColumn.AddHyperLinkIds(linkIds.ToArray());
+        return partIdSequencer;
+    }
+
     private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart, string sharedTableId)
     {
         // Run this for all strings in the workbook
@@ -170,12 +209,42 @@ public class SaxLib
         }
     }
 
+    private bool AddToDatetimeToDictionary(string[] dates, string dataFormat)
+    {
+        var baseDataFormat = string.IsNullOrEmpty(dataFormat) ? CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString() : dataFormat;
+        var index = 0;
+        var isDate = true;
+        DateTime date;
+        while (index < dates.Length && isDate)
+        {
+            if (!_oleADates.ContainsKey(dates[index]))
+            {
+                if (string.IsNullOrEmpty(dataFormat))
+                {
+                    isDate = DateTime.TryParseExact(dates[index], baseDataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+                }
+                else
+                {
+                    isDate = DateTime.TryParseExact(dates[index], baseDataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
+                }
+                
+                if (isDate)
+                {
+                    _oleADates.Add(dates[index], date.ToOADate());
+                } 
+            }
+            index++;
+        }
+        
+        return isDate;
+    }
+
     private void AddToSharedStringDictionary(string[] sharedStrings)
     {
         var count = 0;
         foreach (var item in sharedStrings)
         {
-            if (this._sharedStringsToIndex.ContainsKey(item))
+            if (_sharedStringsToIndex.ContainsKey(item))
             {
                 count++;
             }
@@ -199,12 +268,12 @@ public class SaxLib
             writer.WriteStartElement(new Worksheet());
 
             //Alinhar com o Table generation
+            writer.WriteStartElement(new Columns() { });
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-            {
-                writer.WriteStartElement(new Columns() { });
+            { 
                 writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = allColumns[columnNum - 1].MaxWidth, CustomWidth = true });
-                writer.WriteEndElement();
             }
+            writer.WriteEndElement();
 
             writer.WriteStartElement(new SheetData());
 
@@ -243,18 +312,40 @@ public class SaxLib
                 for (int columnNum = 1; columnNum <= numColumns; columnNum++)
                 {
                     var currentColumn = allColumns[columnNum - 1];
-                    //write the cell start element with the type and reference attributes
-                    cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                    
-                    cell.DataType = CellValues.SharedString;
-                    cell.StyleIndex = _styleIndexes[currentColumn.StyleKey];
-                    writer.WriteStartElement(cell);
-                    //write the cell value
-                    cellValue.Text = _sharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
-                    writer.WriteElement(cellValue);
+                    if (allColumns.Length > (columnNum - 1) && allColumns[columnNum - 1].Data.Length > (rowNum -2))
+                    {
+                        //write the cell start element with the type and reference attributes
+                        cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
 
-                    // write the end cell element
-                    writer.WriteEndElement();
+                        cell.StyleIndex = _styleIndexes[currentColumn.StyleKey];
+
+                        //Only set string type if not number or date
+                        if (currentColumn.DataType == ExcelDataTypes.DataType.Text || currentColumn.DataType == ExcelDataTypes.DataType.HyperLink)
+                        {
+                            cell.DataType = CellValues.SharedString;
+
+                            //write the cell value
+                            cellValue.Text = _sharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
+                            
+                        }
+                        else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
+                        {
+                            cell.DataType = CellValues.Number;
+                            cellValue.Text = _oleADates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
+                        }
+                        else
+                        {
+                            cell.DataType = CellValues.Number;
+                            //write the cell value
+                            cellValue.Text = allColumns[columnNum - 1].Data[rowNum - 2];
+                        }
+
+                        writer.WriteStartElement(cell);
+                        
+                        writer.WriteElement(cellValue);
+                        // write the end cell element
+                        writer.WriteEndElement();
+                    }
                 }
 
                 // write the end row element
@@ -264,6 +355,28 @@ public class SaxLib
             // write the end SheetData element
             writer.WriteEndElement();
 
+            //HyperlinksInfo
+            if (allColumns.Any(x => x.DataType == ExcelDataTypes.DataType.HyperLink))
+            {
+                writer.WriteStartElement(new Hyperlinks());
+                for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+                {
+                    if (allColumns[columnNum - 1].DataType == ExcelDataTypes.DataType.HyperLink)
+                    {
+                        var linkColumn = allColumns[columnNum - 1];
+                        var hyperlink = new Hyperlink();
+                        for (int rowNum = 2; rowNum <= linkColumn.HyperLinkIds.Length + 1; rowNum++)
+                        {
+                            hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                            hyperlink.Id = linkColumn.HyperLinkIds[rowNum - 2];
+                            writer.WriteElement(hyperlink);
+                        }
+                    }
+                }
+                writer.WriteEndElement();
+            }
+
+            // Table Info
             writer.WriteStartElement(new TableParts() { Count = 1 });
             writer.WriteElement(new TablePart() { Id = sheetPartId });
             writer.WriteEndElement();
@@ -326,15 +439,16 @@ public class SaxLib
     private string AddFontToDictionary(
         Dictionary<string, ExcelFontDetail> fonts, 
         ExcelFonts.FontType font, 
-        int fontSize)
+        int fontSize,
+        int colorTheme)
     {
         string key;
         ExcelFontDetail fontDetail;
 
-        key = font.ToString() + fontSize.ToString();
+        key = font.ToString() + fontSize.ToString() + colorTheme.ToString();
         if (!fonts.ContainsKey(key))
         {
-            fontDetail = ExcelFontDetail.GetFontStyles(font, (UInt32)fonts.Count, fontSize);
+            fontDetail = ExcelFontDetail.GetFontStyles(font, (UInt32)fonts.Count, fontSize, colorTheme);
             fonts.Add(key, fontDetail);
         }
 
@@ -402,7 +516,7 @@ public class SaxLib
         //Run all tables looking for styles
         foreach (var table in modelData.WorkbookModel.Tables)
         {
-            key = AddFontToDictionary(fonts, table.Header.Style.Font, table.Header.Style.FontSize);
+            key = AddFontToDictionary(fonts, table.Header.Style.Font, table.Header.Style.FontSize, 1);
                 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 
@@ -412,7 +526,9 @@ public class SaxLib
 
             foreach (var column in table.Columns)
             {
-                key = AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize);
+                key = column.DataType == ExcelDataTypes.DataType.HyperLink ? 
+                    AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize, 10) :
+                    AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize, 1);
                 // Columns can have diferent types, formats and fonts
                 styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 if (column.DataType == ExcelDataTypes.DataType.Text)
@@ -424,16 +540,19 @@ public class SaxLib
                 {
                     // Add numFormat or CellStyle to xml and get index to add to the style class
                     styleKey = key + column.DataType.ToString();
-                    
+
                     if (column.DataType == ExcelDataTypes.DataType.Number)
                     {
                         if (!string.IsNullOrEmpty(column.DataFormat))
                         {
                             var numFormatId = AddNumFormatToDictionary(numFormats, column.DataFormat);
                             styleKey = styleKey + numFormatId.ToString();
-                            AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
+                        }
+                        else
+                        {
+                            AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U, true, true);
                             column.AddStyleKey(styleKey);
-                        }   
+                        }
                     }
                     else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
                     {
@@ -444,17 +563,7 @@ public class SaxLib
                     }
                     else if (column.DataType == ExcelDataTypes.DataType.DateTime)
                     {
-                        //DateTime dt = DateTime.Now;
-                        //double x = dt.ToOADate();
-                        string sysDateFormat;
-                        if (string.IsNullOrEmpty(column.DataFormat))
-                        {
-                            sysDateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-                        }
-                        else
-                        {
-                            sysDateFormat = column.DataFormat;
-                        }
+                        var sysDateFormat = string.IsNullOrEmpty(column.DataFormat) ? CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString() : column.DataFormat;
                         var numFormatId = AddNumFormatToDictionary(numFormats, sysDateFormat);
                         styleKey = styleKey + numFormatId.ToString();
                         AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
@@ -471,7 +580,7 @@ public class SaxLib
         // Future Watermark Details
         if (modelData.WorkbookModel.Watermark != null)
         {
-            key = AddFontToDictionary(fonts, modelData.WorkbookModel.Watermark.Font, modelData.WorkbookModel.Watermark.FontSize);
+            key = AddFontToDictionary(fonts, modelData.WorkbookModel.Watermark.Font, modelData.WorkbookModel.Watermark.FontSize, 1);
 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
 
@@ -487,17 +596,26 @@ public class SaxLib
             #region NumFormats
 
             //TODO add numformat fields here for numbering and Dates
+            
+            writer.WriteStartElement(new NumberingFormats() { Count = (UInt32)numFormats.Count });
+            
+            foreach (var format in numFormats.Values)
+            {
+                writer.WriteElement(new NumberingFormat() { NumberFormatId = format.FormatId, FormatCode = format.FormatCode });  
+            }
+
+            writer.WriteEndElement();
 
             #endregion
 
-            #region Fonts
+                #region Fonts
 
-            //write the fonts sections
-            //<Fonts>
-            //  <Font>...props...</Font>
-            //</Fonts>
-            //writer.WriteStartElement(new Fonts() { Count = (UInt32)hardCodedFonts.Length });
-            writer.WriteStartElement(new Fonts() { Count = (UInt32)fonts.Count });
+                //write the fonts sections
+                //<Fonts>
+                //  <Font>...props...</Font>
+                //</Fonts>
+                //writer.WriteStartElement(new Fonts() { Count = (UInt32)hardCodedFonts.Length });
+                writer.WriteStartElement(new Fonts() { Count = (UInt32)fonts.Count });
 
             foreach (var font in fonts.Values)
             {

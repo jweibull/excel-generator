@@ -1,0 +1,192 @@
+{
+  "workbookModel": {
+    "fileName": "MyOutput",
+    "title": "Basniak's Awesome Table",
+    "author": "Basniak",
+    "company": "Basniak's awesome library'",
+    "comments": "Awesome Excel Generation",
+    "isDraft": true,
+    "watermark": {
+      "text": "Rascunho",
+      "alpha": 0.3,
+      "textColor": 65,
+      "font": 3,
+      "rotationAngle": 45,
+      "fontSize": 160
+    },
+    "tables": [
+      {
+        "name": "Custom Spreadsheet Name",
+        "tabIndex": 0,
+        "sheetType": 0,
+        "shouldSort": false,
+        "sortColumn": 2,
+        "theme": 24,
+        "tabColor": 65,
+        "header": {
+          "data": ["Tag1", "Tag2"],
+          "style": {
+            "font": 4,
+            "fontSize": 14,
+            "bold": false,
+            "italic": false
+          }
+        },
+        "columns": [
+          {
+            "data": [
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e",
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e",
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e",
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e"
+            ],
+            "style": {
+              "font": 3,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 25,
+            "dataType": 0,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com"
+            ],
+            "style": {
+              "font": 6,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 20,
+            "dataType": 3,
+            "dataFormat": ""
+          }
+        ]
+      },
+      {
+        "name": "Spreadsheet Name 2",
+        "tabIndex": 0,
+        "sheetType": 0,
+        "shouldSort": false,
+        "sortColumn": 2,
+        "theme": 7,
+        "tabColor": 65,
+        "header": {
+          "data": ["Tag21", "Tag22"],
+          "style": {
+            "font": 5,
+            "fontSize": 14,
+            "bold": false,
+            "italic": false
+          }
+        },
+        "columns": [
+          {
+            "data": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "20"
+            ],
+            "style": {
+              "font": 3,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 26,
+            "dataType": 1,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "12/10/1977",
+              "13/10/1977",
+              "14/10/1977",
+              "15/10/1977",
+              "16/10/1977",
+              "12/10/1977",
+              "13/10/1977",
+              "14/10/1977",
+              "15/10/1977",
+              "16/10/1977",
+              "12/11/1977",
+              "13/11/1977",
+              "14/11/1977",
+              "15/11/1977",
+              "16/11/1977",
+              "12/10/1979",
+              "13/10/1979",
+              "14/10/1979",
+              "15/10/1979",
+              "16/10/1979"
+            ],
+            "style": {
+              "font": 6,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 20,
+            "dataType": 2,
+            "dataFormat": ""
+          }
+        ]
+      }
+    ],
+    "charts": []
+  }
+}

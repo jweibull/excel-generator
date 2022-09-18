@@ -41,22 +41,20 @@ public class ExcelFontDetail
     /// </summary>
     public UInt32 FontIndex { get; set; }
 
-    public static ExcelFontDetail GetFontStyles(ExcelFonts.FontType font, UInt32 fontIndex, int? fontSize)
+    public static ExcelFontDetail GetFontStyles(ExcelFonts.FontType font, UInt32 fontIndex, int fontSize, int theme)
     {
-        var size = fontSize == null ? 11 : fontSize.Value;
-        
         switch ((int)font)
         {
-            case 0: return new ExcelFontDetail("Arial", (UInt32)size, 2, 1, fontIndex);
-            case 1: return new ExcelFontDetail("Arial Bold", (UInt32)size, 2, 1, fontIndex);
-            case 2: return new ExcelFontDetail("Arial Narrow", (UInt32)size, 2, 1, fontIndex);
-            case 3: return new ExcelFontDetail("Calibri", (UInt32)size, 2, 1, fontIndex);
-            case 4: return new ExcelFontDetail("Calibri Light", (UInt32)size, 2, 1, fontIndex);
-            case 5: return new ExcelFontDetail("Courrier New", (UInt32)size, 1, 1, fontIndex);
-            case 6: return new ExcelFontDetail("Times New Roman", (UInt32)size, 2, 1, fontIndex);
-            case 7: return new ExcelFontDetail("Georgia", (UInt32)size, 3, 1, fontIndex);
+            case 0: return new ExcelFontDetail("Arial", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+            case 1: return new ExcelFontDetail("Arial Bold", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+            case 2: return new ExcelFontDetail("Arial Narrow", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+            case 3: return new ExcelFontDetail("Calibri", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+            case 4: return new ExcelFontDetail("Calibri Light", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+            case 5: return new ExcelFontDetail("Courrier New", (UInt32)fontSize, 1, (UInt32)theme, fontIndex);
+            case 6: return new ExcelFontDetail("Times New Roman", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+            case 7: return new ExcelFontDetail("Georgia", (UInt32)fontSize, 3, (UInt32)theme, fontIndex);
             default:
-                return new ExcelFontDetail("Calibri", (UInt32)size, 2, 1, fontIndex);
+                return new ExcelFontDetail("Calibri", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
         }
     }
 
