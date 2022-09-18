@@ -19,6 +19,7 @@
         "name": "Custom Spreadsheet Name",
         "tabIndex": 0,
         "sheetType": 0,
+        "isMultilined": true,
         "shouldSort": false,
         "sortColumn": 2,
         "theme": 24,
@@ -27,7 +28,7 @@
           "data": ["Tag1", "Tag2"],
           "style": {
             "font": 4,
-            "fontSize": 14,
+            "fontSize": 12,
             "bold": false,
             "italic": false
           }
@@ -37,7 +38,7 @@
             "data": [
               "string muito muito muito muito longa",
               "b",
-              "c",
+              "Estou na Linha 1<br>Pulei pra linha 2",
               "d",
               "e",
               "string muito muito muito muito longa",
@@ -62,15 +63,16 @@
               "bold": false,
               "italic": false
             },
-            "maxWidth": 25,
+            "maxWidth": 2,
             "dataType": 0,
             "dataFormat": ""
           },
           {
             "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
               "www.google.com",
               "www.yahoo.com",
-              "www.microsoft.com",
+              "",
               "www.github.com",
               "www.gitlab.com",
               "www.google.com",
@@ -94,8 +96,7 @@
               "bold": false,
               "italic": false
             },
-            "maxWidth": 20,
-            "dataType": 3,
+            "dataType": 4,
             "dataFormat": ""
           }
         ]
@@ -127,7 +128,7 @@
               "5",
               "6",
               "7",
-              "8",
+              "8.56",
               "9",
               "10",
               "1",
@@ -139,7 +140,7 @@
               "7",
               "8",
               "9",
-              "20"
+              "20000.34"
             ],
             "style": {
               "font": 3,
@@ -149,7 +150,7 @@
             },
             "maxWidth": 26,
             "dataType": 1,
-            "dataFormat": ""
+            "dataFormat": "#,##0.00"
           },
           {
             "data": [
@@ -181,7 +182,7 @@
               "italic": false
             },
             "maxWidth": 20,
-            "dataType": 2,
+            "dataType": 4,
             "dataFormat": ""
           }
         ]
