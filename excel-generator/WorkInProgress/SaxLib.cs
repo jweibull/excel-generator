@@ -678,7 +678,6 @@ public class SaxLib
         }
     }
 
-    // TODO create dictionaries to link fonts and fills etc to the CellFormatStyles element inside this method.
     // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
     // will be the third font added in fonts section, while the font with id "0" will be the first you added.
     // Same goes for borders, fills, etc.
@@ -756,7 +755,7 @@ public class SaxLib
             }
         }
 
-        #endregion
+        
 
         //TODO Add Chart Fonts;
 
@@ -772,14 +771,14 @@ public class SaxLib
             modelData.WorkbookModel.Watermark.AddStyleKey(styleKey);
         }
 
+        #endregion
+
         using (var writer = OpenXmlWriter.Create(workbookStylesPart))
         {
             writer.WriteStartElement(new Stylesheet());
 
             #region NumFormats
 
-            //TODO add numformat fields here for numbering and Dates
-            
             writer.WriteStartElement(new NumberingFormats() { Count = (UInt32)numFormats.Count });
             
             foreach (var format in numFormats.Values)
@@ -791,7 +790,7 @@ public class SaxLib
 
             #endregion
 
-                #region Fonts
+            #region Fonts
 
                 //write the fonts sections
                 //<Fonts>
