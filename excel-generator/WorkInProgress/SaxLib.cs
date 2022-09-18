@@ -72,7 +72,7 @@ public class SaxLib
                 string sheetPartId = string.Empty;
                 List<string> sheetPartIds = new List<string>();
                 var numSheets = modelData.WorkbookModel.Tables.Count();
-
+                
                 document.AddWorkbookPart();
                 
                 if (document.WorkbookPart != null)
@@ -152,53 +152,140 @@ public class SaxLib
             AddToSharedStringDictionary(table.Header.Data);
             foreach (var column in table.Columns)
             {
-                // Check for either Dates or Hyperlinks on data colunms
+                
                 if (column.DataType == ExcelDataTypes.DataType.AutoDetect)
                 {
-                    var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && (x.Contains("href") || x.StartsWith("http://") || x.StartsWith("https://")));
-                    if (linkSample != null)
-                    {
-                        PrepareAutodetectedHyperlinks(column, linkSample);
-                        AddToSharedStringDictionary(column.Data);
-                    }
-                    else if (DateTime.TryParseExact(column.Data.FirstOrDefault(), CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
-                    {
-                        column.DataType = ExcelDataTypes.DataType.DateTime;
-                        if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
-                        {
-                            column.DataType = ExcelDataTypes.DataType.Text;
-                            AddToSharedStringDictionary(column.Data);
-                        }
-                    }
+                    // Check for either Dates or Hyperlinks on data colunms
+                    PrepareAutodetectData(column, table.IsMultilined);
                 }
-                else if (column.DataType == ExcelDataTypes.DataType.Text)
+                else
                 {
-                    AddToSharedStringDictionary(column.Data);
+                    // If not autodetect prepare regular types
+                    PrepareDeclaredTypeData(column, table.IsMultilined);
                 }
-                else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
-                {
-                    var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && x.Contains("href"));
-                    if (linkSample != null)
-                    {
-                        PrepareHrefHyperlinks(column);
-                    }
-                    else
-                    {
-                        PrepareRegularHyperlinks(column);
-                    }
-                    AddToSharedStringDictionary(column.Data);
-                }
-                else if (column.DataType == ExcelDataTypes.DataType.DateTime)
-                {
-                    if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
-                    {
-                        column.DataType = ExcelDataTypes.DataType.Text;
-                        AddToSharedStringDictionary(column.Data);
-                    }
-                }
+                                
             }
         }
         _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
+    }
+
+    private void PrepareDeclaredTypeData(ExcelColumnModel column, bool isMultilined)
+    {
+        if (column.DataType == ExcelDataTypes.DataType.Text)
+        {
+            AddToSharedStringDictionary(column.Data);
+        }
+        else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
+        {
+            var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && x.Contains("href"));
+            if (linkSample != null)
+            {
+                if (isMultilined)
+                {
+                    PrepareMultilinedHrefHyperlinks(column);
+                }
+                else
+                {
+                    PrepareHrefHyperlinks(column);
+                }
+            }
+            else
+            {
+                if (isMultilined)
+                {
+                    PrepareMultilinedRegularHyperlinks(column);
+                }
+                else
+                {
+                    PrepareRegularHyperlinks(column);
+                }
+            }
+            AddToSharedStringDictionary(column.Data);
+        }
+        else if (column.DataType == ExcelDataTypes.DataType.DateTime)
+        {
+            if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
+            {
+                column.DataType = ExcelDataTypes.DataType.Text;
+                AddToSharedStringDictionary(column.Data);
+            }
+        }
+    }
+
+    private void PrepareAutodetectData(ExcelColumnModel column, bool isMultilined)
+    {
+        var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && (x.Contains("href") || x.StartsWith("http://") || x.StartsWith("https://")));
+        if (linkSample != null)
+        {
+            if (isMultilined)
+            {
+                PrepareMultilinedAutodetectedHyperlinks(column, linkSample);
+            }
+            else
+            {
+                PrepareAutodetectedHyperlinks(column, linkSample);
+            }
+            AddToSharedStringDictionary(column.Data);
+        }
+        else if (DateTime.TryParseExact(
+            column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim())),
+            CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString(),
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None,
+            out var date))
+        {
+            column.DataType = ExcelDataTypes.DataType.DateTime;
+            if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
+            {
+                column.DataType = ExcelDataTypes.DataType.Text;
+                AddToSharedStringDictionary(column.Data);
+            }
+        }
+        else
+        {
+            column.DataType = ExcelDataTypes.DataType.Text;
+            AddToSharedStringDictionary(column.Data);
+        }
+    }
+
+    private void PrepareMultilinedAutodetectedHyperlinks(ExcelColumnModel column, string linkSample)
+    {
+        if (linkSample.Contains("href"))
+        {
+            PrepareMultilinedHrefHyperlinks(column);
+        }
+        else
+        {
+            PrepareMultilinedRegularHyperlinks(column);
+        }
+    }
+
+    private void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column)
+    {
+        column.DataType = ExcelDataTypes.DataType.Text;
+        var data = column.Data;
+        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
+        {
+            data[itemIndex] = Regex.Replace(data[itemIndex], "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
+        }
+    }
+
+    private void PrepareMultilinedHrefHyperlinks(ExcelColumnModel column)
+    {
+        column.DataType = ExcelDataTypes.DataType.Text;
+        var data = column.Data;
+        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
+        {
+            string hyperlink = data[itemIndex];
+            hyperlink = Regex.Replace(hyperlink, "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
+            var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]?([^\'"" >]+).*?<\/a>", RegexOptions.IgnoreCase);
+
+            foreach (Match match in matches)
+            {
+                hyperlink = hyperlink.Replace(match.Value, match.Groups[1].Value);
+            }
+            data[itemIndex] = hyperlink;
+        }
     }
 
     private void PrepareAutodetectedHyperlinks(ExcelColumnModel column, string linkSample)
@@ -233,6 +320,7 @@ public class SaxLib
     {
         var data = column.Data;
         var hyperlinks = new List<ExcelHyperlink>();
+        
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
             if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
@@ -346,6 +434,22 @@ public class SaxLib
         _sharedStringsCount += count;
     }
 
+    private double FitColumn(string header, int headerFontSize, ExcelColumnModel column, bool isMultilined, int maxWidth)
+    {
+        var offset = 1;
+        var numSamples = 50;
+        double headerWidth = (header.Length + offset) * (72D / 96D) * (headerFontSize / 9D) * ((double)headerFontSize / (double)column.Style.FontSize);
+        double columnWidth = (column.GetMaxDataLength(isMultilined, numSamples) + offset) * (72D / 96D) * (column.Style.FontSize / 9D) * ((double)column.Style.FontSize / (double)headerFontSize);
+        var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
+        if (maxWidth > 13)
+        {
+            var higherFontSize = headerFontSize > column.Style.FontSize ? headerFontSize : column.Style.FontSize;
+            var correctedMaxWidth = maxWidth * (72D / 96D) * (higherFontSize / 9D);
+            width = width > correctedMaxWidth ? correctedMaxWidth : width;
+        }
+        return width;
+    }
+
     private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, ExcelColumnModel[] allColumns, int numRows, string sheetPartId)
     {
         // Actual Cell Values from string table
@@ -357,11 +461,13 @@ public class SaxLib
             writer.WriteStartElement(new Worksheet());
 
             //Alinhar com o Table generation
-            writer.WriteStartElement(new Columns() { });
+            writer.WriteStartElement(new Columns());
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-            { 
-                writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = allColumns[columnNum - 1].MaxWidth, CustomWidth = true });
+            {
+                var width = FitColumn(headers.Data[columnNum - 1], headers.Style.FontSize, allColumns[columnNum - 1], sheetModel.IsMultilined, allColumns[columnNum - 1].MaxWidth);
+                writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = width, CustomWidth = true });
             }
+            
             writer.WriteEndElement();
 
             writer.WriteStartElement(new SheetData());
