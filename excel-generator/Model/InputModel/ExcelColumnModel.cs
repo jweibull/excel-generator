@@ -42,11 +42,11 @@ public class ExcelColumnModel
     /// <summary>
     /// Builder helper Field to distinguish the hyperlink Ids related to this column
     /// </summary>
-    public string[] HyperLinkIds { get; private set; }
+    public ExcelHyperlink[] HyperLinkData { get; private set; }
 
-    public void AddHyperLinkIds(string[] hyperLinkIds)
+    public void AddHyperLinkData(ExcelHyperlink[] hyperLinkData)
     {
-        HyperLinkIds = hyperLinkIds;
+        HyperLinkData = hyperLinkData;
     }
 
     /// <summary>

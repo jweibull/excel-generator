@@ -5,9 +5,9 @@ namespace ExcelGenerator.Excel;
 /// <summary>
 /// Class describing a Font as it is written inside the XML file.
 /// </summary>
-public class HyperlinkFormat
+public class ExcelHyperlinkFormat
 { 
-    public HyperlinkFormat(UInt32 fontIdx)
+    public ExcelHyperlinkFormat(UInt32 fontIdx)
     {
         FontIndex = fontIdx;
     }

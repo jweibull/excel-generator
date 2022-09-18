@@ -7,6 +7,8 @@ using ExcelGenerator.Excel;
 using Newtonsoft.Json;
 using System.Globalization;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using System.Text.RegularExpressions;
 
 namespace ExcelGenerator.Generators;
 
@@ -76,37 +78,15 @@ public class SaxLib
                 if (document.WorkbookPart != null)
                 {
                     // Generate all Shared Strings that will be used in all the sheets
-                    _sharedStringsCount = 0;
-                    foreach (var table in modelData.WorkbookModel.Tables)
-                    {
-                        AddToSharedStringDictionary(table.Header.Data);
-                        foreach (var column in table.Columns)
-                        {
-                            if (column.DataType == ExcelDataTypes.DataType.Text || column.DataType == ExcelDataTypes.DataType.HyperLink)
-                            {
-                                AddToSharedStringDictionary(column.Data);
-                            }
-                            else if (column.DataType == ExcelDataTypes.DataType.DateTime)
-                            {
-                                if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
-                                {
-                                    column.DataType = ExcelDataTypes.DataType.Text;
-                                    AddToSharedStringDictionary(column.Data);
-                                }
-                            }
-                        }
-                    }
-                    _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
+                    PrepareData(modelData);
 
-                    // Generate a single sheet 
-                    stylesPartId = "rId" + partId++;
-                    sharedTableId = "rId" + partId++;
-                    
                     // Generate all Styles needed on every sheet in this workbook
+                    stylesPartId = "sPrId1";
+                    sharedTableId = "sTrId1";
                     WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
                     SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
-                    GenerateStylePart(workbookStylesPart, stylesPartId, modelData);
-                    GenerateSharedStringsTable(sharedStringTablePart, sharedTableId);
+                    GenerateStylePart(workbookStylesPart, modelData);
+                    GenerateSharedStringsTable(sharedStringTablePart);
 
                     for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
                     {
@@ -127,9 +107,8 @@ public class SaxLib
 
                         int numRows = allColumns.Select(x => x.Data.Count()).Max() + 1;
 
-                        GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId, sheetTablesPart);
+                        GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId);
                         GenerateTableParts(sheetTablesPart, sheetPartId, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
-                        
                     }
 
                     // Create the worksheet and sheets list to end the package
@@ -165,22 +144,131 @@ public class SaxLib
         }
     }
 
+    private void PrepareData(ModelData modelData)
+    {
+        _sharedStringsCount = 0;
+        foreach (var table in modelData.WorkbookModel.Tables)
+        {
+            AddToSharedStringDictionary(table.Header.Data);
+            foreach (var column in table.Columns)
+            {
+                // Check for either Dates or Hyperlinks on data colunms
+                if (column.DataType == ExcelDataTypes.DataType.AutoDetect)
+                {
+                    var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && (x.Contains("href") || x.StartsWith("http://") || x.StartsWith("https://")));
+                    if (linkSample != null)
+                    {
+                        PrepareAutodetectedHyperlinks(column, linkSample);
+                        AddToSharedStringDictionary(column.Data);
+                    }
+                    else if (DateTime.TryParseExact(column.Data.FirstOrDefault(), CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+                    {
+                        column.DataType = ExcelDataTypes.DataType.DateTime;
+                        if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
+                        {
+                            column.DataType = ExcelDataTypes.DataType.Text;
+                            AddToSharedStringDictionary(column.Data);
+                        }
+                    }
+                }
+                else if (column.DataType == ExcelDataTypes.DataType.Text)
+                {
+                    AddToSharedStringDictionary(column.Data);
+                }
+                else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
+                {
+                    var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && x.Contains("href"));
+                    if (linkSample != null)
+                    {
+                        PrepareHrefHyperlinks(column);
+                    }
+                    else
+                    {
+                        PrepareRegularHyperlinks(column);
+                    }
+                    AddToSharedStringDictionary(column.Data);
+                }
+                else if (column.DataType == ExcelDataTypes.DataType.DateTime)
+                {
+                    if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
+                    {
+                        column.DataType = ExcelDataTypes.DataType.Text;
+                        AddToSharedStringDictionary(column.Data);
+                    }
+                }
+            }
+        }
+        _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
+    }
+
+    private void PrepareAutodetectedHyperlinks(ExcelColumnModel column, string linkSample)
+    {
+        column.DataType = ExcelDataTypes.DataType.HyperLink;
+        if (linkSample.Contains("href"))
+        {
+            PrepareHrefHyperlinks(column);
+        }
+        else
+        {
+            PrepareRegularHyperlinks(column);
+        }
+    }
+
+    private void PrepareRegularHyperlinks(ExcelColumnModel column)
+    {
+        var data = column.Data;
+        var hyperlinks = new List<ExcelHyperlink>();
+        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
+        {
+            if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
+            {
+                data[itemIndex] = Regex.Replace(data[itemIndex], "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
+                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = data[itemIndex] });
+            }
+        }
+        column.AddHyperLinkData(hyperlinks.ToArray());
+    }
+
+    private void PrepareHrefHyperlinks(ExcelColumnModel column)
+    {
+        var data = column.Data;
+        var hyperlinks = new List<ExcelHyperlink>();
+        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
+        {
+            if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
+            {
+                string hyperlink = data[itemIndex];
+                hyperlink = Regex.Replace(hyperlink, "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
+
+                string text = Regex.Replace(hyperlink, "(<[a|A][^>]*>|)", "");
+
+                var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]?([^\'"" >]+).*?<\/a>", RegexOptions.IgnoreCase);
+
+                foreach (Match match in matches)
+                {
+                    hyperlink = hyperlink.Replace(match.Value, match.Groups[1].Value);
+                }
+                data[itemIndex] = text;
+                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = hyperlink });
+            }
+        }
+        column.AddHyperLinkData(hyperlinks.ToArray());
+    }
+
     private int GenerateHyperlinkParts(WorksheetPart workSheetPart, ExcelColumnModel linkColumn, int partIdSequencer)
     {
-        var linkIds = new List<string>();
         string url;
-        foreach (var link in linkColumn.Data)
+        foreach (var link in linkColumn.HyperLinkData)
         {
             var id = "lId" + partIdSequencer++;
-            url = link.Substring(0, 7) == @"http://" ? link : @"http://" + link;
+            url = link.Hyperlink.StartsWith("http://") || link.Hyperlink.StartsWith("https://") ? link.Hyperlink : @"http://" + link.Hyperlink;
             workSheetPart.AddHyperlinkRelationship(new Uri(url, UriKind.Absolute), true, id);
-            linkIds.Add(id);
+            link.LinkId = id;
         }
-        linkColumn.AddHyperLinkIds(linkIds.ToArray());
         return partIdSequencer;
     }
 
-    private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart, string sharedTableId)
+    private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart)
     {
         // Run this for all strings in the workbook
         // string[] sharedStrings must contain all the strings in the project
@@ -242,22 +330,23 @@ public class SaxLib
     private void AddToSharedStringDictionary(string[] sharedStrings)
     {
         var count = 0;
-        foreach (var item in sharedStrings)
+        for (int itemIndex = 0; itemIndex < sharedStrings.Length; itemIndex++)
         {
-            if (_sharedStringsToIndex.ContainsKey(item))
+            sharedStrings[itemIndex] = Regex.Replace(sharedStrings[itemIndex], "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
+            if (_sharedStringsToIndex.ContainsKey(sharedStrings[itemIndex]))
             {
                 count++;
             }
             else
             {
                 count++;
-                _sharedStringsToIndex.Add(item, _sharedStringsToIndex.Count().ToString());
+                _sharedStringsToIndex.Add(sharedStrings[itemIndex], _sharedStringsToIndex.Count().ToString());
             }
         }
         _sharedStringsCount += count;
     }
 
-    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, ExcelColumnModel[] allColumns, int numRows, string sheetPartId, TableDefinitionPart sheetTablesPart)
+    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, ExcelColumnModel[] allColumns, int numRows, string sheetPartId)
     {
         // Actual Cell Values from string table
         using (var writer = OpenXmlWriter.Create(workSheetPart))
@@ -287,22 +376,20 @@ public class SaxLib
 
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                //write the cell start element with the type and reference attributes
                 cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1U);
 
                 cell.DataType = CellValues.SharedString;
                 cell.StyleIndex = _styleIndexes[headers.StyleKey];
                 writer.WriteStartElement(cell);
-                //write the cell value
                 cellValue.Text = _sharedStringsToIndex[headers.Data[columnNum - 1]];
                 writer.WriteElement(cellValue);
 
-                // write the end cell element
                 writer.WriteEndElement();
             }
 
             writer.WriteEndElement();
 
+            // Add the rest of the data
             for (int rowNum = 2; rowNum <= numRows; rowNum++)
             {
                 //write the row start element with the row index attribute
@@ -314,19 +401,13 @@ public class SaxLib
                     var currentColumn = allColumns[columnNum - 1];
                     if (allColumns.Length > (columnNum - 1) && allColumns[columnNum - 1].Data.Length > (rowNum -2))
                     {
-                        //write the cell start element with the type and reference attributes
                         cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-
                         cell.StyleIndex = _styleIndexes[currentColumn.StyleKey];
 
-                        //Only set string type if not number or date
                         if (currentColumn.DataType == ExcelDataTypes.DataType.Text || currentColumn.DataType == ExcelDataTypes.DataType.HyperLink)
                         {
                             cell.DataType = CellValues.SharedString;
-
-                            //write the cell value
                             cellValue.Text = _sharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
-                            
                         }
                         else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
                         {
@@ -336,19 +417,14 @@ public class SaxLib
                         else
                         {
                             cell.DataType = CellValues.Number;
-                            //write the cell value
                             cellValue.Text = allColumns[columnNum - 1].Data[rowNum - 2];
                         }
 
                         writer.WriteStartElement(cell);
-                        
                         writer.WriteElement(cellValue);
-                        // write the end cell element
                         writer.WriteEndElement();
                     }
                 }
-
-                // write the end row element
                 writer.WriteEndElement();
             }
 
@@ -365,10 +441,10 @@ public class SaxLib
                     {
                         var linkColumn = allColumns[columnNum - 1];
                         var hyperlink = new Hyperlink();
-                        for (int rowNum = 2; rowNum <= linkColumn.HyperLinkIds.Length + 1; rowNum++)
+                        for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
                         {
                             hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                            hyperlink.Id = linkColumn.HyperLinkIds[rowNum - 2];
+                            hyperlink.Id = linkColumn.HyperLinkData[rowNum - 2].LinkId;
                             writer.WriteElement(hyperlink);
                         }
                     }
@@ -500,7 +576,7 @@ public class SaxLib
     // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
     // will be the third font added in fonts section, while the font with id "0" will be the first you added.
     // Same goes for borders, fills, etc.
-    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, string stylesPartId, ModelData modelData )
+    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, ModelData modelData )
     {
         #region Fonts, NumFormats, CellXfs and CellStyles
 
@@ -547,12 +623,13 @@ public class SaxLib
                         {
                             var numFormatId = AddNumFormatToDictionary(numFormats, column.DataFormat);
                             styleKey = styleKey + numFormatId.ToString();
+                            AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
                         }
                         else
                         {
                             AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U, true, true);
-                            column.AddStyleKey(styleKey);
                         }
+                        column.AddStyleKey(styleKey);
                     }
                     else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
                     {
@@ -768,15 +845,9 @@ public class SaxLib
             #region Diferential formats
 
             //Hardcoded Props
-            var diferentialFormatsCount = 1;
-
+            var diferentialFormatsCount = 0;
             // Start diferential formats section Although empty it is a needed part of the Stylesheet
             writer.WriteStartElement(new DifferentialFormats() { Count = (UInt32)diferentialFormatsCount });
-            // Start diferential format tag
-            writer.WriteStartElement(new DifferentialFormat());
-            // End diferential format tag
-            writer.WriteEndElement();
-            // End diferential formats section
             writer.WriteEndElement();
 
             #endregion
