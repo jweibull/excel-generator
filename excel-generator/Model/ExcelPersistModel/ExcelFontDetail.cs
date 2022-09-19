@@ -1,4 +1,5 @@
-﻿using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 
 namespace ExcelGenerator.Excel;
 
@@ -7,13 +8,16 @@ namespace ExcelGenerator.Excel;
 /// </summary>
 public class ExcelFontDetail
 { 
-    public ExcelFontDetail(string fontName, UInt32 fontSize, Int32 fontFamily, UInt32 theme, UInt32 fontIndex)
+    public ExcelFontDetail(string fontName, UInt32 fontSize, bool bold, bool italic, bool underline,  Int32 fontFamily, UInt32 theme, UInt32 fontIndex)
     {
         FontName = fontName;
         FontSize = fontSize;
         FontFamily = fontFamily;
         Theme = theme;
         FontIndex = fontIndex;
+        Bold = bold;
+        Italic = italic;
+        Underline = underline;
     }
 
     /// <summary>
@@ -25,6 +29,21 @@ public class ExcelFontDetail
     /// Font Size in Points as in Excel font size dropdown
     /// </summary>
     public UInt32 FontSize { get; set; } = 11;
+
+    /// <summary>
+    /// Set the font as bold
+    /// </summary>
+    public bool Bold { get; set; }
+
+    /// <summary>
+    /// Set the font as Italic
+    /// </summary>
+    public bool Italic { get; set; }
+
+    /// <summary>
+    /// Set an underline when using this font
+    /// </summary>
+    public bool Underline { get; set; }
 
     /// <summary>
     /// Font family number as defined by Excel Microsoft Arial, Calibri, Times are family 2
@@ -41,20 +60,17 @@ public class ExcelFontDetail
     /// </summary>
     public UInt32 FontIndex { get; set; }
 
-    public static ExcelFontDetail GetFontStyles(ExcelFonts.FontType font, UInt32 fontIndex, int fontSize, int theme)
+    public static ExcelFontDetail GetFontStyles(ExcelFonts.FontType font, bool bold, bool italic, bool underline, UInt32 fontIndex, int fontSize, int theme)
     {
         switch ((int)font)
         {
-            case 0: return new ExcelFontDetail("Arial", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
-            case 1: return new ExcelFontDetail("Arial Bold", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
-            case 2: return new ExcelFontDetail("Arial Narrow", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
-            case 3: return new ExcelFontDetail("Calibri", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
-            case 4: return new ExcelFontDetail("Calibri Light", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
-            case 5: return new ExcelFontDetail("Courrier New", (UInt32)fontSize, 1, (UInt32)theme, fontIndex);
-            case 6: return new ExcelFontDetail("Times New Roman", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
-            case 7: return new ExcelFontDetail("Georgia", (UInt32)fontSize, 3, (UInt32)theme, fontIndex);
+            case 0: return new ExcelFontDetail("Arial", (UInt32)fontSize, bold, italic, underline, 2, (UInt32)theme, fontIndex);
+            case 1: return new ExcelFontDetail("Calibri", (UInt32)fontSize, bold, italic, underline, 2, (UInt32)theme, fontIndex);
+            case 2: return new ExcelFontDetail("Calibri Light", (UInt32)fontSize, bold, italic, underline, 2, (UInt32)theme, fontIndex);
+            case 3: return new ExcelFontDetail("Courrier New", (UInt32)fontSize, bold, italic, underline, 1, (UInt32)theme, fontIndex);
+            case 4: return new ExcelFontDetail("Times New Roman", (UInt32)fontSize, bold, italic, underline, 2, (UInt32)theme, fontIndex);
             default:
-                return new ExcelFontDetail("Calibri", (UInt32)fontSize, 2, (UInt32)theme, fontIndex);
+                return new ExcelFontDetail("Calibri", (UInt32)fontSize, bold, italic, underline, 2, (UInt32)theme, fontIndex);
         }
     }
 

@@ -9,6 +9,7 @@ using System.Globalization;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System.Text.RegularExpressions;
+using ExcelGenerator.ExcelDefs;
 
 namespace ExcelGenerator.Generators;
 
@@ -204,11 +205,11 @@ public class SaxLib
         }
         else if (column.DataType == ExcelDataTypes.DataType.DateTime)
         {
-            if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
+            if (string.IsNullOrEmpty(column.DataFormat.Trim()))
             {
-                column.DataType = ExcelDataTypes.DataType.Text;
-                AddToSharedStringDictionary(column.Data);
+                throw new Exception("Data format should not be empty when using the DateTime type");
             }
+            AddToDatetimeToDictionary(column.Data, column.DataFormat);
         }
     }
 
@@ -235,11 +236,7 @@ public class SaxLib
             out var date))
         {
             column.DataType = ExcelDataTypes.DataType.DateTime;
-            if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
-            {
-                column.DataType = ExcelDataTypes.DataType.Text;
-                AddToSharedStringDictionary(column.Data);
-            }
+            AddToDatetimeToDictionary(column.Data, column.DataFormat);
         }
         else
         {
@@ -385,34 +382,21 @@ public class SaxLib
         }
     }
 
-    private bool AddToDatetimeToDictionary(string[] dates, string dataFormat)
+    private void AddToDatetimeToDictionary(string[] dates, string dataFormat)
     {
-        var baseDataFormat = string.IsNullOrEmpty(dataFormat) ? CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString() : dataFormat;
         var index = 0;
-        var isDate = true;
         DateTime date;
-        while (index < dates.Length && isDate)
+        while (index < dates.Length)
         {
             if (!_oleADates.ContainsKey(dates[index]))
             {
-                if (string.IsNullOrEmpty(dataFormat))
-                {
-                    isDate = DateTime.TryParseExact(dates[index], baseDataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
-                }
-                else
-                {
-                    isDate = DateTime.TryParseExact(dates[index], baseDataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
-                }
-                
-                if (isDate)
+                if (DateTime.TryParseExact(dates[index], dataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                 {
                     _oleADates.Add(dates[index], date.ToOADate());
-                } 
+                }
             }
             index++;
         }
-        
-        return isDate;
     }
 
     private void AddToSharedStringDictionary(string[] sharedStrings)
@@ -434,19 +418,42 @@ public class SaxLib
         _sharedStringsCount += count;
     }
 
-    private double FitColumn(string header, int headerFontSize, ExcelColumnModel column, bool isMultilined, int maxWidth)
+    private double FitColumn(string header, ExcelStyleClasses headerStyle, ExcelColumnModel column, bool isMultilined, int maxWidth)
     {
-        var offset = 1;
+        var hOffset = 2;
+        var cOffset = 0;
         var numSamples = 50;
-        double headerWidth = (header.Length + offset) * (72D / 96D) * (headerFontSize / 9D) * ((double)headerFontSize / (double)column.Style.FontSize);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, numSamples) + offset) * (72D / 96D) * (column.Style.FontSize / 9D) * ((double)column.Style.FontSize / (double)headerFontSize);
+
+        var hFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(headerStyle.Font);
+        var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
+
+        if (column.DataType == ExcelDataTypes.DataType.DateTime)
+        {
+            cOffset = 5;
+        }
+
+        if (headerStyle.Bold)
+        {
+            hFontFactor -= 0.5;
+        }
+
+        if (column.Style.Bold == true)
+        {
+            cFontFactor -= 0.5D;
+        }
+
+        double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor) * ((double)headerStyle.FontSize / (double)column.Style.FontSize);
+        double columnWidth = (column.GetMaxDataLength(isMultilined, numSamples) + cOffset) * (72D / 96D) * (column.Style.FontSize / cFontFactor) * ((double)column.Style.FontSize / (double)headerStyle.FontSize);
+        
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
+        
         if (maxWidth > 13)
         {
-            var higherFontSize = headerFontSize > column.Style.FontSize ? headerFontSize : column.Style.FontSize;
+            var higherFontSize = headerStyle.FontSize > column.Style.FontSize ? headerStyle.FontSize : column.Style.FontSize;
             var correctedMaxWidth = maxWidth * (72D / 96D) * (higherFontSize / 9D);
             width = width > correctedMaxWidth ? correctedMaxWidth : width;
         }
+        
         return width;
     }
 
@@ -464,7 +471,7 @@ public class SaxLib
             writer.WriteStartElement(new Columns());
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                var width = FitColumn(headers.Data[columnNum - 1], headers.Style.FontSize, allColumns[columnNum - 1], sheetModel.IsMultilined, allColumns[columnNum - 1].MaxWidth);
+                var width = FitColumn(headers.Data[columnNum - 1], headers.Style, allColumns[columnNum - 1], sheetModel.IsMultilined, allColumns[columnNum - 1].MaxWidth);
                 writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = width, CustomWidth = true });
             }
             
@@ -518,7 +525,14 @@ public class SaxLib
                         else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
                         {
                             cell.DataType = CellValues.Number;
-                            cellValue.Text = _oleADates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
+                            if (_oleADates.ContainsKey(allColumns[columnNum - 1].Data[rowNum - 2]))
+                            {
+                                cellValue.Text = _oleADates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
+                            }
+                            else
+                            {
+                                cellValue.Text = String.Empty;
+                            }
                         }
                         else
                         {
@@ -620,17 +634,16 @@ public class SaxLib
 
     private string AddFontToDictionary(
         Dictionary<string, ExcelFontDetail> fonts, 
-        ExcelFonts.FontType font, 
-        int fontSize,
+        ExcelStyleClasses styles, 
         int colorTheme)
     {
         string key;
         ExcelFontDetail fontDetail;
 
-        key = font.ToString() + fontSize.ToString() + colorTheme.ToString();
+        key = styles.Font.ToString() + styles.FontSize.ToString() + colorTheme.ToString() + styles.Bold.ToString() + styles.Italic.ToString() + styles.Underline.ToString();
         if (!fonts.ContainsKey(key))
         {
-            fontDetail = ExcelFontDetail.GetFontStyles(font, (UInt32)fonts.Count, fontSize, colorTheme);
+            fontDetail = ExcelFontDetail.GetFontStyles(styles.Font, styles.Bold, styles.Italic, styles.Underline, (UInt32)fonts.Count, styles.FontSize, colorTheme);
             fonts.Add(key, fontDetail);
         }
 
@@ -697,7 +710,7 @@ public class SaxLib
         //Run all tables looking for styles
         foreach (var table in modelData.WorkbookModel.Tables)
         {
-            key = AddFontToDictionary(fonts, table.Header.Style.Font, table.Header.Style.FontSize, 1);
+            key = AddFontToDictionary(fonts, table.Header.Style, 1);
                 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 
@@ -708,8 +721,8 @@ public class SaxLib
             foreach (var column in table.Columns)
             {
                 key = column.DataType == ExcelDataTypes.DataType.HyperLink ? 
-                    AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize, 10) :
-                    AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize, 1);
+                    AddFontToDictionary(fonts, column.Style, 10) :
+                    AddFontToDictionary(fonts, column.Style, 1);
                 // Columns can have diferent types, formats and fonts
                 styleKey = key + ExcelDataTypes.DataType.Text.ToString();
                 if (column.DataType == ExcelDataTypes.DataType.Text)
@@ -762,7 +775,13 @@ public class SaxLib
         // Future Watermark Details
         if (modelData.WorkbookModel.Watermark != null)
         {
-            key = AddFontToDictionary(fonts, modelData.WorkbookModel.Watermark.Font, modelData.WorkbookModel.Watermark.FontSize, 1);
+            var styles = new ExcelStyleClasses() 
+            { 
+                Font = modelData.WorkbookModel.Watermark.Font,
+                FontSize = modelData.WorkbookModel.Watermark.FontSize
+            };
+            
+            key = AddFontToDictionary(fonts, styles, 1);
 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
 
@@ -802,7 +821,18 @@ public class SaxLib
             foreach (var font in fonts.Values)
             {
                 writer.WriteStartElement(new Font());
-
+                if (font.Bold)
+                {
+                    writer.WriteElement(new Bold());
+                }
+                if (font.Italic)
+                {
+                    writer.WriteElement(new Italic());
+                }
+                if (font.Underline)
+                {
+                    writer.WriteElement(new Underline());
+                }
                 writer.WriteElement(new FontSize() { Val = font.FontSize });
                 writer.WriteElement(new Color() { Theme = font.Theme });
                 writer.WriteElement(new FontName() { Val = font.FontName });
