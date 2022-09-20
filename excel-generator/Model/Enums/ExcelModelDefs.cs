@@ -153,13 +153,23 @@ public static class ExcelModelDefs
         public enum FontType
         {
             Arial = 0,
-            ArialBold = 1,
-            ArialNarrow = 2,
-            Calibri = 3,
-            CalibriLight = 4,
-            CourierNew = 5,
-            TimesNewRoman = 6,
-            Georgia = 7
+            Calibri = 1,
+            CalibriLight = 2,
+            CourierNew = 3,
+            TimesNewRoman = 4
+        }
+
+        public static double GetFontSizeFactor(FontType fontType)
+        {
+            switch ((int)fontType)
+            {
+                case 0: return 8D;
+                case 1: return 8.5D;
+                case 2: return 8.5D;
+                case 3: return 8.5D;
+                case 4: return 8.5D;
+                default: return 8.5D;
+            }
         }
     }
 

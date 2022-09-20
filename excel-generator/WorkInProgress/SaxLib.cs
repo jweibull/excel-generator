@@ -7,22 +7,21 @@ using ExcelGenerator.Excel;
 using Newtonsoft.Json;
 using System.Globalization;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
-using System.Text.RegularExpressions;
+using ExcelGenerator.ExcelDefs;
 
 
 namespace ExcelGenerator.Generators;
 
 public class SaxLib
 {
-    private readonly Dictionary<string, string> _sharedStringsToIndex = new Dictionary<string, string>();
-
-    private int _sharedStringsCount;
-
-    private int _sharedStringsUniqueCount;
-
-    private readonly Dictionary<string, UInt32> _styleIndexes = new Dictionary<string, UInt32>();
-
-    private readonly Dictionary<string, double> _oleADates = new Dictionary<string, double>();
+    private readonly DataParser _parser;
+    private readonly StyleParser _styleParser;
+    
+    public SaxLib()
+    {
+        _parser = new DataParser();
+        _styleParser = new StyleParser();
+    }
 
     public void Run()
     {
@@ -72,7 +71,7 @@ public class SaxLib
                 }
 
                 // Generate all Shared Strings that will be used in all the sheets
-                PrepareData(modelData.WorkbookModel);
+                _parser.PrepareData(modelData.WorkbookModel);
 
                 // Generate all Styles needed on every sheet in this workbook
                 var stylesPartId = "sPrId1";
@@ -145,205 +144,6 @@ public class SaxLib
         }
     }
 
-    private void PrepareData(ExcelWorkbookModel workbookModel)
-    {
-        _sharedStringsCount = 0;
-        foreach (var table in workbookModel.Tables)
-        {
-            AddToSharedStringDictionary(table.Header.Data);
-            foreach (var column in table.Columns)
-            {
-                
-                if (column.DataType == ExcelDataTypes.DataType.AutoDetect)
-                {
-                    // Check for either Dates or Hyperlinks on data colunms
-                    PrepareAutodetectData(column, table.IsMultilined);
-                }
-                else
-                {
-                    // If not autodetect prepare regular types
-                    PrepareDeclaredTypeData(column, table.IsMultilined);
-                }
-                                
-            }
-        }
-        _sharedStringsUniqueCount = _sharedStringsToIndex.Count;
-    }
-
-    private void PrepareDeclaredTypeData(ExcelColumnModel column, bool isMultilined)
-    {
-        if (column.DataType == ExcelDataTypes.DataType.Text)
-        {
-            AddToSharedStringDictionary(column.Data);
-        }
-        else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
-        {
-            var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && x.Contains("href"));
-            if (linkSample != null)
-            {
-                if (isMultilined)
-                {
-                    PrepareMultilinedHrefHyperlinks(column);
-                }
-                else
-                {
-                    PrepareHrefHyperlinks(column);
-                }
-            }
-            else
-            {
-                if (isMultilined)
-                {
-                    PrepareMultilinedRegularHyperlinks(column);
-                }
-                else
-                {
-                    PrepareRegularHyperlinks(column);
-                }
-            }
-            AddToSharedStringDictionary(column.Data);
-        }
-        else if (column.DataType == ExcelDataTypes.DataType.DateTime)
-        {
-            if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
-            {
-                column.DataType = ExcelDataTypes.DataType.Text;
-                AddToSharedStringDictionary(column.Data);
-            }
-        }
-    }
-
-    private void PrepareAutodetectData(ExcelColumnModel column, bool isMultilined)
-    {
-        var linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim()) && (x.Contains("href") || x.StartsWith("http://") || x.StartsWith("https://")));
-        if (linkSample != null)
-        {
-            if (isMultilined)
-            {
-                PrepareMultilinedAutodetectedHyperlinks(column, linkSample);
-            }
-            else
-            {
-                PrepareAutodetectedHyperlinks(column, linkSample);
-            }
-            AddToSharedStringDictionary(column.Data);
-        }
-        else if (DateTime.TryParseExact(
-            column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x.Trim())),
-            CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString(),
-            CultureInfo.InvariantCulture,
-            DateTimeStyles.None,
-            out var date))
-        {
-            column.DataType = ExcelDataTypes.DataType.DateTime;
-            if (!AddToDatetimeToDictionary(column.Data, column.DataFormat))
-            {
-                column.DataType = ExcelDataTypes.DataType.Text;
-                AddToSharedStringDictionary(column.Data);
-            }
-        }
-        else
-        {
-            column.DataType = ExcelDataTypes.DataType.Text;
-            AddToSharedStringDictionary(column.Data);
-        }
-    }
-
-    private void PrepareMultilinedAutodetectedHyperlinks(ExcelColumnModel column, string linkSample)
-    {
-        if (linkSample.Contains("href"))
-        {
-            PrepareMultilinedHrefHyperlinks(column);
-        }
-        else
-        {
-            PrepareMultilinedRegularHyperlinks(column);
-        }
-    }
-
-    private void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column)
-    {
-        column.DataType = ExcelDataTypes.DataType.Text;
-        var data = column.Data;
-        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
-        {
-            data[itemIndex] = Regex.Replace(data[itemIndex], "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
-        }
-    }
-
-    private void PrepareMultilinedHrefHyperlinks(ExcelColumnModel column)
-    {
-        column.DataType = ExcelDataTypes.DataType.Text;
-        var data = column.Data;
-        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
-        {
-            string hyperlink = data[itemIndex];
-            hyperlink = Regex.Replace(hyperlink, "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
-            var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]?([^\'"" >]+).*?<\/a>", RegexOptions.IgnoreCase);
-
-            foreach (Match match in matches)
-            {
-                hyperlink = hyperlink.Replace(match.Value, match.Groups[1].Value);
-            }
-            data[itemIndex] = hyperlink;
-        }
-    }
-
-    private void PrepareAutodetectedHyperlinks(ExcelColumnModel column, string linkSample)
-    {
-        column.DataType = ExcelDataTypes.DataType.HyperLink;
-        if (linkSample.Contains("href"))
-        {
-            PrepareHrefHyperlinks(column);
-        }
-        else
-        {
-            PrepareRegularHyperlinks(column);
-        }
-    }
-
-    private void PrepareRegularHyperlinks(ExcelColumnModel column)
-    {
-        var data = column.Data;
-        var hyperlinks = new List<ExcelHyperlink>();
-        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
-        {
-            if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
-            {
-                data[itemIndex] = Regex.Replace(data[itemIndex], "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
-                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = data[itemIndex] });
-            }
-        }
-        column.AddHyperLinkData(hyperlinks.ToArray());
-    }
-
-    private void PrepareHrefHyperlinks(ExcelColumnModel column)
-    {
-        var data = column.Data;
-        var hyperlinks = new List<ExcelHyperlink>();
-        
-        for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
-        {
-            if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
-            {
-                string hyperlink = data[itemIndex];
-                hyperlink = Regex.Replace(hyperlink, "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
-
-                string text = Regex.Replace(hyperlink, "(<[a|A][^>]*>|)", "");
-
-                var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]?([^\'"" >]+).*?<\/a>", RegexOptions.IgnoreCase);
-
-                foreach (Match match in matches)
-                {
-                    hyperlink = hyperlink.Replace(match.Value, match.Groups[1].Value);
-                }
-                data[itemIndex] = text;
-                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = hyperlink });
-            }
-        }
-        column.AddHyperLinkData(hyperlinks.ToArray());
-    }
-
     private int GenerateHyperlinkParts(WorksheetPart workSheetPart, ExcelColumnModel linkColumn, int partIdSequencer)
     {
         string url;
@@ -365,9 +165,9 @@ public class SaxLib
         using (var writer = OpenXmlWriter.Create(sharedStringTablePart))
         {
             // Change this based on real data count
-            writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)_sharedStringsCount, UniqueCount = (UInt32)_sharedStringsUniqueCount });
+            writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)_parser.SharedStringsCount, UniqueCount = (UInt32)_parser.SharedStringsUniqueCount });
 
-            foreach (var key in _sharedStringsToIndex.Keys)
+            foreach (var key in _parser.SharedStringsToIndex.Keys)
             {
                 //write the row start element with the row index attribute
                 writer.WriteStartElement(new SharedStringItem());
@@ -386,68 +186,42 @@ public class SaxLib
         }
     }
 
-    private bool AddToDatetimeToDictionary(string[] dates, string dataFormat)
+    private double FitColumn(string header, ExcelStyleClasses headerStyle, ExcelColumnModel column, bool isMultilined, int maxWidth)
     {
-        var baseDataFormat = string.IsNullOrEmpty(dataFormat) ? CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString() : dataFormat;
-        var index = 0;
-        var isDate = true;
-        DateTime date;
-        while (index < dates.Length && isDate)
-        {
-            if (!_oleADates.ContainsKey(dates[index]))
-            {
-                if (string.IsNullOrEmpty(dataFormat))
-                {
-                    isDate = DateTime.TryParseExact(dates[index], baseDataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
-                }
-                else
-                {
-                    isDate = DateTime.TryParseExact(dates[index], baseDataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
-                }
-                
-                if (isDate)
-                {
-                    _oleADates.Add(dates[index], date.ToOADate());
-                } 
-            }
-            index++;
-        }
-        
-        return isDate;
-    }
-
-    private void AddToSharedStringDictionary(string[] sharedStrings)
-    {
-        var count = 0;
-        for (int itemIndex = 0; itemIndex < sharedStrings.Length; itemIndex++)
-        {
-            sharedStrings[itemIndex] = Regex.Replace(sharedStrings[itemIndex], "<br>", Environment.NewLine, RegexOptions.IgnoreCase);
-            if (_sharedStringsToIndex.ContainsKey(sharedStrings[itemIndex]))
-            {
-                count++;
-            }
-            else
-            {
-                count++;
-                _sharedStringsToIndex.Add(sharedStrings[itemIndex], _sharedStringsToIndex.Count().ToString());
-            }
-        }
-        _sharedStringsCount += count;
-    }
-
-    private double FitColumn(string header, int headerFontSize, ExcelColumnModel column, bool isMultilined, int maxWidth)
-    {
-        var offset = 1;
+        var hOffset = 2;
+        var cOffset = 0;
         var numSamples = 50;
-        double headerWidth = (header.Length + offset) * (72D / 96D) * (headerFontSize / 9D) * ((double)headerFontSize / (double)column.Style.FontSize);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, numSamples) + offset) * (72D / 96D) * (column.Style.FontSize / 9D) * ((double)column.Style.FontSize / (double)headerFontSize);
+
+        var hFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(headerStyle.Font);
+        var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
+
+        if (column.DataType == ExcelDataTypes.DataType.DateTime)
+        {
+            cOffset = 5;
+        }
+
+        if (headerStyle.Bold)
+        {
+            hFontFactor -= 0.5;
+        }
+
+        if (column.Style.Bold == true)
+        {
+            cFontFactor -= 0.5D;
+        }
+
+        double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor) * ((double)headerStyle.FontSize / (double)column.Style.FontSize);
+        double columnWidth = (column.GetMaxDataLength(isMultilined, numSamples) + cOffset) * (72D / 96D) * (column.Style.FontSize / cFontFactor) * ((double)column.Style.FontSize / (double)headerStyle.FontSize);
+        
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
+        
         if (maxWidth > 13)
         {
-            var higherFontSize = headerFontSize > column.Style.FontSize ? headerFontSize : column.Style.FontSize;
+            var higherFontSize = headerStyle.FontSize > column.Style.FontSize ? headerStyle.FontSize : column.Style.FontSize;
             var correctedMaxWidth = maxWidth * (72D / 96D) * (higherFontSize / 9D);
             width = width > correctedMaxWidth ? correctedMaxWidth : width;
         }
+        
         return width;
     }
 
@@ -465,7 +239,7 @@ public class SaxLib
             writer.WriteStartElement(new Columns());
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                var width = FitColumn(headers.Data[columnNum - 1], headers.Style.FontSize, allColumns[columnNum - 1], sheetModel.IsMultilined, allColumns[columnNum - 1].MaxWidth);
+                var width = FitColumn(headers.Data[columnNum - 1], headers.Style, allColumns[columnNum - 1], sheetModel.IsMultilined, allColumns[columnNum - 1].MaxWidth);
                 writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = width, CustomWidth = true });
             }
             
@@ -476,7 +250,8 @@ public class SaxLib
             Row row = new Row();
             Cell cell = new Cell();
             CellValue cellValue = new CellValue();
-            
+            var stringIndexes = _parser.SharedStringsToIndex;
+            var dates = _parser.OleADates;
             //Add header row
             row.RowIndex = 1U;
             writer.WriteStartElement(row);
@@ -486,9 +261,9 @@ public class SaxLib
                 cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1U);
 
                 cell.DataType = CellValues.SharedString;
-                cell.StyleIndex = _styleIndexes[headers.StyleKey];
+                cell.StyleIndex = _styleParser.StyleIndexes[headers.StyleKey];
                 writer.WriteStartElement(cell);
-                cellValue.Text = _sharedStringsToIndex[headers.Data[columnNum - 1]];
+                cellValue.Text = stringIndexes[headers.Data[columnNum - 1]];
                 writer.WriteElement(cellValue);
 
                 writer.WriteEndElement();
@@ -509,17 +284,24 @@ public class SaxLib
                     if (allColumns.Length > (columnNum - 1) && allColumns[columnNum - 1].Data.Length > (rowNum -2))
                     {
                         cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                        cell.StyleIndex = _styleIndexes[currentColumn.StyleKey];
+                        cell.StyleIndex = _styleParser.StyleIndexes[currentColumn.StyleKey];
 
                         if (currentColumn.DataType == ExcelDataTypes.DataType.Text || currentColumn.DataType == ExcelDataTypes.DataType.HyperLink)
                         {
                             cell.DataType = CellValues.SharedString;
-                            cellValue.Text = _sharedStringsToIndex[allColumns[columnNum - 1].Data[rowNum - 2]];
+                            cellValue.Text = stringIndexes[allColumns[columnNum - 1].Data[rowNum - 2]];
                         }
                         else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
                         {
                             cell.DataType = CellValues.Number;
-                            cellValue.Text = _oleADates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
+                            if (dates.ContainsKey(allColumns[columnNum - 1].Data[rowNum - 2]))
+                            {
+                                cellValue.Text = dates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
+                            }
+                            else
+                            {
+                                cellValue.Text = String.Empty;
+                            }
                         }
                         else
                         {
@@ -619,160 +401,12 @@ public class SaxLib
         }
     }
 
-    private string AddFontToDictionary(
-        Dictionary<string, ExcelFontDetail> fonts, 
-        ExcelFonts.FontType font, 
-        int fontSize,
-        int colorTheme)
-    {
-        string key;
-        ExcelFontDetail fontDetail;
-
-        key = font.ToString() + fontSize.ToString() + colorTheme.ToString();
-        if (!fonts.ContainsKey(key))
-        {
-            fontDetail = ExcelFontDetail.GetFontStyles(font, (UInt32)fonts.Count, fontSize, colorTheme);
-            fonts.Add(key, fontDetail);
-        }
-
-        return key;
-    }
-    
-    private UInt32 AddNumFormatToDictionary(Dictionary<string, ExcelNumFormat> numFormats, string dataFormat)
-    {
-        UInt32 numFormatId;
-        
-        if (numFormats.ContainsKey(dataFormat))
-        {
-            numFormatId = numFormats[dataFormat].FormatId;
-        }
-        else
-        {
-            numFormatId = StyleContants.StartIndex + (UInt32)numFormats.Count;
-            ExcelNumFormat numFormat = new ExcelNumFormat(dataFormat, numFormatId);
-            numFormats.Add(dataFormat, numFormat);
-        }
-        
-        return numFormatId;
-    }
-
-    private void AddStyleFormatToDictionary(
-        Dictionary<string, ExcelStyleFormat> styleFormats,
-        string styleKey,
-        UInt32 fontIdx, 
-        UInt32 numFormatIdx, 
-        UInt32 cellStyleIdx, 
-        UInt32 fillIdx, 
-        UInt32 borderIdx,
-        bool applyNumFormat,
-        bool applyFont)
-    {
-        ExcelStyleFormat styleFormat;
-
-        if (!styleFormats.ContainsKey(styleKey))
-        {
-            styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)styleFormats.Count + 1);
-            styleFormat.ApplyFont = applyFont;
-            styleFormat.ApplyNumFormat = applyNumFormat;
-            styleFormats.Add(styleKey, styleFormat);
-            _styleIndexes.Add(styleKey, styleFormat.StyleIndex);
-        }
-    }
-
     // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
     // will be the third font added in fonts section, while the font with id "0" will be the first you added.
     // Same goes for borders, fills, etc.
     private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, ExcelWorkbookModel workbookModel)
     {
-        #region Fonts, NumFormats, CellXfs and CellStyles
-
-        // TODO Write all fonts and styles here!!!
-
-        var fonts = new Dictionary<string, ExcelFontDetail>();
-        var numFormats = new Dictionary<string, ExcelNumFormat>();
-        var hyperlinkFormats = new Dictionary<string, UInt32>();
-        var styleFormats = new Dictionary<string, ExcelStyleFormat>();
-        string styleKey;
-        string key;
-
-        //Run all tables looking for styles
-        foreach (var table in workbookModel.Tables)
-        {
-            key = AddFontToDictionary(fonts, table.Header.Style.Font, table.Header.Style.FontSize, 1);
-                
-            styleKey = key + ExcelDataTypes.DataType.Text.ToString();
-                
-            AddStyleFormatToDictionary(styleFormats, styleKey, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
-                
-            table.Header.AddStyleKey(styleKey);
-
-            foreach (var column in table.Columns)
-            {
-                key = column.DataType == ExcelDataTypes.DataType.HyperLink ? 
-                    AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize, 10) :
-                    AddFontToDictionary(fonts, column.Style.Font, column.Style.FontSize, 1);
-                // Columns can have diferent types, formats and fonts
-                styleKey = key + ExcelDataTypes.DataType.Text.ToString();
-                if (column.DataType == ExcelDataTypes.DataType.Text)
-                {
-                    AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
-                    column.AddStyleKey(styleKey);
-                }
-                else
-                {
-                    // Add numFormat or CellStyle to xml and get index to add to the style class
-                    styleKey = key + column.DataType.ToString();
-
-                    if (column.DataType == ExcelDataTypes.DataType.Number)
-                    {
-                        if (!string.IsNullOrEmpty(column.DataFormat))
-                        {
-                            var numFormatId = AddNumFormatToDictionary(numFormats, column.DataFormat);
-                            styleKey = styleKey + numFormatId.ToString();
-                            AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
-                        }
-                        else
-                        {
-                            AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 0U, 0U, 0U, true, true);
-                        }
-                        column.AddStyleKey(styleKey);
-                    }
-                    else if (column.DataType == ExcelDataTypes.DataType.HyperLink)
-                    {
-                        styleKey = key + column.DataType.ToString();
-                        hyperlinkFormats.TryAdd(key, fonts[key].FontIndex);
-                        AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, 0U, 1U, 0U, 0U, false, false);
-                        column.AddStyleKey(styleKey);
-                    }
-                    else if (column.DataType == ExcelDataTypes.DataType.DateTime)
-                    {
-                        var sysDateFormat = string.IsNullOrEmpty(column.DataFormat) ? CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.ToString() : column.DataFormat;
-                        var numFormatId = AddNumFormatToDictionary(numFormats, sysDateFormat);
-                        styleKey = styleKey + numFormatId.ToString();
-                        AddStyleFormatToDictionary(styleFormats, styleKey, fonts[key].FontIndex, numFormatId, 0U, 0U, 0U, true, true);
-                        column.AddStyleKey(styleKey);
-                    }
-                }
-            }
-        }
-
-        
-
-        //TODO Add Chart Fonts;
-
-        // Future Watermark Details
-        if (workbookModel.Watermark != null)
-        {
-            key = AddFontToDictionary(fonts, workbookModel.Watermark.Font, workbookModel.Watermark.FontSize, 1);
-
-            styleKey = key + ExcelDataTypes.DataType.Text.ToString();
-
-            AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
-
-            workbookModel.Watermark.AddStyleKey(styleKey);
-        }
-
-        #endregion
+        _styleParser.ParseStyles(workbookModel);
 
         using (var writer = OpenXmlWriter.Create(workbookStylesPart))
         {
@@ -780,9 +414,9 @@ public class SaxLib
 
             #region NumFormats
 
-            writer.WriteStartElement(new NumberingFormats() { Count = (UInt32)numFormats.Count });
+            writer.WriteStartElement(new NumberingFormats() { Count = (UInt32)_styleParser.NumFormats.Count });
             
-            foreach (var format in numFormats.Values)
+            foreach (var format in _styleParser.NumFormats.Values)
             {
                 writer.WriteElement(new NumberingFormat() { NumberFormatId = format.FormatId, FormatCode = format.FormatCode });  
             }
@@ -798,12 +432,23 @@ public class SaxLib
                 //  <Font>...props...</Font>
                 //</Fonts>
                 //writer.WriteStartElement(new Fonts() { Count = (UInt32)hardCodedFonts.Length });
-                writer.WriteStartElement(new Fonts() { Count = (UInt32)fonts.Count });
+                writer.WriteStartElement(new Fonts() { Count = (UInt32)_styleParser.Fonts.Count });
 
-            foreach (var font in fonts.Values)
+            foreach (var font in _styleParser.Fonts.Values)
             {
                 writer.WriteStartElement(new Font());
-
+                if (font.Bold)
+                {
+                    writer.WriteElement(new Bold());
+                }
+                if (font.Italic)
+                {
+                    writer.WriteElement(new Italic());
+                }
+                if (font.Underline)
+                {
+                    writer.WriteElement(new Underline());
+                }
                 writer.WriteElement(new FontSize() { Val = font.FontSize });
                 writer.WriteElement(new Color() { Theme = font.Theme });
                 writer.WriteElement(new FontName() { Val = font.FontName });
@@ -866,13 +511,13 @@ public class SaxLib
 
             // Creates a shared style table to apply to cells using an Id. 
 
-            var cellStyleXfsCount = hyperlinkFormats.Count + 1;
+            var cellStyleXfsCount = _styleParser.HyperlinkFormats.Count + 1;
             //Start CellStyleXfs element
             writer.WriteStartElement(new CellStyleFormats() { Count = (UInt32)cellStyleXfsCount });
             //Hardcoded base CellFormat
             writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)0, FillId = (UInt32)0, BorderId = (UInt32)0 });
 
-            foreach(var fontIndex in hyperlinkFormats.Values)
+            foreach(var fontIndex in _styleParser.HyperlinkFormats.Values)
             {
                 writer.WriteElement(new CellFormat()
                 {
@@ -897,14 +542,14 @@ public class SaxLib
             
             // Add all alignment and apply numberformat features
             
-            var cellXfsCount = styleFormats.Count() + 1;
+            var cellXfsCount = _styleParser.StyleFormats.Count() + 1;
 
             //Start CellStyleFormats section
             writer.WriteStartElement(new CellFormats() { Count = (UInt32)cellXfsCount });
 
             writer.WriteElement(new CellFormat() { NumberFormatId = (UInt32)0, FontId = (UInt32)0, FillId = (UInt32)0, BorderId = (UInt32)0 });
 
-            foreach (var styleFormat in styleFormats.Values)
+            foreach (var styleFormat in _styleParser.StyleFormats.Values)
             {
                 writer.WriteStartElement(new CellFormat() 
                 { 
@@ -933,13 +578,13 @@ public class SaxLib
 
             #region CellStyles
 
-            var cellStylesCount = hyperlinkFormats.Count() + 1;
+            var cellStylesCount = _styleParser.HyperlinkFormats.Count() + 1;
 
             //Start CellStyleFormats element
             writer.WriteStartElement(new CellStyles() { Count = (UInt32)cellStylesCount });
 
             writer.WriteElement(new CellStyle() { Name = "Normal", FormatId = (UInt32)0, BuiltinId = (UInt32)0 });
-            if (hyperlinkFormats.Count() > 0)
+            if (_styleParser.HyperlinkFormats.Count() > 0)
             {
                 writer.WriteElement(new CellStyle() { Name = "Hyperlink", FormatId = (UInt32)1, BuiltinId = (UInt32)8 });
             }
@@ -983,7 +628,6 @@ public class SaxLib
             writer.WriteEndElement();
 
             #endregion
-
 
             //End styleSsheet
             writer.WriteEndElement();
