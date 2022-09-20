@@ -7,8 +7,8 @@ using ExcelGenerator.Excel;
 using Newtonsoft.Json;
 using System.Globalization;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System.Text.RegularExpressions;
+
 
 namespace ExcelGenerator.Generators;
 
@@ -64,90 +64,91 @@ public class SaxLib
         {
             using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
             {
-                // TestData
+                document.AddWorkbookPart();
+
+                if (document.WorkbookPart == null)
+                {
+                    throw new Exception("Error creating workbook part");
+                }
+
+                // Generate all Shared Strings that will be used in all the sheets
+                PrepareData(modelData.WorkbookModel);
+
+                // Generate all Styles needed on every sheet in this workbook
+                var stylesPartId = "sPrId1";
+                var sharedTableId = "sTrId1";
+                WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
+                SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
+                GenerateStylePart(workbookStylesPart, modelData.WorkbookModel);
+                GenerateSharedStringsTable(sharedStringTablePart);
+
                 var partId = 1;
                 var linksId = 1;
-                string sharedTableId = string.Empty;
-                string stylesPartId = string.Empty;
-                string sheetPartId = string.Empty;
                 List<string> sheetPartIds = new List<string>();
                 var numSheets = modelData.WorkbookModel.Tables.Count();
-                
-                document.AddWorkbookPart();
-                
-                if (document.WorkbookPart != null)
+                for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
                 {
-                    // Generate all Shared Strings that will be used in all the sheets
-                    PrepareData(modelData);
+                    var sheetPartId = "rId" + partId++;
+                    sheetPartIds.Add(sheetPartId);
+                    WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
+                    TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
 
-                    // Generate all Styles needed on every sheet in this workbook
-                    stylesPartId = "sPrId1";
-                    sharedTableId = "sTrId1";
-                    WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
-                    SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
-                    GenerateStylePart(workbookStylesPart, modelData);
-                    GenerateSharedStringsTable(sharedStringTablePart);
+                    var sheetModel = modelData.WorkbookModel.Tables[sheetNum - 1];
 
-                    for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
+                    var allColumns = sheetModel.Columns;
+
+                    var linkColumns = allColumns.Where(x => x.DataType == ExcelDataTypes.DataType.HyperLink).ToList();
+                    foreach (var linkColumn in linkColumns)
                     {
-                        sheetPartId = "rId" + partId++;
-                        sheetPartIds.Add(sheetPartId);
-                        WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
-                        TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
-
-                        var sheetModel = modelData.WorkbookModel.Tables[sheetNum - 1];
-
-                        var allColumns = sheetModel.Columns;
-                        
-                        var linkColumns = allColumns.Where(x => x.DataType == ExcelDataTypes.DataType.HyperLink).ToList();
-                        foreach (var linkColumn in linkColumns)
-                        {
-                            linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
-                        }
-
-                        int numRows = allColumns.Select(x => x.Data.Count()).Max() + 1;
-
-                        GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId);
-                        GenerateTableParts(sheetTablesPart, sheetPartId, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
+                        linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
                     }
 
-                    // Create the worksheet and sheets list to end the package
-                    using (var writer = OpenXmlWriter.Create(document.WorkbookPart))
-                    {
-                        writer.WriteStartElement(new Workbook());
-                        writer.WriteStartElement(new Sheets());
+                    int numRows = allColumns.Select(x => x.Data.Count()).Max() + 1;
 
-                        for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
-                        {
-                            writer.WriteElement(new Sheet()
-                            {
-                                Name = modelData.WorkbookModel.Tables[sheetNum - 1].Name,
-                                SheetId = (UInt32)sheetNum,
-                                Id = sheetPartIds[sheetNum - 1]
-                            });
-                        }
-
-                        // End Sheets
-                        writer.WriteEndElement();
-                        // End Workbook
-                        writer.WriteEndElement();
-
-                        writer.Close();
-                    }
-                    //document.Save();
-
-                    document.SaveAs(filename);
-
-                    document.Close();
+                    GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId);
+                    GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
                 }
+
+                // Create the worksheet and sheets list to end the package
+                FinishDocument(document.WorkbookPart, modelData.WorkbookModel, numSheets, sheetPartIds);
+                
+                //document.Save();
+                document.SaveAs(filename);
+                document.Close();
             }
         }
     }
 
-    private void PrepareData(ModelData modelData)
+    private void FinishDocument(WorkbookPart workbookPart, ExcelWorkbookModel workbookModel, int numSheets, List<string> sheetPartIds)
+    {
+        using (var writer = OpenXmlWriter.Create(workbookPart))
+        {
+            writer.WriteStartElement(new Workbook());
+            writer.WriteStartElement(new Sheets());
+
+            for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
+            {
+                writer.WriteElement(new Sheet()
+                {
+                    Name = workbookModel.Tables[sheetNum - 1].Name,
+                    SheetId = (UInt32)sheetNum,
+                    Id = sheetPartIds[sheetNum - 1]
+                });
+            }
+
+            // End Sheets
+            writer.WriteEndElement();
+            // End Workbook
+            writer.WriteEndElement();
+
+            writer.Close();
+        }
+    }
+
+    private void PrepareData(ExcelWorkbookModel workbookModel)
     {
         _sharedStringsCount = 0;
-        foreach (var table in modelData.WorkbookModel.Tables)
+        foreach (var table in workbookModel.Tables)
         {
             AddToSharedStringDictionary(table.Header.Data);
             foreach (var column in table.Columns)
@@ -569,7 +570,7 @@ public class SaxLib
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, string sheetPartId, UInt32 tableId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
     {
         var numColumns = headers.Data.Count();
 
@@ -681,7 +682,7 @@ public class SaxLib
     // Everything is linked by a string id that is in fact the index of the array of style element. Ex the font with id "2"
     // will be the third font added in fonts section, while the font with id "0" will be the first you added.
     // Same goes for borders, fills, etc.
-    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, ModelData modelData )
+    private void GenerateStylePart(WorkbookStylesPart workbookStylesPart, ExcelWorkbookModel workbookModel)
     {
         #region Fonts, NumFormats, CellXfs and CellStyles
 
@@ -695,7 +696,7 @@ public class SaxLib
         string key;
 
         //Run all tables looking for styles
-        foreach (var table in modelData.WorkbookModel.Tables)
+        foreach (var table in workbookModel.Tables)
         {
             key = AddFontToDictionary(fonts, table.Header.Style.Font, table.Header.Style.FontSize, 1);
                 
@@ -760,15 +761,15 @@ public class SaxLib
         //TODO Add Chart Fonts;
 
         // Future Watermark Details
-        if (modelData.WorkbookModel.Watermark != null)
+        if (workbookModel.Watermark != null)
         {
-            key = AddFontToDictionary(fonts, modelData.WorkbookModel.Watermark.Font, modelData.WorkbookModel.Watermark.FontSize, 1);
+            key = AddFontToDictionary(fonts, workbookModel.Watermark.Font, workbookModel.Watermark.FontSize, 1);
 
             styleKey = key + ExcelDataTypes.DataType.Text.ToString();
 
             AddStyleFormatToDictionary(styleFormats, key, (UInt32)fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 
-            modelData.WorkbookModel.Watermark.AddStyleKey(styleKey);
+            workbookModel.Watermark.AddStyleKey(styleKey);
         }
 
         #endregion
