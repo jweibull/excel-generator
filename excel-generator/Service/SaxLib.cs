@@ -5,10 +5,8 @@ using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using ExcelGenerator.Excel;
 using Newtonsoft.Json;
-using System.Globalization;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 using ExcelGenerator.ExcelDefs;
-
 
 namespace ExcelGenerator.Generators;
 
@@ -16,6 +14,8 @@ public class SaxLib
 {
     private readonly DataParser _parser;
     private readonly StyleParser _styleParser;
+    
+    private readonly int _numLengthSamples = 50;
     
     public SaxLib()
     {
@@ -76,6 +76,7 @@ public class SaxLib
                 // Generate all Styles needed on every sheet in this workbook
                 var stylesPartId = "sPrId1";
                 var sharedTableId = "sTrId1";
+                
                 WorkbookStylesPart workbookStylesPart = document.WorkbookPart.AddNewPart<WorkbookStylesPart>(stylesPartId);
                 SharedStringTablePart sharedStringTablePart = document.WorkbookPart.AddNewPart<SharedStringTablePart>(sharedTableId);
                 GenerateStylePart(workbookStylesPart, modelData.WorkbookModel);
@@ -85,24 +86,25 @@ public class SaxLib
                 var linksId = 1;
                 List<string> sheetPartIds = new List<string>();
                 var numSheets = modelData.WorkbookModel.Tables.Count();
+
                 for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
                 {
                     var sheetPartId = "rId" + partId++;
                     sheetPartIds.Add(sheetPartId);
+
                     WorksheetPart workSheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>(sheetPartId);
                     TableDefinitionPart sheetTablesPart = workSheetPart.AddNewPart<TableDefinitionPart>(sheetPartId);
 
                     var sheetModel = modelData.WorkbookModel.Tables[sheetNum - 1];
-
                     var allColumns = sheetModel.Columns;
-
                     var linkColumns = allColumns.Where(x => x.DataType == ExcelDataTypes.DataType.HyperLink).ToList();
+                    
                     foreach (var linkColumn in linkColumns)
                     {
                         linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
                     }
 
-                    int numRows = allColumns.Select(x => x.Data.Count()).Max() + 1;
+                    int numRows = allColumns.Select(x => x.Data.Length).Max() + 1;
 
                     GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId);
                     GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
@@ -135,9 +137,7 @@ public class SaxLib
                 });
             }
 
-            // End Sheets
             writer.WriteEndElement();
-            // End Workbook
             writer.WriteEndElement();
 
             writer.Close();
@@ -159,75 +159,25 @@ public class SaxLib
 
     private void GenerateSharedStringsTable(SharedStringTablePart sharedStringTablePart)
     {
-        // Run this for all strings in the workbook
-        // string[] sharedStrings must contain all the strings in the project
-
         using (var writer = OpenXmlWriter.Create(sharedStringTablePart))
         {
-            // Change this based on real data count
             writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)_parser.SharedStringsCount, UniqueCount = (UInt32)_parser.SharedStringsUniqueCount });
 
             foreach (var key in _parser.SharedStringsToIndex.Keys)
             {
-                //write the row start element with the row index attribute
                 writer.WriteStartElement(new SharedStringItem());
-
-                //write the text value
                 writer.WriteElement(new Text(key));
-
-                // write the end sharedItem element
                 writer.WriteEndElement();
             }
 
-            // write the end SharedStringTable element
             writer.WriteEndElement();
 
             writer.Close();
         }
     }
 
-    private double FitColumn(string header, ExcelStyleClasses headerStyle, ExcelColumnModel column, bool isMultilined, int maxWidth)
-    {
-        var hOffset = 2;
-        var cOffset = 0;
-        var numSamples = 50;
-
-        var hFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(headerStyle.Font);
-        var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
-
-        if (column.DataType == ExcelDataTypes.DataType.DateTime)
-        {
-            cOffset = 5;
-        }
-
-        if (headerStyle.Bold)
-        {
-            hFontFactor -= 0.5;
-        }
-
-        if (column.Style.Bold == true)
-        {
-            cFontFactor -= 0.5D;
-        }
-
-        double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor) * ((double)headerStyle.FontSize / (double)column.Style.FontSize);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, numSamples) + cOffset) * (72D / 96D) * (column.Style.FontSize / cFontFactor) * ((double)column.Style.FontSize / (double)headerStyle.FontSize);
-        
-        var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
-        
-        if (maxWidth > 13)
-        {
-            var higherFontSize = headerStyle.FontSize > column.Style.FontSize ? headerStyle.FontSize : column.Style.FontSize;
-            var correctedMaxWidth = maxWidth * (72D / 96D) * (higherFontSize / 9D);
-            width = width > correctedMaxWidth ? correctedMaxWidth : width;
-        }
-        
-        return width;
-    }
-
     private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, ExcelColumnModel[] allColumns, int numRows, string sheetPartId)
     {
-        // Actual Cell Values from string table
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
             var headers = sheetModel.Header;
@@ -235,111 +185,19 @@ public class SaxLib
                         
             writer.WriteStartElement(new Worksheet());
 
-            //Alinhar com o Table generation
-            writer.WriteStartElement(new Columns());
-            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-            {
-                var width = FitColumn(headers.Data[columnNum - 1], headers.Style, allColumns[columnNum - 1], sheetModel.IsMultilined, allColumns[columnNum - 1].MaxWidth);
-                writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = width, CustomWidth = true });
-            }
-            
-            writer.WriteEndElement();
+            WriteSheetDataColumnSection(writer, numColumns, headers, allColumns, sheetModel);
 
             writer.WriteStartElement(new SheetData());
 
-            Row row = new Row();
-            Cell cell = new Cell();
-            CellValue cellValue = new CellValue();
-            var stringIndexes = _parser.SharedStringsToIndex;
-            var dates = _parser.OleADates;
-            //Add header row
-            row.RowIndex = 1U;
-            writer.WriteStartElement(row);
+            WriteSheetDataHeaderRow(writer, numColumns, headers);
 
-            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-            {
-                cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1U);
-
-                cell.DataType = CellValues.SharedString;
-                cell.StyleIndex = _styleParser.StyleIndexes[headers.StyleKey];
-                writer.WriteStartElement(cell);
-                cellValue.Text = stringIndexes[headers.Data[columnNum - 1]];
-                writer.WriteElement(cellValue);
-
-                writer.WriteEndElement();
-            }
-
-            writer.WriteEndElement();
-
-            // Add the rest of the data
-            for (int rowNum = 2; rowNum <= numRows; rowNum++)
-            {
-                //write the row start element with the row index attribute
-                row.RowIndex = (UInt32)rowNum;
-                writer.WriteStartElement(row);
-
-                for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-                {
-                    var currentColumn = allColumns[columnNum - 1];
-                    if (allColumns.Length > (columnNum - 1) && allColumns[columnNum - 1].Data.Length > (rowNum -2))
-                    {
-                        cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                        cell.StyleIndex = _styleParser.StyleIndexes[currentColumn.StyleKey];
-
-                        if (currentColumn.DataType == ExcelDataTypes.DataType.Text || currentColumn.DataType == ExcelDataTypes.DataType.HyperLink)
-                        {
-                            cell.DataType = CellValues.SharedString;
-                            cellValue.Text = stringIndexes[allColumns[columnNum - 1].Data[rowNum - 2]];
-                        }
-                        else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
-                        {
-                            cell.DataType = CellValues.Number;
-                            if (dates.ContainsKey(allColumns[columnNum - 1].Data[rowNum - 2]))
-                            {
-                                cellValue.Text = dates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
-                            }
-                            else
-                            {
-                                cellValue.Text = String.Empty;
-                            }
-                        }
-                        else
-                        {
-                            cell.DataType = CellValues.Number;
-                            cellValue.Text = allColumns[columnNum - 1].Data[rowNum - 2];
-                        }
-
-                        writer.WriteStartElement(cell);
-                        writer.WriteElement(cellValue);
-                        writer.WriteEndElement();
-                    }
-                }
-                writer.WriteEndElement();
-            }
+            WriteSheetDataColumns(writer, numColumns, numRows, allColumns);
 
             // write the end SheetData element
             writer.WriteEndElement();
 
             //HyperlinksInfo
-            if (allColumns.Any(x => x.DataType == ExcelDataTypes.DataType.HyperLink))
-            {
-                writer.WriteStartElement(new Hyperlinks());
-                for (int columnNum = 1; columnNum <= numColumns; columnNum++)
-                {
-                    if (allColumns[columnNum - 1].DataType == ExcelDataTypes.DataType.HyperLink)
-                    {
-                        var linkColumn = allColumns[columnNum - 1];
-                        var hyperlink = new Hyperlink();
-                        for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
-                        {
-                            hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                            hyperlink.Id = linkColumn.HyperLinkData[rowNum - 2].LinkId;
-                            writer.WriteElement(hyperlink);
-                        }
-                    }
-                }
-                writer.WriteEndElement();
-            }
+            WriteHyperlinkSection(writer, numColumns, allColumns);
 
             // Table Info
             writer.WriteStartElement(new TableParts() { Count = 1 });
@@ -349,6 +207,132 @@ public class SaxLib
             // write the end Worksheet element
             writer.WriteEndElement();
             writer.Close();
+        }
+    }
+
+    private void WriteSheetDataColumnSection(OpenXmlWriter writer, int numColumns, ExcelHeaderModel headers, ExcelColumnModel[] allColumns, ExcelTableSheetModel sheetModel)
+    {
+        writer.WriteStartElement(new Columns());
+
+        for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+        {
+            var column = allColumns[columnNum - 1];
+            
+            var width = FitColumn(headers.Data[columnNum - 1], headers.Style, column, column.IsMultilined, column.MaxWidth);
+            
+            writer.WriteElement(new Column() { Min = (UInt32)columnNum, Max = (UInt32)columnNum, Width = width, CustomWidth = true });
+        }
+        
+        writer.WriteEndElement();
+    }
+
+    private void WriteSheetDataHeaderRow(OpenXmlWriter writer, int numColumns, ExcelHeaderModel headers)
+    {
+        Row row = new Row();
+        Cell cell = new Cell();
+        CellValue cellValue = new CellValue();
+        var stringIndexes = _parser.SharedStringsToIndex;
+        
+        row.RowIndex = 1U;
+        writer.WriteStartElement(row);
+
+        for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+        {
+            cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1);
+
+            cell.DataType = CellValues.SharedString;
+            cell.StyleIndex = _styleParser.StyleIndexes[headers.StyleKey];
+            writer.WriteStartElement(cell);
+            cellValue.Text = stringIndexes[headers.Data[columnNum - 1]];
+            writer.WriteElement(cellValue);
+
+            writer.WriteEndElement();
+        }
+
+        writer.WriteEndElement();
+    }
+
+    private void WriteSheetDataColumns(OpenXmlWriter writer, int numColumns, int numRows, ExcelColumnModel[] allColumns)
+    {
+        Row row = new Row();
+        Cell cell = new Cell();
+        CellValue cellValue = new CellValue();
+
+        for (int rowNum = 2; rowNum <= numRows; rowNum++)
+        {
+            //write the row start element with the row index attribute
+            row.RowIndex = (UInt32)rowNum;
+            writer.WriteStartElement(row);
+
+            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+            {
+                var currentColumn = allColumns[columnNum - 1];
+                if (allColumns.Length > (columnNum - 1) && allColumns[columnNum - 1].Data.Length > (rowNum - 2))
+                {
+                    cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                    cell.StyleIndex = _styleParser.StyleIndexes[currentColumn.StyleKey];
+
+                    WriteCellValue(currentColumn, cell, cellValue, allColumns, rowNum, columnNum);
+
+                    writer.WriteStartElement(cell);
+                    writer.WriteElement(cellValue);
+                    writer.WriteEndElement();
+                }
+            }
+            writer.WriteEndElement();
+        }
+    }
+
+    private void WriteCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, ExcelColumnModel[] allColumns, int rowNum, int columnNum)
+    {
+        var stringIndexes = _parser.SharedStringsToIndex;
+        var dates = _parser.OleADates;
+
+        if (currentColumn.DataType == ExcelDataTypes.DataType.Text || currentColumn.DataType == ExcelDataTypes.DataType.HyperLink)
+        {
+            cell.DataType = CellValues.SharedString;
+            cellValue.Text = stringIndexes[allColumns[columnNum - 1].Data[rowNum - 2]];
+        }
+        else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
+        {
+            cell.DataType = CellValues.Number;
+            if (dates.ContainsKey(allColumns[columnNum - 1].Data[rowNum - 2]))
+            {
+                cellValue.Text = dates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
+            }
+            else
+            {
+                cellValue.Text = String.Empty;
+            }
+        }
+        else
+        {
+            cell.DataType = CellValues.Number;
+            cellValue.Text = allColumns[columnNum - 1].Data[rowNum - 2];
+        }
+    }
+
+    private void WriteHyperlinkSection(OpenXmlWriter writer, int numColumns, ExcelColumnModel[] allColumns)
+    {
+        if (allColumns.Any(x => x.DataType == ExcelDataTypes.DataType.HyperLink))
+        {
+
+            writer.WriteStartElement(new Hyperlinks());
+            for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+            {
+                if (allColumns[columnNum - 1].DataType == ExcelDataTypes.DataType.HyperLink)
+                {
+                    var linkColumn = allColumns[columnNum - 1];
+                    var hyperlink = new Hyperlink();
+                    for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
+                    {
+                        hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                        hyperlink.Id = linkColumn.HyperLinkData[rowNum - 2].LinkId;
+                        writer.WriteElement(hyperlink);
+                    }
+                }
+            }
+            writer.WriteEndElement();
         }
     }
 
@@ -633,6 +617,45 @@ public class SaxLib
             writer.WriteEndElement();
             writer.Close();
         }
+    }
+
+    private double FitColumn(string header, ExcelStyleClasses headerStyle, ExcelColumnModel column, bool isMultilined, int maxWidth)
+    {
+        var hOffset = 2;
+        var cOffset = 0;
+        
+
+        var hFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(headerStyle.Font);
+        var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
+
+        if (column.DataType == ExcelDataTypes.DataType.DateTime)
+        {
+            cOffset = 5;
+        }
+
+        if (headerStyle.Bold)
+        {
+            hFontFactor -= 0.5;
+        }
+
+        if (column.Style.Bold == true)
+        {
+            cFontFactor -= 0.5D;
+        }
+
+        double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor) * ((double)headerStyle.FontSize / (double)column.Style.FontSize);
+        double columnWidth = (column.GetMaxDataLength(isMultilined, _numLengthSamples) + cOffset) * (72D / 96D) * (column.Style.FontSize / cFontFactor) * ((double)column.Style.FontSize / (double)headerStyle.FontSize);
+
+        var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
+
+        if (maxWidth > 13)
+        {
+            var higherFontSize = headerStyle.FontSize > column.Style.FontSize ? headerStyle.FontSize : column.Style.FontSize;
+            var correctedMaxWidth = maxWidth * (72D / 96D) * (higherFontSize / 9D);
+            width = width > correctedMaxWidth ? correctedMaxWidth : width;
+        }
+
+        return width;
     }
 
     //A simple helper to get the column name from the column index. This is not well tested!

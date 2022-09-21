@@ -35,16 +35,30 @@ public class ExcelColumnModel
     public int MaxWidth { get; set; } = -1;
 
     /// <summary>
+    /// If a cell has multiple lines, then NewLineString must define the string which separates the lines: "\n", <br>, etc.
+    /// If this is empty, then the cell doesn't have multiple lines
+    /// </summary>
+    public string NewLineString { get; set; } = string.Empty;
+
+
+    #region Build Helper Section
+
+    /// <summary>
     /// Reserved Quick access Key Built from font, fontSize, data type and format
     /// </summary>
-    public string StyleKey { get; private set; } = string.Empty;
+    internal string StyleKey { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// If the table is multilined, this will invalidate using clicable hyperlinks, since there can only be one hyperlink per cell
+    /// </summary>
+    internal bool IsMultilined { get; set; } = false;
 
     /// <summary>
     /// Builder helper Field to distinguish the hyperlink Ids related to this column
     /// </summary>
-    public ExcelHyperlink[] HyperLinkData { get; private set; }
+    internal ExcelHyperlink[] HyperLinkData { get; private set; }
 
-    public void AddHyperLinkData(ExcelHyperlink[] hyperLinkData)
+    internal void AddHyperLinkData(ExcelHyperlink[] hyperLinkData)
     {
         HyperLinkData = hyperLinkData;
     }
@@ -52,7 +66,7 @@ public class ExcelColumnModel
     /// <summary>
     /// Reserved MaxDataLength in characters for a given column sampled from n
     /// </summary>
-    public int GetMaxDataLength(bool isMultilined, int numSamples) 
+    internal int GetMaxDataLength(bool isMultilined, int numSamples) 
     {
         numSamples = numSamples <= Data.Length ? numSamples : Data.Length;
         var samples = Data.Take(numSamples).ToList();
@@ -80,9 +94,11 @@ public class ExcelColumnModel
         // if not multiline, return the max length of the sample list
         return samples.Select(x => x.Length).Max();
     }
-    
-    public void AddStyleKey(string key)
+
+    internal void AddStyleKey(string key)
     {
         StyleKey = key;
     }
+
+    #endregion
 }

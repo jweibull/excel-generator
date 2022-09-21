@@ -19,18 +19,18 @@
         "name": "Custom Spreadsheet Name",
         "tabIndex": 0,
         "sheetType": 0,
-        "isMultilined": true,
         "shouldSort": false,
         "sortColumn": 2,
         "theme": 24,
         "tabColor": 65,
         "header": {
-          "data": ["Tag1", "Tag2"],
+          "data": ["MaxW25", "Tag2", "Tag3", "Tag4", "Tag5", "Tag 6"],
           "style": {
             "font": 4,
             "fontSize": 12,
-            "bold": false,
-            "italic": false
+            "bold": true,
+            "italic": false,
+            "underline": false
           }
         },
         "columns": [
@@ -60,11 +60,47 @@
             "style": {
               "font": 3,
               "fontSize": 11,
-              "bold": false,
-              "italic": false
+              "bold": true,
+              "italic": true,
+              "underline": true
             },
-            "maxWidth": 2,
+            "isMultilined": true,
+            "maxWidth": 25,
             "dataType": 0,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
+              "www.google.com",
+              "www.yahoo.com",
+              "",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": true
+            },
+            "isMultilined": false,
+            "dataType": 4,
             "dataFormat": ""
           },
           {
@@ -91,10 +127,148 @@
               "www.github.com"
             ],
             "style": {
-              "font": 6,
+              "font": 0,
               "fontSize": 11,
               "bold": false,
-              "italic": false
+              "italic": false,
+              "underline": true
+            },
+            "isMultilined": true,
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "www.google.com",
+              "www.yahoo.com",
+              "",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": true
+            },
+            "isMultilined": true,
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "www.google.com",
+              "www.yahoo.com",
+              "",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com"
+            ],
+            "style": {
+              "font": 2,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": true
+            },
+            "isMultilined": true,
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "www.google.com",
+              "www.yahoo.com",
+              "",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com"
+            ],
+            "style": {
+              "font": 3,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": true
+            },
+            "isMultilined": true,
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "www.google.com",
+              "www.yahoo.com",
+              "",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com",
+              "www.gitlab.com",
+              "www.google.com",
+              "www.yahoo.com",
+              "www.microsoft.com",
+              "www.github.com"
+            ],
+            "style": {
+              "isMultilined": true,
+              "font": 4,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": true
             },
             "dataType": 4,
             "dataFormat": ""
@@ -110,12 +284,13 @@
         "theme": 7,
         "tabColor": 65,
         "header": {
-          "data": ["Tag21", "Tag22"],
+          "data": ["Numbers", "Dates"],
           "style": {
-            "font": 5,
+            "font": 2,
             "fontSize": 14,
-            "bold": false,
-            "italic": false
+            "bold": true,
+            "italic": false,
+            "underline": false
           }
         },
         "columns": [
@@ -159,7 +334,7 @@
               "14/10/1977",
               "15/10/1977",
               "16/10/1977",
-              "12/10/1977",
+              "",
               "13/10/1977",
               "14/10/1977",
               "15/10/1977",
@@ -176,14 +351,15 @@
               "16/10/1979"
             ],
             "style": {
-              "font": 6,
+              "font": 0,
               "fontSize": 11,
               "bold": false,
-              "italic": false
+              "italic": true,
+              "underline": true
             },
             "maxWidth": 20,
-            "dataType": 4,
-            "dataFormat": ""
+            "dataType": 2,
+            "dataFormat": "dd/MM/yyyy"
           }
         ]
       }

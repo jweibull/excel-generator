@@ -43,11 +43,6 @@ public class ExcelTableSheetModel: ExcelBaseSheetModel
     public ExcelColumnModel[] Columns { get; set; }
 
     /// <summary>
-    /// If the table is multilined, this will invalidate using clicable hyperlinks, since there can only be one hyperlink per cell
-    /// </summary>
-    public bool IsMultilined { get; set; } = false;
-
-    /// <summary>
     /// If diferent from "None", applies a theme from excel's standard theme list to this spreadsheet
     /// </summary>
     public ExcelThemes.Theme Theme { get; set; } = ExcelThemes.Theme.None;
