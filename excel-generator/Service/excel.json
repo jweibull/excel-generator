@@ -24,7 +24,7 @@
         "theme": 24,
         "tabColor": 65,
         "header": {
-          "data": ["MaxW25", "Tag2", "Tag3", "Tag4", "Tag5", "Tag 6"],
+          "data": ["MaxW25", "Regular Hyperlink", "Tag2", "Tag3", "Tag4", "Tag5", "Tag 6"],
           "style": {
             "font": 4,
             "fontSize": 12,
@@ -64,7 +64,7 @@
               "italic": true,
               "underline": true
             },
-            "isMultilined": true,
+            "newLineString": "<br>",
             "maxWidth": 25,
             "dataType": 0,
             "dataFormat": ""
@@ -97,9 +97,9 @@
               "fontSize": 11,
               "bold": false,
               "italic": false,
-              "underline": true
+              "underline": false
             },
-            "isMultilined": false,
+            "newLineString": "  ",
             "dataType": 4,
             "dataFormat": ""
           },
@@ -131,9 +131,9 @@
               "fontSize": 11,
               "bold": false,
               "italic": false,
-              "underline": true
+              "underline": false
             },
-            "isMultilined": true,
+            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           },
@@ -165,9 +165,9 @@
               "fontSize": 11,
               "bold": false,
               "italic": false,
-              "underline": true
+              "underline": false
             },
-            "isMultilined": true,
+            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           },
@@ -199,9 +199,9 @@
               "fontSize": 11,
               "bold": false,
               "italic": false,
-              "underline": true
+              "underline": false
             },
-            "isMultilined": true,
+            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           },
@@ -233,9 +233,9 @@
               "fontSize": 11,
               "bold": false,
               "italic": false,
-              "underline": true
+              "underline": false
             },
-            "isMultilined": true,
+            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           },
@@ -263,13 +263,13 @@
               "www.github.com"
             ],
             "style": {
-              "isMultilined": true,
               "font": 4,
               "fontSize": 11,
               "bold": false,
               "italic": false,
-              "underline": true
+              "underline": false
             },
+            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           }
@@ -284,7 +284,7 @@
         "theme": 7,
         "tabColor": 65,
         "header": {
-          "data": ["Numbers", "Dates"],
+          "data": ["Numbers", "Dates", "Dates Auto"],
           "style": {
             "font": 2,
             "fontSize": 14,
@@ -360,6 +360,40 @@
             "maxWidth": 20,
             "dataType": 2,
             "dataFormat": "dd/MM/yyyy"
+          },
+          {
+            "data": [
+              "12/10/1977",
+              "10/11/1977",
+              "10/10/1977",
+              "10/10/1977",
+              "10/10/1977",
+              "",
+              "11/10/1977",
+              "11/10/1977",
+              "11/10/1977",
+              "11/10/1977",
+              "11/11/1977",
+              "11/11/1977",
+              "11/20/1977",
+              "12/18/1977",
+              "12/11/1977",
+              "11/15/1979",
+              "11/10/1979",
+              "10/10/1979",
+              "10/10/1979",
+              "10/16/1979"
+            ],
+            "style": {
+              "font": 0,
+              "fontSize": 11,
+              "bold": false,
+              "italic": true,
+              "underline": true
+            },
+            "maxWidth": 20,
+            "dataType": 4,
+            "dataFormat": ""
           }
         ]
       }
