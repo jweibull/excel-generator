@@ -6,7 +6,8 @@ using ExcelGenerator.Generators;
 //var summary2 = BenchmarkRunner.Run<DOMBasedGenerator>();
 //var summary3 = BenchmarkRunner.Run<SAXBasedGenerator>();
 //var summary4 = BenchmarkRunner.Run<EPPlusFreeXMLBasedGenerator>();
+var summary5 = BenchmarkRunner.Run<SAXSharedGenerator>();
 
-var runner = new SaxLib();
-runner.Run();
+//var runner = new SaxLib();
+//runner.Run();
 
