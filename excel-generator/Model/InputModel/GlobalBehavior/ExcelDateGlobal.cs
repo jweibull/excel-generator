@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExcelGenerator.Excel;
 
-public class ExcelHyperlinkAutodetect
+public class ExcelDateGlobal
 {
-    public bool IsHtml { get; set; } = false;
+    public string Format { get; set; } = string.Empty;
 }

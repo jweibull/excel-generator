@@ -152,9 +152,12 @@ public class SaxLib
     {
         foreach (var link in linkColumn.HyperLinkData)
         {
-            var id = "lId" + partIdSequencer++;
-            workSheetPart.AddHyperlinkRelationship(new Uri(link.Hyperlink, UriKind.Absolute), true, id);
-            link.LinkId = id;
+            if (!string.IsNullOrEmpty(link.Hyperlink))
+            {
+                var id = "lId" + partIdSequencer++;
+                workSheetPart.AddHyperlinkRelationship(new Uri(link.Hyperlink, UriKind.Absolute), true, id);
+                link.LinkId = id;
+            }
         }
         return partIdSequencer;
     }
@@ -195,7 +198,7 @@ public class SaxLib
 
             if(sheetModel.StartRow > 1)
             {
-                WriteSheetDataSubtotalRow(writer, startRow, numColumns, allColumns);
+                WriteSheetDataSubtotalRow(writer, startRow, numColumns, numRows, allColumns);
             }
 
             WriteSheetDataHeaderRow(writer, startRow, numColumns, headers);
@@ -235,7 +238,7 @@ public class SaxLib
         writer.WriteEndElement();
     }
 
-    private void WriteSheetDataSubtotalRow(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
+    private void WriteSheetDataSubtotalRow(OpenXmlWriter writer, int startRow, int numColumns, int numRows, ExcelColumnModel[] allColumns)
     {
         Cell cell = new Cell();
         CellFormula cellFormula = new CellFormula();
@@ -252,7 +255,7 @@ public class SaxLib
                 writer.WriteStartElement(cell);
 
                 var columnName = GetColumnName(columnNum);
-                cellFormula.Text = String.Format("SUBTOTAL(9, {0}{1}:{2}$1048576)", columnName, startRow + 1, columnName);
+                cellFormula.Text = String.Format("SUBTOTAL(9, {0}{1}:{2}${3})", columnName, startRow + 1, columnName, numRows);
                 writer.WriteElement(cellFormula);
 
                 writer.WriteEndElement();
@@ -347,20 +350,25 @@ public class SaxLib
         var rowShift = startRow + 1;
         if (allColumns.Any(x => x.DataType == ExcelDataTypes.DataType.HyperLink))
         {
-
             writer.WriteStartElement(new Hyperlinks());
+            
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
                 if (allColumns[columnNum - 1].DataType == ExcelDataTypes.DataType.HyperLink)
                 {
                     var linkColumn = allColumns[columnNum - 1];
                     var hyperlink = new Hyperlink();
+            
                     for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
                     {
-                        hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                        hyperlink.Id = linkColumn.HyperLinkData[rowNum - rowShift].LinkId;
-                        writer.WriteElement(hyperlink);
+                        if (!string.IsNullOrEmpty(linkColumn.HyperLinkData[rowNum - rowShift].Hyperlink))
+                        {
+                            hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
+                            hyperlink.Id = linkColumn.HyperLinkData[rowNum - rowShift].LinkId;
+                            writer.WriteElement(hyperlink);
+                        }
                     }
+
                 }
             }
             writer.WriteEndElement();

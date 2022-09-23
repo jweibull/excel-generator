@@ -31,7 +31,7 @@ public class ExcelWorkbookModel
     /// <summary>
     /// This class must contain all rules needed for finding specific data types when autodetect is true for a column.
     /// </summary>
-    public ExcelAutodetectBehavior GlobalColumnBehavior { get; set; }
+    public ExcelGlobalBehavior GlobalColumnBehavior { get; set; } = new ExcelGlobalBehavior();
 
     /// <summary>
     /// The data to generate a watermark image

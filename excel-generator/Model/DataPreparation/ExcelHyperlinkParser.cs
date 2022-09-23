@@ -91,10 +91,7 @@ internal class ExcelHyperlinkParser
         var hyperlinks = new List<ExcelHyperlink>();
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
-            if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
-            {
-                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = data[itemIndex] });
-            }
+            hyperlinks.Add(new ExcelHyperlink() { Hyperlink = data[itemIndex] });
         }
         column.AddHyperLinkData(hyperlinks.ToArray());
     }
@@ -120,6 +117,10 @@ internal class ExcelHyperlinkParser
                 }
                 data[itemIndex] = text;
                 hyperlinks.Add(new ExcelHyperlink() { Hyperlink = hyperlink });
+            }
+            else
+            {
+                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = string.Empty });
             }
         }
         column.AddHyperLinkData(hyperlinks.ToArray());
