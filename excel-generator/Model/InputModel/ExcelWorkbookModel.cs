@@ -17,26 +17,32 @@ public class ExcelWorkbookModel
     /// Authoring Metadata, Author name
     /// </summary>
     public string Author { get; set; } = string.Empty;
+    
     /// <summary>
     /// Authoring Metadata, Company name
     /// </summary>
     public string Company { get; set; } = string.Empty;
+    
     /// <summary>
     /// Authoring Metadata, Comments
     /// </summary>
     public string Comments { get; set; } = string.Empty;
+
     /// <summary>
-    /// If the workbook is a Draft or a Release
+    /// This class must contain all rules needed for finding specific data types when autodetect is true for a column.
     /// </summary>
-    public bool IsDraft { get; set; } = false;
+    public ExcelAutodetectBehavior GlobalColumnBehavior { get; set; }
+
     /// <summary>
     /// The data to generate a watermark image
     /// </summary>
     public Watermark Watermark { get; set; }
+    
     /// <summary>
     /// List of all spreadsheets for this workbook, with tabular data and styling.
     /// </summary>
     public ExcelTableSheetModel[] Tables { get; set; }
+    
     /// <summary>
     /// List of all plot sheets for this workbook, with plot, their data and styling.
     /// </summary>

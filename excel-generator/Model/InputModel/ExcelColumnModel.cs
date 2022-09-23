@@ -40,6 +40,11 @@ public class ExcelColumnModel
     /// </summary>
     public string NewLineString { get; set; } = string.Empty;
 
+    /// <summary>
+    /// If this is set as true a subtotal line will be added to the first line to compute a filtered sum of the column values
+    /// </summary>
+    public bool HasSubtotal { get; set; } = false;
+
 
     #region Build Helper Section
 

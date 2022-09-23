@@ -4,7 +4,7 @@ using OfficeOpenXml;
 namespace ExcelGenerator.ForBenchmarking;
 
 [MemoryDiagnoser]
-public class EPPlusFreeXMLBasedGenerator
+public class EPPlusStyledBasedGenerator
 {
     [Benchmark]
     public void EPPlusFree()

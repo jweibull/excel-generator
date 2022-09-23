@@ -60,11 +60,27 @@ public class SAXSharedGenerator
     [Benchmark]
     public void SAX_SHARED()
     {
-        CreatePackage();
+        string path = Directory.GetCurrentDirectory();
+        path = Path.Combine(path, "..", "..", "output");
+        for (int i = 0; i < 1; i++)
+        {
+            var nameCounter = 1;
+            var baseFilename = "output";
+            var filename = baseFilename;
+            while (File.Exists(Path.Combine(path, filename + ".xlsx")))
+            {
+                filename = baseFilename + nameCounter++;
+            }
+            filename = Path.Combine(path, filename + ".xlsx");
+
+            CreatePackage(filename);
+        }
+
+        //CreatePackage();
     }
 
 
-    public void CreatePackage()
+    public void CreatePackage(string filename)
     {
         using (var stream = new MemoryStream())
         {
@@ -135,7 +151,7 @@ public class SAXSharedGenerator
 
                     writer.Close();
 
-                    document.Save();
+                    document.SaveAs(filename);
 
                     document.Close();
                 }

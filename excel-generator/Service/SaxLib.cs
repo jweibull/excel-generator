@@ -3,12 +3,10 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
 using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
-using ExcelGenerator.Excel;
-using Newtonsoft.Json;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
-using ExcelGenerator.ExcelDefs;
+using Newtonsoft.Json;
 
-namespace ExcelGenerator.Generators;
+namespace ExcelGenerator.Excel;
 
 public class SaxLib
 {
@@ -56,7 +54,7 @@ public class SaxLib
 
         if (modelData == null)
         {
-            throw new Exception("Model should not be null");
+            throw new Exception("Data input was null.");
         }
 
         using (var stream = new MemoryStream())
@@ -98,16 +96,22 @@ public class SaxLib
                     var sheetModel = modelData.WorkbookModel.Tables[sheetNum - 1];
                     var allColumns = sheetModel.Columns;
                     var linkColumns = allColumns.Where(x => x.DataType == ExcelDataTypes.DataType.HyperLink).ToList();
-                    
-                    foreach (var linkColumn in linkColumns)
+                    try
                     {
-                        linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
+                        foreach (var linkColumn in linkColumns)
+                        {
+                            linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
+                        }
+                    }
+                    catch
+                    {
+                        throw new Exception("The hyperlinks on table " + sheetModel.Name + " must start with http:// or https://.");
                     }
 
-                    int numRows = allColumns.Select(x => x.Data.Length).Max() + 1;
+                    int numRows = allColumns.Select(x => x.Data.Length).Max() + sheetModel.StartRow;
 
                     GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId);
-                    GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, numRows);
+                    GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, sheetModel.StartRow, numRows);
                 }
 
                 // Create the worksheet and sheets list to end the package
@@ -146,12 +150,10 @@ public class SaxLib
 
     private int GenerateHyperlinkParts(WorksheetPart workSheetPart, ExcelColumnModel linkColumn, int partIdSequencer)
     {
-        string url;
         foreach (var link in linkColumn.HyperLinkData)
         {
             var id = "lId" + partIdSequencer++;
-            url = link.Hyperlink.StartsWith("http://") || link.Hyperlink.StartsWith("https://") ? link.Hyperlink : @"http://" + link.Hyperlink;
-            workSheetPart.AddHyperlinkRelationship(new Uri(url, UriKind.Absolute), true, id);
+            workSheetPart.AddHyperlinkRelationship(new Uri(link.Hyperlink, UriKind.Absolute), true, id);
             link.LinkId = id;
         }
         return partIdSequencer;
@@ -161,9 +163,10 @@ public class SaxLib
     {
         using (var writer = OpenXmlWriter.Create(sharedStringTablePart))
         {
-            writer.WriteStartElement(new SharedStringTable() { Count = (UInt32)_parser.SharedStringsCount, UniqueCount = (UInt32)_parser.SharedStringsUniqueCount });
+            var stringCount = _parser.GetSharedStringCount();
+            writer.WriteStartElement(new SharedStringTable() { Count = stringCount.TotalCount, UniqueCount = stringCount.UniqueCount });
 
-            foreach (var key in _parser.SharedStringsToIndex.Keys)
+            foreach (var key in _parser.GetSharedStrings())
             {
                 writer.WriteStartElement(new SharedStringItem());
                 writer.WriteElement(new Text(key));
@@ -181,6 +184,7 @@ public class SaxLib
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
             var headers = sheetModel.Header;
+            var startRow = sheetModel.StartRow;
             var numColumns = allColumns.Count();
                         
             writer.WriteStartElement(new Worksheet());
@@ -189,15 +193,20 @@ public class SaxLib
 
             writer.WriteStartElement(new SheetData());
 
-            WriteSheetDataHeaderRow(writer, numColumns, headers);
+            if(sheetModel.StartRow > 1)
+            {
+                WriteSheetDataSubtotalRow(writer, startRow, numColumns, allColumns);
+            }
 
-            WriteSheetDataColumns(writer, numColumns, numRows, allColumns);
+            WriteSheetDataHeaderRow(writer, startRow, numColumns, headers);
+
+            WriteSheetDataColumns(writer, startRow, numColumns, numRows, allColumns);
 
             // write the end SheetData element
             writer.WriteEndElement();
 
             //HyperlinksInfo
-            WriteHyperlinkSection(writer, numColumns, allColumns);
+            WriteHyperlinkSection(writer, startRow, numColumns, allColumns);
 
             // Table Info
             writer.WriteStartElement(new TableParts() { Count = 1 });
@@ -226,24 +235,49 @@ public class SaxLib
         writer.WriteEndElement();
     }
 
-    private void WriteSheetDataHeaderRow(OpenXmlWriter writer, int numColumns, ExcelHeaderModel headers)
+    private void WriteSheetDataSubtotalRow(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
     {
-        Row row = new Row();
         Cell cell = new Cell();
-        CellValue cellValue = new CellValue();
-        var stringIndexes = _parser.SharedStringsToIndex;
+        CellFormula cellFormula = new CellFormula();
         
-        row.RowIndex = 1U;
-        writer.WriteStartElement(row);
+        writer.WriteStartElement(new Row() { RowIndex = 1U });
 
         for (int columnNum = 1; columnNum <= numColumns; columnNum++)
         {
-            cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1);
+            if (allColumns[columnNum - 1].HasSubtotal)
+            {
+                cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), 1U);
+                cell.DataType = CellValues.SharedString;
+                cell.StyleIndex = _styleParser.StyleIndexes[allColumns[columnNum - 1].StyleKey];
+                writer.WriteStartElement(cell);
+
+                var columnName = GetColumnName(columnNum);
+                cellFormula.Text = String.Format("SUBTOTAL(9, {0}{1}:{2}$1048576)", columnName, startRow + 1, columnName);
+                writer.WriteElement(cellFormula);
+
+                writer.WriteEndElement();
+            }
+        }
+
+        writer.WriteEndElement();
+    }
+
+    private void WriteSheetDataHeaderRow(OpenXmlWriter writer, int startRow, int numColumns, ExcelHeaderModel headers)
+    {
+        Cell cell = new Cell();
+        CellValue cellValue = new CellValue();
+        var firstRow = (UInt32) startRow;
+
+        writer.WriteStartElement(new Row() { RowIndex = firstRow });
+
+        for (int columnNum = 1; columnNum <= numColumns; columnNum++)
+        {
+            cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), firstRow);
 
             cell.DataType = CellValues.SharedString;
             cell.StyleIndex = _styleParser.StyleIndexes[headers.StyleKey];
             writer.WriteStartElement(cell);
-            cellValue.Text = stringIndexes[headers.Data[columnNum - 1]];
+            cellValue.Text = _parser.GetValue(ExcelDataTypes.DataType.Text, headers.Data[columnNum - 1]);
             writer.WriteElement(cellValue);
 
             writer.WriteEndElement();
@@ -252,13 +286,15 @@ public class SaxLib
         writer.WriteEndElement();
     }
 
-    private void WriteSheetDataColumns(OpenXmlWriter writer, int numColumns, int numRows, ExcelColumnModel[] allColumns)
+    private void WriteSheetDataColumns(OpenXmlWriter writer, int startRow, int numColumns, int numRows, ExcelColumnModel[] allColumns)
     {
         Row row = new Row();
         Cell cell = new Cell();
         CellValue cellValue = new CellValue();
 
-        for (int rowNum = 2; rowNum <= numRows; rowNum++)
+        var rowShift = startRow + 1;
+
+        for (int rowNum = rowShift; rowNum <= numRows; rowNum++)
         {
             //write the row start element with the row index attribute
             row.RowIndex = (UInt32)rowNum;
@@ -266,13 +302,15 @@ public class SaxLib
 
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                var currentColumn = allColumns[columnNum - 1];
-                if (allColumns.Length > (columnNum - 1) && allColumns[columnNum - 1].Data.Length > (rowNum - 2))
+                var columnIndex = columnNum - 1;
+                var rowIndex = rowNum - rowShift;
+                var currentColumn = allColumns[columnIndex];
+                if (allColumns.Length > (columnIndex) && allColumns[columnIndex].Data.Length > (rowIndex))
                 {
                     cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
                     cell.StyleIndex = _styleParser.StyleIndexes[currentColumn.StyleKey];
 
-                    WriteCellValue(currentColumn, cell, cellValue, allColumns, rowNum, columnNum);
+                    WriteCellValue(currentColumn, cell, cellValue, allColumns, rowIndex, columnIndex);
 
                     writer.WriteStartElement(cell);
                     writer.WriteElement(cellValue);
@@ -283,37 +321,30 @@ public class SaxLib
         }
     }
 
-    private void WriteCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, ExcelColumnModel[] allColumns, int rowNum, int columnNum)
+    private void WriteCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, ExcelColumnModel[] allColumns, int rowIndex, int columnIndex)
     {
-        var stringIndexes = _parser.SharedStringsToIndex;
-        var dates = _parser.OleADates;
+        cellValue.Text = _parser.GetValue(currentColumn.DataType, allColumns[columnIndex].Data[rowIndex]);
+        switch (currentColumn.DataType)
+        {
+            case ExcelDataTypes.DataType.Number:
+                cell.DataType = CellValues.Number;
+                break;
+            
+            case ExcelDataTypes.DataType.DateTime:
+                cell.DataType = CellValues.Number;
+                break;
 
-        if (currentColumn.DataType == ExcelDataTypes.DataType.Text || currentColumn.DataType == ExcelDataTypes.DataType.HyperLink)
-        {
-            cell.DataType = CellValues.SharedString;
-            cellValue.Text = stringIndexes[allColumns[columnNum - 1].Data[rowNum - 2]];
-        }
-        else if (currentColumn.DataType == ExcelDataTypes.DataType.DateTime)
-        {
-            cell.DataType = CellValues.Number;
-            if (dates.ContainsKey(allColumns[columnNum - 1].Data[rowNum - 2]))
-            {
-                cellValue.Text = dates[allColumns[columnNum - 1].Data[rowNum - 2]].ToString();
-            }
-            else
-            {
-                cellValue.Text = String.Empty;
-            }
-        }
-        else
-        {
-            cell.DataType = CellValues.Number;
-            cellValue.Text = allColumns[columnNum - 1].Data[rowNum - 2];
+            case ExcelDataTypes.DataType.HyperLink:
+            case ExcelDataTypes.DataType.Text:
+            default:
+                cell.DataType = CellValues.SharedString;
+                break;
         }
     }
 
-    private void WriteHyperlinkSection(OpenXmlWriter writer, int numColumns, ExcelColumnModel[] allColumns)
+    private void WriteHyperlinkSection(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
     {
+        var rowShift = startRow + 1;
         if (allColumns.Any(x => x.DataType == ExcelDataTypes.DataType.HyperLink))
         {
 
@@ -327,7 +358,7 @@ public class SaxLib
                     for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
                     {
                         hyperlink.Reference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
-                        hyperlink.Id = linkColumn.HyperLinkData[rowNum - 2].LinkId;
+                        hyperlink.Id = linkColumn.HyperLinkData[rowNum - rowShift].LinkId;
                         writer.WriteElement(hyperlink);
                     }
                 }
@@ -336,13 +367,13 @@ public class SaxLib
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int numRows)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int startRow, int numRows)
     {
         var numColumns = headers.Data.Count();
 
         using (var writer = OpenXmlWriter.Create(sheetTablesPart))
         {
-            var reference = "A1:" + GetColumnName(numColumns) + numRows.ToString();
+            var reference = "A" + startRow.ToString() + ":" + GetColumnName(numColumns) + numRows.ToString();
 
             var table = new Table()
             {
@@ -625,8 +656,8 @@ public class SaxLib
         var cOffset = 0;
         
 
-        var hFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(headerStyle.Font);
-        var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
+        var hFontFactor = ExcelFonts.GetFontSizeFactor(headerStyle.Font);
+        var cFontFactor = ExcelFonts.GetFontSizeFactor(column.Style.Font);
 
         if (column.DataType == ExcelDataTypes.DataType.DateTime)
         {

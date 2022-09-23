@@ -5,7 +5,14 @@
     "author": "Basniak",
     "company": "Basniak's awesome library'",
     "comments": "Awesome Excel Generation",
-    "isDraft": true,
+    "autodetectBehavior": {
+      "date": {
+        "format": "dd/MM/yyyy"
+      },
+      "hyperlink": {
+        "isHtml":  true
+      } 
+    },
     "watermark": {
       "text": "Rascunho",
       "alpha": 0.3,

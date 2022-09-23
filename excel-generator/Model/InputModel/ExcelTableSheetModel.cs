@@ -46,5 +46,14 @@ public class ExcelTableSheetModel: ExcelBaseSheetModel
     /// If diferent from "None", applies a theme from excel's standard theme list to this spreadsheet
     /// </summary>
     public ExcelThemes.Theme Theme { get; set; } = ExcelThemes.Theme.None;
-    
+
+    /// <summary>
+    /// Internal work variable that defines the start row if a column contains a subtotal row
+    /// </summary>
+    public int StartRow { get; private set; } = 1;
+
+    public void SetStartRow(int startRow)
+    {
+        StartRow = startRow;
+    }
 }
