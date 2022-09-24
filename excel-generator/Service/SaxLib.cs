@@ -5,6 +5,7 @@ using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
 using Newtonsoft.Json;
+using DocumentFormat.OpenXml.ExtendedProperties;
 
 namespace ExcelGenerator.Excel;
 
@@ -115,16 +116,48 @@ public class SaxLib
                 }
 
                 // Create the worksheet and sheets list to end the package
-                FinishDocument(document.WorkbookPart, modelData.WorkbookModel, numSheets, sheetPartIds);
-                
-                //document.Save();
+                LinkAllSheetsInformations(document.WorkbookPart, modelData.WorkbookModel, numSheets, sheetPartIds);
+
+                SetDocumentProperties(modelData.WorkbookModel, document);
+
                 document.SaveAs(filename);
+
                 document.Close();
+
             }
         }
     }
 
-    private void FinishDocument(WorkbookPart workbookPart, ExcelWorkbookModel workbookModel, int numSheets, List<string> sheetPartIds)
+    private void SetDocumentProperties(ExcelWorkbookModel workbookModel, SpreadsheetDocument document)
+    {
+        var corePart = document.AddCoreFilePropertiesPart();
+
+        using (System.Xml.XmlTextWriter writer = new System.Xml.XmlTextWriter(corePart.GetStream(System.IO.FileMode.Create), System.Text.Encoding.UTF8))
+        {
+            writer.WriteRaw(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n<cp:coreProperties xmlns:" +
+                "cp=\"http://schemas.openxmlformats.org/package/2006/metadata/core-properties\" xmlns:" +
+                "dc=\"http://purl.org/dc/elements/1.1/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:" +
+                "dcmitype=\"http://purl.org/dc/dcmitype/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
+                String.Format("<dc:description>{0}</dc:description><dc:title>{1}</dc:title><dc:creator>{2}</dc:creator>" +
+                "<dcterms:created xsi:type=\"dcterms:W3CDTF\">{3}</dcterms:created></cp:coreProperties>",
+                workbookModel.Comments, workbookModel.Title, workbookModel.Author, DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ")));
+            writer.Flush();
+            writer.Close();
+        }
+        
+        if (!string.IsNullOrEmpty(workbookModel.Company))
+        {
+            document.AddExtendedFilePropertiesPart();
+            if (document.ExtendedFilePropertiesPart != null)
+            {
+                document.ExtendedFilePropertiesPart.Properties = new Properties();
+                document.ExtendedFilePropertiesPart.Properties.Company = new Company(workbookModel.Company);
+            }
+        }
+    }
+
+    private void LinkAllSheetsInformations(WorkbookPart workbookPart, ExcelWorkbookModel workbookModel, int numSheets, List<string> sheetPartIds)
     {
         using (var writer = OpenXmlWriter.Create(workbookPart))
         {
@@ -218,6 +251,7 @@ public class SaxLib
 
             // write the end Worksheet element
             writer.WriteEndElement();
+            
             writer.Close();
         }
     }
@@ -313,7 +347,7 @@ public class SaxLib
                     cell.CellReference = string.Format("{0}{1}", GetColumnName(columnNum), rowNum);
                     cell.StyleIndex = _styleParser.StyleIndexes[currentColumn.StyleKey];
 
-                    WriteCellValue(currentColumn, cell, cellValue, allColumns, rowIndex, columnIndex);
+                    SetCellValue(currentColumn, cell, cellValue, allColumns, rowIndex, columnIndex);
 
                     writer.WriteStartElement(cell);
                     writer.WriteElement(cellValue);
@@ -324,7 +358,7 @@ public class SaxLib
         }
     }
 
-    private void WriteCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, ExcelColumnModel[] allColumns, int rowIndex, int columnIndex)
+    private void SetCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, ExcelColumnModel[] allColumns, int rowIndex, int columnIndex)
     {
         cellValue.Text = _parser.GetValue(currentColumn.DataType, allColumns[columnIndex].Data[rowIndex]);
         switch (currentColumn.DataType)

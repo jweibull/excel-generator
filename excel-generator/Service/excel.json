@@ -31,7 +31,7 @@
         "theme": 24,
         "tabColor": 65,
         "header": {
-          "data": ["MaxW25", "Regular Hyperlink", "Tag2", "Tag3", "Tag4", "Tag5", "Tag 6"],
+          "data": ["MaxW25", "Regular Hyperlink", "Multiline Hyperlinks", "Font Fit check 1", "Font Fit check 2", "Font Fit check 3", "Font Fit check 4"],
           "style": {
             "font": 4,
             "fontSize": 12,
@@ -146,7 +146,7 @@
           },
           {
             "data": [
-              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
               "<a href=\"http://www.google.com\">Google</a>",
               "<a href=\"http://www.yahoo.com\">Yahoo</a>",
               "",
@@ -174,16 +174,15 @@
               "italic": false,
               "underline": false
             },
-            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           },
           {
             "data": [
-              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
               "<a href=\"http://www.google.com\">Google</a>",
               "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "",
+              "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.microsoft.com\">Microsoft</a>",
               "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.github.com\">Github</a>",
@@ -208,16 +207,15 @@
               "italic": false,
               "underline": false
             },
-            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           },
           {
             "data": [
-              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
               "<a href=\"http://www.google.com\">Google</a>",
               "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "",
+              "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.microsoft.com\">Microsoft</a>",
               "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.github.com\">Github</a>",
@@ -242,7 +240,7 @@
               "italic": false,
               "underline": false
             },
-            "newLineString": "<br>",
+            "newLineString": "",
             "dataType": 4,
             "dataFormat": ""
           },
@@ -251,7 +249,7 @@
               "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
               "<a href=\"http://www.google.com\">Google</a>",
               "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "",
+              "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.microsoft.com\">Microsoft</a>",
               "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.github.com\">Github</a>",
@@ -276,7 +274,6 @@
               "italic": false,
               "underline": false
             },
-            "newLineString": "<br>",
             "dataType": 4,
             "dataFormat": ""
           }
@@ -408,7 +405,7 @@
               "18/10/1977",
               "10/10/1977",
               "10/10/1977",
-              "",
+              "25/01/1965",
               "11/10/1977",
               "11/10/1977",
               "11/10/1977",

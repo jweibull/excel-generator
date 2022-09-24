@@ -12,7 +12,7 @@ public class ExcelWorkbookModel
     /// <summary>
     /// Authoring Metadata, Title
     /// </summary>
-    public string Info { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     /// <summary>
     /// Authoring Metadata, Author name
     /// </summary>
