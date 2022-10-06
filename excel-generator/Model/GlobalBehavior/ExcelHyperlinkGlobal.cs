@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
-public class ExcelHyperlinkAutodetect
+public class ExcelHyperlinkGlobal
 {
     public bool IsHtml { get; set; } = false;
 }

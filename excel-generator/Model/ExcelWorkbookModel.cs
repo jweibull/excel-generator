@@ -1,4 +1,7 @@
-﻿namespace ExcelGenerator.Excel;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.
@@ -12,7 +15,7 @@ public class ExcelWorkbookModel
     /// <summary>
     /// Authoring Metadata, Title
     /// </summary>
-    public string Info { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     /// <summary>
     /// Authoring Metadata, Author name
     /// </summary>
@@ -31,7 +34,7 @@ public class ExcelWorkbookModel
     /// <summary>
     /// This class must contain all rules needed for finding specific data types when autodetect is true for a column.
     /// </summary>
-    public ExcelAutodetectBehavior GlobalColumnBehavior { get; set; }
+    public ExcelGlobalBehavior GlobalColumnBehavior { get; set; } = new ExcelGlobalBehavior();
 
     /// <summary>
     /// The data to generate a watermark image

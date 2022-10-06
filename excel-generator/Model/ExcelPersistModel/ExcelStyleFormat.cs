@@ -1,6 +1,7 @@
-﻿using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+﻿using System;
+using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Class combining Fonts, Data Type and formats to be applied to Cells or Columns.

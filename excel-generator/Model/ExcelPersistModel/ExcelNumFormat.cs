@@ -1,6 +1,6 @@
-﻿using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+﻿using System;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Class describing a Font as it is written inside the XML file.

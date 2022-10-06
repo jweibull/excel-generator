@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
-using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.
@@ -91,10 +93,7 @@ internal class ExcelHyperlinkParser
         var hyperlinks = new List<ExcelHyperlink>();
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
-            if (!string.IsNullOrEmpty(data[itemIndex].Trim()))
-            {
-                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = data[itemIndex] });
-            }
+            hyperlinks.Add(new ExcelHyperlink() { Hyperlink = data[itemIndex] });
         }
         column.AddHyperLinkData(hyperlinks.ToArray());
     }
@@ -120,6 +119,10 @@ internal class ExcelHyperlinkParser
                 }
                 data[itemIndex] = text;
                 hyperlinks.Add(new ExcelHyperlink() { Hyperlink = hyperlink });
+            }
+            else
+            {
+                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = string.Empty });
             }
         }
         column.AddHyperLinkData(hyperlinks.ToArray());

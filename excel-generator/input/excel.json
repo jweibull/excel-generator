@@ -1,0 +1,438 @@
+{
+  "workbookModel": {
+    "fileName": "MyOutput",
+    "title": "Basniak's Awesome Table",
+    "author": "Basniak",
+    "company": "Basniak's awesome library'",
+    "comments": "Awesome Excel Generation",
+    "globalColumnBehavior": {
+      "date": {
+        "format": "dd/MM/yyyy"
+      },
+      "hyperlink": {
+        "isHtml":  true
+      } 
+    },
+    "watermark": {
+      "text": "Rascunho",
+      "fontColor": "66E63746",
+      "font": 3,
+      "rotationAngle": 45,
+      "fontSize": 160
+    },
+    "tables": [
+      {
+        "name": "Custom Spreadsheet Name",
+        "tabIndex": 0,
+        "sheetType": 0,
+        "theme": 2,
+        "tabColor": "FFEB8638",
+        "header": {
+          "data": ["MaxW25", "Regular Hyperlink", "Multiline Hyperlinks", "Font Fit check 1", "Font Fit check 2", "Font Fit check 3", "Font Fit check 4"],
+          "rowHeight": 42,
+          "style": {
+            "font": 4,
+            "fontSize": 14,
+            "bold": true,
+            "italic": false,
+            "underline": false
+          }
+        },
+        "columns": [
+          {
+            "data": [
+              "string muito muito muito muito longa",
+              "b",
+              "Estou na Linha 1<br>Pulei pra linha 2",
+              "d",
+              "e",
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e",
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e",
+              "string muito muito muito muito longa",
+              "b",
+              "c",
+              "d",
+              "e"
+            ],
+            "style": {
+              "font": 3,
+              "fontSize": 11,
+              "fontColor": "FFE63746",
+              "bold": true,
+              "italic": true,
+              "underline": true
+            },
+            "newLineString": "<br>",
+            "maxWidth": 20,
+            "dataType": 0,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": false
+            },
+            "newLineString": "  ",
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
+            ],
+            "style": {
+              "font": 0,
+              "fontSize": 11,
+              "fontColor": "FF000000",
+              "bold": false,
+              "italic": false,
+              "underline": false
+            },
+            "newLineString": "<br>",
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": false
+            },
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
+            ],
+            "style": {
+              "font": 2,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": false
+            },
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
+            ],
+            "style": {
+              "font": 3,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": false
+            },
+            "newLineString": "",
+            "dataType": 4,
+            "dataFormat": ""
+          },
+          {
+            "data": [
+              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.apple.com\">Apple</a>",
+              "<a href=\"http://www.github.com\">Github</a>",
+              "<a href=\"http://www.google.com\">Google</a>",
+              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
+            ],
+            "style": {
+              "font": 4,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false,
+              "underline": false
+            },
+            "dataType": 4,
+            "dataFormat": ""
+          }
+        ]
+      },
+      {
+        "name": "Spreadsheet Name 2",
+        "tabIndex": 1,
+        "sheetType": 0,
+        "theme": 7,
+        "tabColor": "FF5A8F28",
+        "header": {
+          "data": ["Numbers", "Auto Sum Column", "Dates", "Dates Auto"],
+          "style": {
+            "font": 1,
+            "fontSize": 14,
+            "bold": true,
+            "italic": false,
+            "underline": false
+          }
+        },
+        "columns": [
+          {
+            "data": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8.56",
+              "9",
+              "10",
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "20000.34"
+            ],
+            "style": {
+              "font": 3,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 26,
+            "dataType": 1,
+            "dataFormat": "#,##0.00"
+          },{
+            "data": [
+              "10.10",
+              "11.11",
+              "9.76",
+              "8.56",
+              "30.45",
+              "5.87",
+              "6.34",
+              "8.56",
+              "9.23",
+              "10.10",
+              "11.11",
+              "",
+              "8.56",
+              "30.45",
+              "5.87",
+              "6.34",
+              "15.45",
+              "8.56",
+              "9.54",
+              "20.34"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 26,
+            "dataType": 1,
+            "dataFormat": "R$ #,##0.00",
+            "HasSubtotal": true
+          },
+          {
+            "data": [
+              "12/10/1977",
+              "13/10/1977",
+              "14/10/1977",
+              "15/10/1977",
+              "16/10/1977",
+              "",
+              "13/10/1977",
+              "14/10/1977",
+              "15/10/1977",
+              "16/10/1977",
+              "12/11/1977",
+              "13/11/1977",
+              "14/11/1977",
+              "15/11/1977",
+              "16/11/1977",
+              "12/10/1979",
+              "13/10/1979",
+              "14/10/1979",
+              "15/10/1979",
+              "16/10/1979"
+            ],
+            "style": {
+              "font": 0,
+              "fontSize": 11,
+              "bold": false,
+              "italic": true,
+              "underline": true
+            },
+            "maxWidth": 20,
+            "dataType": 2,
+            "dataFormat": "dd/MM/yyyy"
+          },
+          {
+            "data": [
+              "12/10/1977",
+              "16/10/1977",
+              "18/10/1977",
+              "10/10/1977",
+              "10/10/1977",
+              "25/01/1965",
+              "11/10/1977",
+              "11/10/1977",
+              "11/10/1977",
+              "11/10/1977",
+              "11/11/1977",
+              "11/11/1977",
+              "20/07/1977",
+              "28/03/1977",
+              "12/11/1977",
+              "15/11/1979",
+              "11/10/1979",
+              "10/10/1979",
+              "10/10/1979",
+              "16/12/1979"
+            ],
+            "style": {
+              "font": 0,
+              "fontSize": 11,
+              "bold": false,
+              "italic": true,
+              "underline": true
+            },
+            "maxWidth": 20,
+            "dataType": 4,
+            "dataFormat": ""
+          }
+        ]
+      }
+    ],
+    "charts": []
+  }
+}

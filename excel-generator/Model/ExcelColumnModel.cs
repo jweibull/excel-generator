@@ -1,6 +1,8 @@
-﻿using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+﻿using System;
+using System.Linq;
+using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Class with the data models and styling for a column data, to be displayed under a header title.

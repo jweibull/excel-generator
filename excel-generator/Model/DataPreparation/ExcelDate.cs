@@ -1,9 +1,9 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+using System.Linq;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.
@@ -23,7 +23,16 @@ internal class ExcelDate
 
     internal bool IsDate(ExcelColumnModel column, string format)
     {
-        return false;
+        if (string.IsNullOrEmpty(format.Trim()))
+        {
+            return false;
+        }    
+        if (column.Data.Any(x => !string.IsNullOrEmpty(x) && x.Length != format.Length))
+        {
+            return false;
+        }
+        
+        return true;
     }
     
     internal string GetValue(string key)
@@ -42,11 +51,15 @@ internal class ExcelDate
         DateTime date;
         while (index < dates.Length)
         {
-            if (!_oleADates.ContainsKey(dates[index]))
+            if (!string.IsNullOrEmpty(dates[index].Trim()) && !_oleADates.ContainsKey(dates[index]))
             {
                 if (DateTime.TryParseExact(dates[index], dataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                 {
                     _oleADates.Add(dates[index], date.ToOADate().ToString());
+                }
+                else
+                {
+                    throw new Exception("Unsupported date format");
                 }
             }
             index++;

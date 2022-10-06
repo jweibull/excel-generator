@@ -1,6 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-namespace ExcelGenerator.ExcelDefs;
+﻿using System;
+namespace rbkApiModules.Utilities.Excel;
 
 public static class ExcelModelDefs
 {

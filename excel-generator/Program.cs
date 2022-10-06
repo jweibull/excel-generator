@@ -2,7 +2,7 @@
 using ExcelGenerator.ForBenchmarking;
 using ExcelGenerator.Generators;
 
-using ExcelGenerator.Excel;
+using rbkApiModules.Utilities.Excel;
 
 //var summary1 = BenchmarkRunner.Run<ClosedXMLBasedGenerator>();
 //var summary2 = BenchmarkRunner.Run<DOMBasedGenerator>();
@@ -10,6 +10,6 @@ using ExcelGenerator.Excel;
 //var summary4 = BenchmarkRunner.Run<EPPlusFreeXMLBasedGenerator>();
 //var summary5 = BenchmarkRunner.Run<SAXSharedGenerator>();
 
-var runner = new SaxLib();
+var runner = new Runner();
 runner.Run();
 

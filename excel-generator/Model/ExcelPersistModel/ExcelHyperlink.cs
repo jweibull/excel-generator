@@ -1,6 +1,6 @@
-﻿using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+﻿using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Class describing Hyperlink Data. Needed to write and link all components inside a XML file.

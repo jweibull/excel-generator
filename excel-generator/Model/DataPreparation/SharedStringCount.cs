@@ -1,4 +1,6 @@
-﻿namespace ExcelGenerator.Excel;
+﻿using System;
+
+namespace rbkApiModules.Utilities.Excel;
 
 internal class SharedStringCount
 {

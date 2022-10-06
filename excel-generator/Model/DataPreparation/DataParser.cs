@@ -1,6 +1,7 @@
-﻿using static ExcelGenerator.ExcelDefs.ExcelModelDefs;
+﻿using System.Linq;
+using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
-namespace ExcelGenerator.Excel;
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.
@@ -50,27 +51,14 @@ internal class DataParser
         {
             if (table.Header.Data.Length != table.Columns.Length)
             {
-                throw new Exception("Length of Headers and columns must match");
+                throw new Exception("Length of Headers and number of columns must match");
             }
 
             _sharedString.AddToSharedStringDictionary(table.Header.Data, false, string.Empty);
             
             foreach (var column in table.Columns)
             {
-                if (column.HasSubtotal)
-                {
-                    table.SetStartRow(2);
-                }
-
-                if (!string.IsNullOrEmpty(column.NewLineString.Trim()))
-                {
-                    column.IsMultilined = true;
-                }
-
-                if (column.DataType == ExcelDataTypes.DataType.AutoDetect)
-                {
-                    column.DataType = DetermineDataType(column, workbookModel.GlobalColumnBehavior, column.IsMultilined);
-                }
+                SetupColumn(table, column, workbookModel.GlobalColumnBehavior);
 
                 switch (column.DataType)
                 {
@@ -91,11 +79,42 @@ internal class DataParser
         }
     }
 
-    private ExcelDataTypes.DataType DetermineDataType(ExcelColumnModel column, ExcelAutodetectBehavior behavior, bool isMultilined)
+    private void SetupColumn(ExcelTableSheetModel table, ExcelColumnModel column, ExcelGlobalBehavior globalBehavior)
+    {
+        if (column.HasSubtotal)
+        {
+            table.SetStartRow(2);
+        }
+
+        if (!string.IsNullOrEmpty(column.NewLineString.Trim()))
+        {
+            column.IsMultilined = true;
+        }
+
+        if (column.DataType == ExcelDataTypes.DataType.DateTime && string.IsNullOrEmpty(column.DataFormat.Trim()))
+        {
+            if (!string.IsNullOrEmpty(globalBehavior.Date.Format.Trim()))
+            {
+                column.DataFormat = globalBehavior.Date.Format;
+            }
+            else
+            {
+                throw new Exception("No Date Format found");
+            }
+        }
+
+        if (column.DataType == ExcelDataTypes.DataType.AutoDetect)
+        {
+            DetermineDataType(column, globalBehavior, column.IsMultilined);
+        }
+    }
+
+    private ExcelDataTypes.DataType DetermineDataType(ExcelColumnModel column, ExcelGlobalBehavior behavior, bool isMultilined)
     {
         if (_hyperlinkParser.IsHyperlink(column, behavior.Hyperlink.IsHtml))
         {
-            return ExcelDataTypes.DataType.HyperLink;
+            column.DataType = ExcelDataTypes.DataType.HyperLink;
+            return column.DataType;
         }
 
         // Multilined columns should not detect dates
@@ -103,10 +122,13 @@ internal class DataParser
         {
             if (_excelDate.IsDate(column, behavior.Date.Format))
             {
-                return ExcelDataTypes.DataType.DateTime;
+                column.DataType = ExcelDataTypes.DataType.DateTime;
+                column.DataFormat = behavior.Date.Format;
+                return column.DataType;
             }
         }
-        
-        return ExcelDataTypes.DataType.Text;
+
+        column.DataType = ExcelDataTypes.DataType.Text;
+        return column.DataType;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ExcelGenerator.Excel;
+﻿namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.
