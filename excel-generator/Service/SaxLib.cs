@@ -743,7 +743,7 @@ public class SaxLib
 
         if (headerStyle.Bold)
         {
-            hFontFactor -= 0.5;
+            hFontFactor -= 1;
         }
 
         if (column.Style.Bold == true)
@@ -751,8 +751,8 @@ public class SaxLib
             cFontFactor -= 0.5D;
         }
 
-        double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor) * fontRatio;
-        double columnWidth = (column.GetMaxDataLength(isMultilined, _numLengthSamples) + cOffset) * (72D / 96D);
+        double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor);
+        double columnWidth = (column.GetMaxDataLength(isMultilined, _numLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
 
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
 

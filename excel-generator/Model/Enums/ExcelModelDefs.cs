@@ -162,12 +162,12 @@ public static class ExcelModelDefs
         {
             switch ((int)fontType)
             {
-                case 0: return 8D;
-                case 1: return 8.5D;
-                case 2: return 8.5D;
-                case 3: return 8.5D;
-                case 4: return 8.5D;
-                default: return 8.5D;
+                case 0: return 10.5D;
+                case 1: return 10D;
+                case 2: return 10D;
+                case 3: return 11D;
+                case 4: return 11D;
+                default: return 11D;
             }
         }
     }

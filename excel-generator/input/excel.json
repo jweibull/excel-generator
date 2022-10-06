@@ -71,7 +71,7 @@
               "underline": true
             },
             "newLineString": "<br>",
-            "maxWidth": 20,
+            "maxWidth": 0,
             "dataType": 0,
             "dataFormat": ""
           },
