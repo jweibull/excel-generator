@@ -5,5 +5,5 @@
 /// </summary>
 public class ModelData
 {
-    public ExcelWorkbookModel WorkbookModel { get; set; }
+    public ExcelWorkbookModel WorkbookModel { get; set; } = new ExcelWorkbookModel();
 }

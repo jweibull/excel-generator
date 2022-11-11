@@ -15,8 +15,6 @@ namespace rbkApiModules.Utilities.Excel;
 
 public class SaxLib
 {
-    private readonly int _numLengthSamples = 50;
-    
     public MemoryStream CreatePackage(ExcelWorkbookModel workbookModel)
     {
         DataParser parser = new DataParser();
@@ -108,7 +106,7 @@ public class SaxLib
                 $"<dc:title>{workbookModel.Title}</dc:title>" +
                 $"<dc:creator>{workbookModel.Author}</dc:creator>" +
                 $"<dcterms:created xsi:type=\"dcterms:W3CDTF\">{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ")}</dcterms:created>" +
-                $"</cp:coreProperties>");
+                "</cp:coreProperties>");
             writer.Flush();
             writer.Close();
         }
@@ -236,7 +234,7 @@ public class SaxLib
 
     private void WriteSheetTabColorSection(OpenXmlWriter writer, ExcelTableSheetModel sheetModel)
     {
-        var regex = new Regex(@"^([A-Fa-f0-9]{8})$");
+        var regex = new Regex(ModelConstants.ColorPattern);
         if (!regex.IsMatch(sheetModel.TabColor))
         {
             throw new Exception("Invalid Color String. String should be a 8 characters ARGB string without the #. e.g. \"FF00FF00\" for solid green");
@@ -752,7 +750,7 @@ public class SaxLib
         }
 
         double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, _numLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
+        double columnWidth = (column.GetMaxDataLength(isMultilined, ModelConstants.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
 
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
 

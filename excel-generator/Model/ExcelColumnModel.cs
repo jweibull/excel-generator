@@ -63,7 +63,7 @@ public class ExcelColumnModel
     /// <summary>
     /// Builder helper Field to distinguish the hyperlink Ids related to this column
     /// </summary>
-    internal ExcelHyperlink[] HyperLinkData { get; private set; }
+    internal ExcelHyperlink[] HyperLinkData { get; private set; } = new ExcelHyperlink[0];
 
     internal void AddHyperLinkData(ExcelHyperlink[] hyperLinkData)
     {
