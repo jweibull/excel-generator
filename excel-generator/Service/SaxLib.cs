@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
 using x14 = DocumentFormat.OpenXml.Office2010.Excel;
@@ -234,7 +230,7 @@ public class SaxLib
 
     private void WriteSheetTabColorSection(OpenXmlWriter writer, ExcelTableSheetModel sheetModel)
     {
-        var regex = new Regex(ModelConstants.ColorPattern);
+        var regex = new Regex(Configuration.ColorPattern);
         if (!regex.IsMatch(sheetModel.TabColor))
         {
             throw new Exception("Invalid Color String. String should be a 8 characters ARGB string without the #. e.g. \"FF00FF00\" for solid green");
@@ -750,7 +746,7 @@ public class SaxLib
         }
 
         double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, ModelConstants.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
+        double columnWidth = (column.GetMaxDataLength(isMultilined, Configuration.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
 
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
 

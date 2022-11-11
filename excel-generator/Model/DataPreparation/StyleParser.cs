@@ -190,7 +190,7 @@ internal class StyleParser
         string key;
         ExcelFontDetail fontDetail;
         
-        var regex = new Regex(ModelConstants.ColorPattern);
+        var regex = new Regex(Configuration.ColorPattern);
         
         if (!string.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
         {
