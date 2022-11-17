@@ -1,4 +1,6 @@
-﻿namespace rbkApiModules.Utilities.Excel;
+﻿using System;
+
+namespace rbkApiModules.Utilities.Excel;
 
 public static class ExcelModelDefs
 {

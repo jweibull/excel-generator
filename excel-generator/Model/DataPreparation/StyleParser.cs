@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
 namespace rbkApiModules.Utilities.Excel;
 
@@ -53,20 +52,20 @@ internal class StyleParser
         }
     }
 
-    private ExcelColumnModel CreateStylesForeachType(ExcelDataTypes.DataType type, ExcelColumnModel column)
+    private ExcelColumnModel CreateStylesForeachType(ExcelModelDefs.ExcelDataTypes.DataType type, ExcelColumnModel column)
     {
         switch (type)
         {
-            case ExcelDataTypes.DataType.HyperLink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
                 return CreateHyperlinkStyle(column);
                 
-            case ExcelDataTypes.DataType.DateTime:
+            case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
                 return CreateDatetimeStyle(column);
             
-            case ExcelDataTypes.DataType.Number:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Number:
                 return CreateNumberStyle(column);
 
-            case ExcelDataTypes.DataType.Text:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Text:
             default:
                 return CreateTextStyle(column);
         }
@@ -78,7 +77,7 @@ internal class StyleParser
 
         var key = AddFontToDictionary(header.Style, 1);
 
-        var styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+        var styleKey = key + ExcelModelDefs.ExcelDataTypes.DataType.Text.ToString();
 
         AddStyleFormatToDictionary(styleKey, (UInt32)_fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 
@@ -154,7 +153,7 @@ internal class StyleParser
 
         var key = AddFontToDictionary(column.Style, 1);
 
-        var styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+        var styleKey = key + ExcelModelDefs.ExcelDataTypes.DataType.Text.ToString();
         
         AddStyleFormatToDictionary(styleKey, _fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 
@@ -176,7 +175,7 @@ internal class StyleParser
 
         var key = AddFontToDictionary(styles, 1);
 
-        var styleKey = key + ExcelDataTypes.DataType.Text.ToString();
+        var styleKey = key + ExcelModelDefs.ExcelDataTypes.DataType.Text.ToString();
 
         AddStyleFormatToDictionary(key, (UInt32)_fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 
@@ -190,7 +189,7 @@ internal class StyleParser
         string key;
         ExcelFontDetail fontDetail;
         
-        var regex = new Regex(Configuration.ColorPattern);
+        var regex = new Regex(ExcelModelDefs.Configuration.ColorPattern);
         
         if (!string.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
         {
@@ -221,7 +220,7 @@ internal class StyleParser
         }
         else
         {
-            numFormatId = StyleContants.StartIndex + (UInt32)_numFormats.Count;
+            numFormatId = ExcelModelDefs.StyleContants.StartIndex + (UInt32)_numFormats.Count;
             ExcelNumFormat numFormat = new ExcelNumFormat(dataFormat, numFormatId);
             _numFormats.Add(dataFormat, numFormat);
         }

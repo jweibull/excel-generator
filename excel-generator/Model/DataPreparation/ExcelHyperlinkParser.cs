@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
 namespace rbkApiModules.Utilities.Excel;
 
@@ -59,7 +58,7 @@ internal class ExcelHyperlinkParser
 
     private void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column)
     {
-        column.DataType = ExcelDataTypes.DataType.Text;
+        column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
         var data = column.Data;
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
@@ -69,7 +68,7 @@ internal class ExcelHyperlinkParser
 
     private void PrepareMultilinedHrefHyperlinks(ExcelColumnModel column)
     {
-        column.DataType = ExcelDataTypes.DataType.Text;
+        column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
         var data = column.Data;
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {

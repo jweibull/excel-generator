@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 
 namespace rbkApiModules.Utilities.Excel;
 
@@ -22,7 +21,7 @@ public class ExcelColumnModel
     /// <summary>
     /// The data sets Data Type. Ex: "0" for Text, "1" for Number, "2" for DateTime, etc.
     /// </summary>
-    public ExcelDataTypes.DataType DataType { get; set; } = ExcelDataTypes.DataType.Text;
+    public ExcelModelDefs.ExcelDataTypes.DataType DataType { get; set; } = ExcelModelDefs.ExcelDataTypes.DataType.Text;
 
     /// <summary>
     /// Data formating for a specific type. Ex: For Number Type: DataFormat = "0.00" Will format the number with 2 decimal precision.

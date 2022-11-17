@@ -4,8 +4,12 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using DocumentFormat.OpenXml.ExtendedProperties;
-using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 using System.Text.RegularExpressions;
+using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+//using rbkApiModules.Infrastructure.Models;
 
 namespace rbkApiModules.Utilities.Excel;
 
@@ -54,7 +58,7 @@ public class SaxLib
 
                 var sheetModel = workbookModel.Tables[sheetNum - 1];
                 var allColumns = sheetModel.Columns;
-                var linkColumns = allColumns.Where(x => x.DataType == ExcelDataTypes.DataType.HyperLink).ToList();
+                var linkColumns = allColumns.Where(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.HyperLink).ToList();
                 try
                 {
                     foreach (var linkColumn in linkColumns)
@@ -230,7 +234,7 @@ public class SaxLib
 
     private void WriteSheetTabColorSection(OpenXmlWriter writer, ExcelTableSheetModel sheetModel)
     {
-        var regex = new Regex(Configuration.ColorPattern);
+        var regex = new Regex(ExcelModelDefs.Configuration.ColorPattern);
         if (!regex.IsMatch(sheetModel.TabColor))
         {
             throw new Exception("Invalid Color String. String should be a 8 characters ARGB string without the #. e.g. \"FF00FF00\" for solid green");
@@ -335,7 +339,7 @@ public class SaxLib
             cell.DataType = CellValues.SharedString;
             cell.StyleIndex = styleParser.StyleIndexes[headers.StyleKey];
             writer.WriteStartElement(cell);
-            cellValue.Text = parser.GetValue(ExcelDataTypes.DataType.Text, headers.Data[columnNum - 1]);
+            cellValue.Text = parser.GetValue(ExcelModelDefs.ExcelDataTypes.DataType.Text, headers.Data[columnNum - 1]);
             writer.WriteElement(cellValue);
 
             writer.WriteEndElement();
@@ -384,16 +388,16 @@ public class SaxLib
         cellValue.Text = parser.GetValue(currentColumn.DataType, allColumns[columnIndex].Data[rowIndex]);
         switch (currentColumn.DataType)
         {
-            case ExcelDataTypes.DataType.Number:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Number:
                 cell.DataType = CellValues.Number;
                 break;
             
-            case ExcelDataTypes.DataType.DateTime:
+            case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
                 cell.DataType = CellValues.Number;
                 break;
 
-            case ExcelDataTypes.DataType.HyperLink:
-            case ExcelDataTypes.DataType.Text:
+            case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Text:
             default:
                 cell.DataType = CellValues.SharedString;
                 break;
@@ -403,13 +407,13 @@ public class SaxLib
     private void WriteHyperlinkSection(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
     {
         var rowShift = startRow + 1;
-        if (allColumns.Any(x => x.DataType == ExcelDataTypes.DataType.HyperLink))
+        if (allColumns.Any(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.HyperLink))
         {
             writer.WriteStartElement(new Hyperlinks());
             
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                if (allColumns[columnNum - 1].DataType == ExcelDataTypes.DataType.HyperLink)
+                if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.DataType.HyperLink)
                 {
                     var linkColumn = allColumns[columnNum - 1];
                     var hyperlink = new Hyperlink();
@@ -430,7 +434,7 @@ public class SaxLib
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelThemes.Theme theme, int startRow, int numRows)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelModelDefs.ExcelThemes.Theme theme, int startRow, int numRows)
     {
         var numColumns = headers.Data.Count();
 
@@ -466,7 +470,7 @@ public class SaxLib
 
             writer.WriteElement(new TableStyleInfo()
             {
-                Name = ExcelThemes.GetTheme(theme),
+                Name = ExcelModelDefs.ExcelThemes.GetTheme(theme),
                 ShowFirstColumn = false,
                 ShowLastColumn = false,
                 ShowRowStripes = true,
@@ -726,11 +730,11 @@ public class SaxLib
         var cOffset = 0;
         
 
-        var hFontFactor = ExcelFonts.GetFontSizeFactor(headerStyle.Font);
-        var cFontFactor = ExcelFonts.GetFontSizeFactor(column.Style.Font);
+        var hFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(headerStyle.Font);
+        var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
         var fontRatio = (double)column.Style.FontSize / (double)headerStyle.FontSize;
 
-        if (column.DataType == ExcelDataTypes.DataType.DateTime)
+        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime)
         {
             cOffset = 5;
         }
@@ -746,7 +750,7 @@ public class SaxLib
         }
 
         double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, Configuration.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
+        double columnWidth = (column.GetMaxDataLength(isMultilined, ExcelModelDefs.Configuration.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
 
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
 
