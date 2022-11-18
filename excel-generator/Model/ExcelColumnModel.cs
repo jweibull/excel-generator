@@ -36,12 +36,6 @@ public class ExcelColumnModel
     public int MaxWidth { get; set; } = -1;
 
     /// <summary>
-    /// If a cell has multiple lines, then NewLineString must define the string which separates the lines: "\n", <br>, etc.
-    /// If this is empty, then the cell doesn't have multiple lines
-    /// </summary>
-    public string NewLineString { get; set; } = string.Empty;
-
-    /// <summary>
     /// If this is set as true a subtotal line will be added to the first line to compute a filtered sum of the column values
     /// </summary>
     public bool HasSubtotal { get; set; } = false;

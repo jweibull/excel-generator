@@ -1,5 +1,4 @@
-﻿//using rbkApiModules.Infrastructure.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -24,7 +23,7 @@ internal class ExcelDate
 
     internal bool IsDate(ExcelColumnModel column, string format)
     {
-        if (string.IsNullOrEmpty(format.Trim()))
+        if (string.IsNullOrEmpty(format))
         {
             return false;
         }    
@@ -52,7 +51,7 @@ internal class ExcelDate
         DateTime date;
         while (index < dates.Length)
         {
-            if (!string.IsNullOrEmpty(dates[index].Trim()) && !_oleADates.ContainsKey(dates[index]))
+            if (!string.IsNullOrEmpty(dates[index]) && !_oleADates.ContainsKey(dates[index]))
             {
                 if (DateTime.TryParseExact(dates[index], dataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                 {

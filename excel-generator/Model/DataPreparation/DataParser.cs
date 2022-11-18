@@ -1,5 +1,4 @@
-﻿//using rbkApiModules.Infrastructure.Models;
-using System.Linq;
+﻿using System.Linq;
 
 namespace rbkApiModules.Utilities.Excel;
 
@@ -66,13 +65,13 @@ internal class DataParser
                         _excelDate.AddToDatetimeToDictionary(column.Data, column.DataFormat);
                         break;
                     case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
-                        _hyperlinkParser.PrepareHyperlinks(column, workbookModel.GlobalColumnBehavior.Hyperlink.IsHtml, column.IsMultilined);
-                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineString);
+                        _hyperlinkParser.PrepareHyperlinks(column, workbookModel.GlobalColumnBehavior.Hyperlink.IsHtml, column.IsMultilined, workbookModel.GlobalColumnBehavior.NewLineSeparator);
+                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, workbookModel.GlobalColumnBehavior.NewLineSeparator);
                         break;
                     case ExcelModelDefs.ExcelDataTypes.DataType.Number:
                     case ExcelModelDefs.ExcelDataTypes.DataType.Text:
                     default:
-                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineString);
+                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, workbookModel.GlobalColumnBehavior.NewLineSeparator);
                         break;
                 }
             }
@@ -86,14 +85,14 @@ internal class DataParser
             table.SetStartRow(2);
         }
 
-        if (!string.IsNullOrEmpty(column.NewLineString.Trim()))
+        if (!string.IsNullOrEmpty(globalBehavior.NewLineSeparator))
         {
             column.IsMultilined = true;
         }
 
-        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime && string.IsNullOrEmpty(column.DataFormat.Trim()))
+        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime && string.IsNullOrEmpty(column.DataFormat))
         {
-            if (!string.IsNullOrEmpty(globalBehavior.Date.Format.Trim()))
+            if (!string.IsNullOrEmpty(globalBehavior.Date.Format))
             {
                 column.DataFormat = globalBehavior.Date.Format;
             }
