@@ -99,6 +99,10 @@ internal class DataParser
         {
             column.IsMultilined = true;
         }
+        else if (!String.IsNullOrEmpty(globalBehavior.Text.NewLineString))
+        {
+            column.IsMultilined = true;
+        }
 
         if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime && String.IsNullOrEmpty(column.DataFormat))
         {
@@ -108,7 +112,7 @@ internal class DataParser
             }
             else
             {
-                throw new Exception("No Date Format found");
+                throw new Exception("No Date Format found.");
             }
         }
 

@@ -15,7 +15,7 @@ internal class ExcelSheetlinkParser
         
         if (isMultilined)
         {
-            throw new Exception("Multilined sheets cannot have links between tabs");
+            throw new Exception("Multilined columns cannot have links between tabs");
         }
     
         PrepareSheetlinks(column, allSheets);

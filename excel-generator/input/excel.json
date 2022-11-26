@@ -10,7 +10,10 @@
         "format": "dd/MM/yyyy"
       },
       "hyperlink": {
-        "isHtml":  true
+        "isHtml": true
+      },
+      "text": {
+        "newLineString":  ""
       }
     },
     "watermark": {
