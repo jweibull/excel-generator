@@ -186,8 +186,9 @@ public static class ExcelModelDefs
             Text = 0,
             Number = 1,
             DateTime = 2,
-            HyperLink = 3,
-            AutoDetect = 4
+            Hyperlink = 3,
+            AutoDetect = 4,
+            Sheetlink = 5
         }
     }
 

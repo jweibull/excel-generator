@@ -2,5 +2,5 @@
 
 public class ExcelDateGlobal
 {
-    public string Format { get; set; } = string.Empty;
+    public string Format { get; set; } = String.Empty;
 }

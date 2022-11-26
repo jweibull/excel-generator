@@ -8,9 +8,9 @@ public class FilterModel
     /// <summary>
     /// Filter type: Contains, Before, After, etc.
     /// </summary>
-    public string FilterType { get; set; } = string.Empty;
+    public string FilterType { get; set; } = String.Empty;
     /// <summary>
     /// Query string for filtering
     /// </summary>
-    public string Query { get; set; } = string.Empty;
+    public string Query { get; set; } = String.Empty;
 }

@@ -11,8 +11,7 @@
       },
       "hyperlink": {
         "isHtml":  true
-      },
-      "newLineString": "<br>"
+      }
     },
     "watermark": {
       "text": "Rascunho",
@@ -23,13 +22,74 @@
     },
     "tables": [
       {
-        "name": "Custom Spreadsheet Name",
+        "name": "Summary",
         "tabIndex": 0,
+        "sheetType": 0,
+        "theme": 11,
+        "tabColor": "FF444444",
+        "header": {
+          "data": [ "Some data", "Some data 1", "sheet links" ],
+          "style": {
+            "font": 2,
+            "fontSize": 14,
+            "bold": true,
+            "italic": false,
+            "underline": false
+          }
+        },
+        "columns": [
+          {
+            "data": [
+              "1",
+              "2"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 26,
+            "dataType": 1
+          },
+          {
+            "data": [
+              "Hyperlinks Sheet",
+              "Number Sheet"
+            ],
+            "style": {
+              "font": 1,
+              "fontSize": 11,
+              "bold": false,
+              "italic": false
+            },
+            "maxWidth": 26,
+            "dataType": 0
+          },
+          {
+            "data": [
+              "1",
+              "2"
+            ],
+            "style": {
+              "font": 0,
+              "fontSize": 11,
+              "bold": false,
+              "italic": true,
+              "underline": true
+            },
+            "dataType": 5
+          }
+        ]
+      },
+      {
+        "name": "Custom Spreadsheet Name",
+        "tabIndex": 1,
         "sheetType": 0,
         "theme": 2,
         "tabColor": "FFEB8638",
         "header": {
-          "data": ["MaxW25", "Regular Hyperlink", "Multiline Hyperlinks", "Font Fit check 1", "Font Fit check 2", "Font Fit check 3", "Font Fit check 4"],
+          "data": [ "MaxW25", "Regular Hyperlink", "Multiline Hyperlinks", "Font Fit check 1", "Font Fit check 2", "Font Fit check 3", "Font Fit check 4" ],
           "rowHeight": 42,
           "style": {
             "font": 4,
@@ -73,7 +133,8 @@
             },
             "maxWidth": 0,
             "dataType": 0,
-            "dataFormat": ""
+            "dataFormat": "",
+            "newLineString": "<br>"
           },
           {
             "data": [
@@ -140,7 +201,8 @@
               "underline": false
             },
             "dataType": 4,
-            "dataFormat": ""
+            "dataFormat": "",
+            "newLineString": "<br>"
           },
           {
             "data": [
@@ -278,12 +340,12 @@
       },
       {
         "name": "Spreadsheet Name 2",
-        "tabIndex": 1,
+        "tabIndex": 2,
         "sheetType": 0,
         "theme": 7,
         "tabColor": "FF5A8F28",
         "header": {
-          "data": ["Numbers", "Auto Sum Column", "Dates", "Dates Auto"],
+          "data": [ "Numbers", "Auto Sum Column", "Dates", "Dates Auto" ],
           "style": {
             "font": 1,
             "fontSize": 14,
@@ -325,7 +387,8 @@
             "maxWidth": 26,
             "dataType": 1,
             "dataFormat": "#,##0.00"
-          },{
+          },
+          {
             "data": [
               "10.10",
               "11.11",
@@ -430,6 +493,6 @@
         ]
       }
     ],
-    "charts": []
-  }
+        "charts": []
+      }
 }

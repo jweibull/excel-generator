@@ -11,7 +11,7 @@ public class ExcelColumnModel
     /// <summary>
     /// List of all data to be displayed on one column
     /// </summary>
-    public string[] Data { get; set; }
+    public string[] Data { get; set; } = new string[0];
 
     /// <summary>
     /// Styles to be applied to this column's data
@@ -27,7 +27,7 @@ public class ExcelColumnModel
     /// Data formating for a specific type. Ex: For Number Type: DataFormat = "0.00" Will format the number with 2 decimal precision.
     /// For the DateTime type: DataFormat = "dd/MM/yyyy" will format dates for the brazilian standard.
     /// </summary>
-    public string DataFormat { get; set; } = string.Empty;
+    public string DataFormat { get; set; } = String.Empty;
 
     /// <summary>
     /// Excel Max Column Width in POINT units (Not Pixels). If this property is set to a positive value, it will limit the Column to the MaxWidth.
@@ -40,13 +40,18 @@ public class ExcelColumnModel
     /// </summary>
     public bool HasSubtotal { get; set; } = false;
 
+    /// <summary>
+    /// If a cell has multiple lines, then NewLineString must define the string which separates the lines: "\n", <br>, etc.
+    /// If this is empty, then the cell doesn't have multiple lines
+    /// </summary>
+    public string NewLineString { get; set; } = "";
 
     #region Build Helper Section
 
     /// <summary>
     /// Reserved Quick access Key Built from font, fontSize, data type and format
     /// </summary>
-    internal string StyleKey { get; private set; } = string.Empty;
+    internal string StyleKey { get; private set; } = String.Empty;
 
     /// <summary>
     /// If the table is multilined, this will invalidate using clicable hyperlinks, since there can only be one hyperlink per cell
@@ -61,6 +66,16 @@ public class ExcelColumnModel
     internal void AddHyperLinkData(ExcelHyperlink[] hyperLinkData)
     {
         HyperLinkData = hyperLinkData;
+    }
+
+    /// <summary>
+    /// Builder helper Field to distinguish the sheetlink Ids related to this column
+    /// </summary>
+    internal ExcelSheetlink[] SheetlinkData { get; private set; } = new ExcelSheetlink[0];
+
+    internal void AddSheetLinkData(ExcelSheetlink[] sheetlinkData)
+    {
+        SheetlinkData = sheetlinkData;
     }
 
     /// <summary>

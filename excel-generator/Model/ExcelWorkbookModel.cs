@@ -15,21 +15,21 @@ public class ExcelWorkbookModel
     /// <summary>
     /// Authoring Metadata, Title
     /// </summary>
-    public string Title { get; set; } = string.Empty;
+    public string Title { get; set; } = String.Empty;
     /// <summary>
     /// Authoring Metadata, Author name
     /// </summary>
-    public string Author { get; set; } = string.Empty;
+    public string Author { get; set; } = String.Empty;
     
     /// <summary>
     /// Authoring Metadata, Company name
     /// </summary>
-    public string Company { get; set; } = string.Empty;
+    public string Company { get; set; } = String.Empty;
     
     /// <summary>
     /// Authoring Metadata, Comments
     /// </summary>
-    public string Comments { get; set; } = string.Empty;
+    public string Comments { get; set; } = String.Empty;
 
     /// <summary>
     /// This class must contain all rules needed for finding specific data types when autodetect is true for a column.

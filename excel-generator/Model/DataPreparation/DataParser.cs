@@ -9,12 +9,14 @@ internal class DataParser
 {
     private ExcelDate _excelDate;
     private ExcelHyperlinkParser _hyperlinkParser;
+    private ExcelSheetlinkParser _sheetlinkParser;
     private ExcelSharedString _sharedString;
     
     internal DataParser()
     {
         _excelDate = new ExcelDate();
         _hyperlinkParser = new ExcelHyperlinkParser();
+        _sheetlinkParser = new ExcelSheetlinkParser();
         _sharedString = new ExcelSharedString();
     }
 
@@ -33,7 +35,8 @@ internal class DataParser
         switch (type)
         {
             case ExcelModelDefs.ExcelDataTypes.DataType.Text:
-            case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink:
                 return _sharedString.GetValue(key);
 
             case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
@@ -53,7 +56,7 @@ internal class DataParser
                 throw new Exception("Length of Headers and number of columns must match");
             }
 
-            _sharedString.AddToSharedStringDictionary(table.Header.Data, false, string.Empty);
+            _sharedString.AddToSharedStringDictionary(table.Header.Data, false, String.Empty);
             
             foreach (var column in table.Columns)
             {
@@ -64,14 +67,21 @@ internal class DataParser
                     case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
                         _excelDate.AddToDatetimeToDictionary(column.Data, column.DataFormat);
                         break;
-                    case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
-                        _hyperlinkParser.PrepareHyperlinks(column, workbookModel.GlobalColumnBehavior.Hyperlink.IsHtml, column.IsMultilined, workbookModel.GlobalColumnBehavior.NewLineSeparator);
-                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, workbookModel.GlobalColumnBehavior.NewLineSeparator);
+
+                    case ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink:
+                        _hyperlinkParser.PrepareHyperlinks(column, workbookModel.GlobalColumnBehavior.Hyperlink.IsHtml, column.IsMultilined, column.NewLineString);
+                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineString);
                         break;
+
+                    case ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink:
+                        _sheetlinkParser.PrepareHyperlinks(column, workbookModel.AllSheets.ToArray(), column.IsMultilined);
+                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineString);
+                        break;
+
                     case ExcelModelDefs.ExcelDataTypes.DataType.Number:
                     case ExcelModelDefs.ExcelDataTypes.DataType.Text:
                     default:
-                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, workbookModel.GlobalColumnBehavior.NewLineSeparator);
+                        _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineString);
                         break;
                 }
             }
@@ -85,14 +95,14 @@ internal class DataParser
             table.SetStartRow(2);
         }
 
-        if (!string.IsNullOrEmpty(globalBehavior.NewLineSeparator))
+        if (!String.IsNullOrEmpty(column.NewLineString))
         {
             column.IsMultilined = true;
         }
 
-        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime && string.IsNullOrEmpty(column.DataFormat))
+        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime && String.IsNullOrEmpty(column.DataFormat))
         {
-            if (!string.IsNullOrEmpty(globalBehavior.Date.Format))
+            if (!String.IsNullOrEmpty(globalBehavior.Date.Format))
             {
                 column.DataFormat = globalBehavior.Date.Format;
             }
@@ -112,7 +122,7 @@ internal class DataParser
     {
         if (_hyperlinkParser.IsHyperlink(column, behavior.Hyperlink.IsHtml))
         {
-            column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.HyperLink;
+            column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink;
             return column.DataType;
         }
 
@@ -128,6 +138,7 @@ internal class DataParser
         }
 
         column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
+
         return column.DataType;
     }
 }

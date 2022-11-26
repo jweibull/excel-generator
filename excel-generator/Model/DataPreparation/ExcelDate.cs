@@ -17,17 +17,17 @@ internal class ExcelDate
         _oleADates = new Dictionary<string, string>();
     }
 
-    internal string DateFormat { get; set; } = string.Empty;
+    internal string DateFormat { get; set; } = String.Empty;
 
     internal Dictionary<string, string> OleADates { get { return _oleADates; } }
 
     internal bool IsDate(ExcelColumnModel column, string format)
     {
-        if (string.IsNullOrEmpty(format))
+        if (String.IsNullOrEmpty(format))
         {
             return false;
         }    
-        if (column.Data.Any(x => !string.IsNullOrEmpty(x) && x.Length != format.Length))
+        if (column.Data.Any(x => !String.IsNullOrEmpty(x) && x.Length != format.Length))
         {
             return false;
         }
@@ -42,7 +42,7 @@ internal class ExcelDate
             return oleADate;
         }
 
-        return string.Empty;
+        return String.Empty;
     }
 
     internal void AddToDatetimeToDictionary(string[] dates, string dataFormat)
@@ -51,7 +51,7 @@ internal class ExcelDate
         DateTime date;
         while (index < dates.Length)
         {
-            if (!string.IsNullOrEmpty(dates[index]) && !_oleADates.ContainsKey(dates[index]))
+            if (!String.IsNullOrEmpty(dates[index]) && !_oleADates.ContainsKey(dates[index]))
             {
                 if (DateTime.TryParseExact(dates[index], dataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                 {

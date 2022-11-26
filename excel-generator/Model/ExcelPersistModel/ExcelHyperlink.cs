@@ -8,22 +8,20 @@ public class ExcelHyperlink
 {
     public ExcelHyperlink()
     {
-        LinkId = string.Empty;
     }
 
     public ExcelHyperlink(string hyperlink)
     {
         Hyperlink = hyperlink;
-        LinkId = string.Empty;
     }
 
     /// <summary>
-    /// The real link
+    /// The actual link, the webpath
     /// </summary>
-    public string Hyperlink { get; set; } = string.Empty;
+    public string Hyperlink { get; set; } = String.Empty;
 
     /// <summary>
-    /// Index of the hyperlink that has to be created at worksheet creation time and needed later on the sheet data
+    /// Index of the hyperlink that has to be created at worksheet creation time and needed later on the sheet data section
     /// </summary>
-    public string LinkId { get; set; }
+    public string LinkId { get; set; } = String.Empty;
 }

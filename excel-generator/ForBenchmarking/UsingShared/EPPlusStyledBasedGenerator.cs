@@ -37,7 +37,7 @@ public class EPPlusStyledBasedGenerator
     private string GetColumnName(int columnIndex)
     {
         int dividend = columnIndex;
-        string columnName = string.Empty;
+        string columnName = String.Empty;
         int modifier;
 
         while (dividend > 0)

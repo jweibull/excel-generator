@@ -16,7 +16,7 @@ public class ExcelNumFormat
     /// <summary>
     /// FontName as in Excel font list
     /// </summary>
-    public string FormatCode { get; set; } = string.Empty;
+    public string FormatCode { get; set; } = String.Empty;
 
     /// <summary>
     /// Index of the Font inside the XML stylestable file

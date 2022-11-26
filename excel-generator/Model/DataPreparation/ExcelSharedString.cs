@@ -30,14 +30,14 @@ internal class ExcelSharedString
         return new SharedStringCount((UInt32)_sharedStringsTotalCount, (UInt32)_sharedStringsToIndex.Count());
     }
 
-    internal void AddToSharedStringDictionary(string[] sharedStrings, bool isMultilined, string newLine)
+    internal void AddToSharedStringDictionary(string[] sharedStrings, bool isMultilined, string newLineString)
     {
         var count = 0;
         for (int itemIndex = 0; itemIndex < sharedStrings.Length; itemIndex++)
         {
             if (isMultilined)
             {
-                sharedStrings[itemIndex] = Regex.Replace(sharedStrings[itemIndex], newLine, Environment.NewLine, RegexOptions.IgnoreCase);
+                sharedStrings[itemIndex] = Regex.Replace(sharedStrings[itemIndex], newLineString, Environment.NewLine, RegexOptions.IgnoreCase);
             }
 
             if (_sharedStringsToIndex.ContainsKey(sharedStrings[itemIndex]))

@@ -71,7 +71,7 @@ public class ExcelFontDetail
     /// Expects an 8 characters Hexadecimal ARGB string pattern without the # e.g. "FFFF0000" for solid Red.
     /// "FF00FF00" for solid green and "FF0000FF" for solid blue.
     /// </summary>
-    public string FontColor { get; set; } = string.Empty;
+    public string FontColor { get; set; } = String.Empty;
 
     /// <summary>
     /// Index of the Font inside the XML stylestable file
@@ -80,7 +80,7 @@ public class ExcelFontDetail
 
     public static ExcelFontDetail GetFontStyles(ExcelModelDefs.ExcelFonts.FontType font, bool bold, bool italic, bool underline, UInt32 fontIndex, int fontSize, int theme, string fontColor = "")
     {
-        if (string.IsNullOrEmpty(fontColor))
+        if (String.IsNullOrEmpty(fontColor))
         {
             switch ((int)font)
             {

@@ -22,9 +22,9 @@ public class MinimalBoilerPlateSax
                 var data = new string[4] { "Header", "A", "B", "B" };
                 var fonts = new string[2] { "Calibri", "Calibri Light" };
                 var partId = 1;
-                string sharedTableId = string.Empty;
-                string stylesPartId = string.Empty;
-                string sheetPartId = string.Empty;
+                string sharedTableId = String.Empty;
+                string stylesPartId = String.Empty;
+                string sheetPartId = String.Empty;
 
                 document.AddWorkbookPart();
                 

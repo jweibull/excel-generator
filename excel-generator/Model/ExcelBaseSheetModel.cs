@@ -9,13 +9,13 @@ public class ExcelBaseSheetModel
     /// <summary>
     /// Spreasheet tab name
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = String.Empty;
     /// <summary>
     /// Sets the spreadsheet's tab background color. By default, it will not set a background color.
     /// Expects an 8 characters Hexadecimal ARGB string pattern without the # e.g. "FFFF0000" for solid Red.
     /// "FF00FF00" for solid green and "FF0000FF" for solid blue.
     /// </summary>
-    public string TabColor { get; set; } = string.Empty;
+    public string TabColor { get; set; } = String.Empty;
     /// <summary>
     /// Data type to be exhibited on the sheet tab. Ex: Table Data, Plots, etc.
     /// </summary>

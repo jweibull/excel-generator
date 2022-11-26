@@ -36,5 +36,5 @@ public class ExcelStyleClasses
     /// Expects an 8 characters Hexadecimal ARGB string pattern without the # e.g. "FFFF0000" for solid Red.
     /// "FF00FF00" for solid green and "FF0000FF" for solid blue.
     /// </summary>
-    public string FontColor { get; set; } = string.Empty;
+    public string FontColor { get; set; } = String.Empty;
 }

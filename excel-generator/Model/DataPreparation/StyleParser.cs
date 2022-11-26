@@ -56,7 +56,8 @@ internal class StyleParser
     {
         switch (type)
         {
-            case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink:
                 return CreateHyperlinkStyle(column);
                 
             case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
@@ -91,7 +92,7 @@ internal class StyleParser
         var styledColumn = column;
 
         //Always sets this font color to standard link color
-        column.Style.FontColor = string.Empty;
+        column.Style.FontColor = String.Empty;
         
         var key = AddFontToDictionary(column.Style, 10);
 
@@ -113,7 +114,7 @@ internal class StyleParser
 
         var styleKey = key + column.DataType.ToString();
 
-        if (!string.IsNullOrEmpty(column.DataFormat))
+        if (!String.IsNullOrEmpty(column.DataFormat))
         {
             var numFormatId = AddNumFormatToDictionary(column.DataFormat);
             styleKey = styleKey + numFormatId.ToString();
@@ -191,7 +192,7 @@ internal class StyleParser
         
         var regex = new Regex(ExcelModelDefs.Configuration.ColorPattern);
         
-        if (!string.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
+        if (!String.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
         {
             key = styles.Font.ToString() + styles.FontSize.ToString() + styles.FontColor + styles.Bold.ToString() + styles.Italic.ToString() + styles.Underline.ToString();
         }

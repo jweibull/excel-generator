@@ -58,10 +58,10 @@ public class SaxLib
 
                 var sheetModel = workbookModel.Tables[sheetNum - 1];
                 var allColumns = sheetModel.Columns;
-                var linkColumns = allColumns.Where(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.HyperLink).ToList();
+                var hyperlinkColumns = allColumns.Where(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink).ToList();
                 try
                 {
-                    foreach (var linkColumn in linkColumns)
+                    foreach (var linkColumn in hyperlinkColumns)
                     {
                         linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
                     }
@@ -70,7 +70,7 @@ public class SaxLib
                 {
                     throw new Exception("The hyperlinks on table " + sheetModel.Name + " must start with http:// or https://.");
                 }
-
+                
                 int numRows = allColumns.Select(x => x.Data.Length).Max() + sheetModel.StartRow;
 
                 GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId, parser, styleParser);
@@ -111,7 +111,7 @@ public class SaxLib
             writer.Close();
         }
         
-        if (!string.IsNullOrEmpty(workbookModel.Company))
+        if (!String.IsNullOrEmpty(workbookModel.Company))
         {
             document.AddExtendedFilePropertiesPart();
             if (document.ExtendedFilePropertiesPart != null)
@@ -155,7 +155,7 @@ public class SaxLib
     {
         foreach (var link in linkColumn.HyperLinkData)
         {
-            if (!string.IsNullOrEmpty(link.Hyperlink))
+            if (!String.IsNullOrEmpty(link.Hyperlink))
             {
                 var id = $"lId{partIdSequencer++}";
                 workSheetPart.AddHyperlinkRelationship(new Uri(link.Hyperlink, UriKind.Absolute), true, id);
@@ -194,7 +194,7 @@ public class SaxLib
                         
             writer.WriteStartElement(new Worksheet());
 
-            if (!string.IsNullOrEmpty(sheetModel.TabColor))
+            if (!String.IsNullOrEmpty(sheetModel.TabColor))
             {
                WriteSheetTabColorSection(writer, sheetModel);
             }
@@ -218,7 +218,7 @@ public class SaxLib
             writer.WriteEndElement();
 
             //HyperlinksInfo
-            WriteHyperlinkSection(writer, sheetModel.StartRow, numColumns, allColumns);
+            WriteLinksSection(writer, sheetModel.StartRow, numColumns, allColumns);
 
             // Table Info
             writer.WriteStartElement(new TableParts() { Count = 1 });
@@ -396,7 +396,7 @@ public class SaxLib
                 cell.DataType = CellValues.Number;
                 break;
 
-            case ExcelModelDefs.ExcelDataTypes.DataType.HyperLink:
+            case ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink:
             case ExcelModelDefs.ExcelDataTypes.DataType.Text:
             default:
                 cell.DataType = CellValues.SharedString;
@@ -404,30 +404,45 @@ public class SaxLib
         }
     }
 
-    private void WriteHyperlinkSection(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
+    private void WriteLinksSection(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
     {
         var rowShift = startRow + 1;
-        if (allColumns.Any(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.HyperLink))
+
+        if (allColumns.Any(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink || x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink))
         {
             writer.WriteStartElement(new Hyperlinks());
             
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.DataType.HyperLink)
+                if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink)
                 {
                     var linkColumn = allColumns[columnNum - 1];
                     var hyperlink = new Hyperlink();
             
                     for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
                     {
-                        if (!string.IsNullOrEmpty(linkColumn.HyperLinkData[rowNum - rowShift].Hyperlink))
+                        if (!String.IsNullOrEmpty(linkColumn.HyperLinkData[rowNum - rowShift].Hyperlink))
                         {
                             hyperlink.Reference =$"{GetColumnName(columnNum)}{rowNum}";
                             hyperlink.Id = linkColumn.HyperLinkData[rowNum - rowShift].LinkId;
                             writer.WriteElement(hyperlink);
                         }
                     }
+                }
+                else if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink)
+                {
+                    var linkColumn = allColumns[columnNum - 1];
+                    var hyperlink = new Hyperlink();
 
+                    for (int rowNum = 2; rowNum <= linkColumn.SheetlinkData.Length + 1; rowNum++)
+                    {
+                        if (!String.IsNullOrEmpty(linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink))
+                        {
+                            hyperlink.Reference = $"{GetColumnName(columnNum)}{rowNum}";
+                            hyperlink.Location = linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink;
+                            writer.WriteElement(hyperlink);
+                        }
+                    }
                 }
             }
             writer.WriteEndElement();
@@ -532,7 +547,7 @@ public class SaxLib
                     writer.WriteElement(new Underline());
                 }
                 writer.WriteElement(new FontSize() { Val = font.FontSize });
-                if (string.IsNullOrEmpty(font.FontColor))
+                if (String.IsNullOrEmpty(font.FontColor))
                 {
                     writer.WriteElement(new Color() { Theme = font.Theme });
                 }

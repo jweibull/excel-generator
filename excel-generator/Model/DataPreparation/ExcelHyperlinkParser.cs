@@ -10,13 +10,13 @@ namespace rbkApiModules.Utilities.Excel;
 /// </summary>
 internal class ExcelHyperlinkParser
 {
-    internal void PrepareHyperlinks(ExcelColumnModel column, bool isHtml, bool isMultilined, string newLineSeparator)
+    internal void PrepareHyperlinks(ExcelColumnModel column, bool isHtml, bool isMultilined, string newLineString)
     {
         if (isHtml)
         {
             if (isMultilined)
             {
-                PrepareMultilinedHrefHyperlinks(column, newLineSeparator);
+                PrepareMultilinedHrefHyperlinks(column, newLineString);
             }
             else
             {
@@ -27,7 +27,7 @@ internal class ExcelHyperlinkParser
         {
             if (isMultilined)
             {
-                PrepareMultilinedRegularHyperlinks(column, newLineSeparator);
+                PrepareMultilinedRegularHyperlinks(column, newLineString);
             }
             else
             {
@@ -41,11 +41,11 @@ internal class ExcelHyperlinkParser
         string? linkSample;
         if (isHtml == true)
         {
-            linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x) && x.Contains("href") && x.Contains("http"), null);
+            linkSample = column.Data.FirstOrDefault(x => !String.IsNullOrEmpty(x) && x.Contains("href") && x.Contains("http"), null);
         }
         else
         {
-            linkSample = column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x) && x.Contains("http"), null);
+            linkSample = column.Data.FirstOrDefault(x => !String.IsNullOrEmpty(x) && x.Contains("http"), null);
         }
 
         if (linkSample != null)
@@ -56,26 +56,26 @@ internal class ExcelHyperlinkParser
         return false;
     }
 
-    private void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column, string newLineSeparator)
+    private void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column, string newLineString)
     {
         column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
         var data = column.Data;
-        if (!String.IsNullOrEmpty(newLineSeparator))
+        if (!String.IsNullOrEmpty(newLineString))
         {
             for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
             {
-                data[itemIndex] = Regex.Replace(data[itemIndex], newLineSeparator, Environment.NewLine, RegexOptions.IgnoreCase);
+                data[itemIndex] = Regex.Replace(data[itemIndex], newLineString, Environment.NewLine, RegexOptions.IgnoreCase);
             }
         }
     }
 
-    private void PrepareMultilinedHrefHyperlinks(ExcelColumnModel column, string newLineSeparator)
+    private void PrepareMultilinedHrefHyperlinks(ExcelColumnModel column, string newLineString)
     {
         column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
         
         var data = column.Data;
 
-        var hasNewLineSeparator = !String.IsNullOrEmpty(newLineSeparator);
+        var hasNewLineSeparator = !String.IsNullOrEmpty(newLineString);
 
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
@@ -83,7 +83,7 @@ internal class ExcelHyperlinkParser
 
             if (hasNewLineSeparator)
             { 
-                hyperlink = Regex.Replace(hyperlink, newLineSeparator, Environment.NewLine, RegexOptions.IgnoreCase);
+                hyperlink = Regex.Replace(hyperlink, newLineString, Environment.NewLine, RegexOptions.IgnoreCase);
             }
 
             var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]?([^\'"" >]+).*?<\/a>", RegexOptions.IgnoreCase);
@@ -114,7 +114,7 @@ internal class ExcelHyperlinkParser
 
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
-            if (!string.IsNullOrEmpty(data[itemIndex]))
+            if (!String.IsNullOrEmpty(data[itemIndex]))
             {
                 string hyperlink = data[itemIndex];
                 
@@ -131,7 +131,7 @@ internal class ExcelHyperlinkParser
             }
             else
             {
-                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = string.Empty });
+                hyperlinks.Add(new ExcelHyperlink() { Hyperlink = String.Empty });
             }
         }
         column.AddHyperLinkData(hyperlinks.ToArray());

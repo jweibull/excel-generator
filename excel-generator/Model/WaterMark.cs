@@ -9,7 +9,7 @@ public class Watermark
     /// <summary>
     /// The Text that will be displayed as watermark image
     /// </summary>
-    public string Text { get; set; } = string.Empty;
+    public string Text { get; set; } = String.Empty;
 
     /// <summary>
     /// Sets the text color. Expects an 8 characters Hexadecimal ARGB string pattern without the # e.g.
