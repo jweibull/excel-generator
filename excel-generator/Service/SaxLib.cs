@@ -234,7 +234,7 @@ public class SaxLib
 
     private void WriteSheetTabColorSection(OpenXmlWriter writer, ExcelTableSheetModel sheetModel)
     {
-        var regex = new Regex(ExcelModelDefs.Configuration.ColorPattern);
+        var regex = new Regex(ExcelLibConstants.Configuration.ColorPattern);
         if (!regex.IsMatch(sheetModel.TabColor))
         {
             throw new Exception("Invalid Color String. String should be a 8 characters ARGB string without the #. e.g. \"FF00FF00\" for solid green");
@@ -485,7 +485,7 @@ public class SaxLib
 
             writer.WriteElement(new TableStyleInfo()
             {
-                Name = ExcelModelDefs.ExcelThemes.GetTheme(theme),
+                Name = theme.ToString(),
                 ShowFirstColumn = false,
                 ShowLastColumn = false,
                 ShowRowStripes = true,
@@ -765,7 +765,7 @@ public class SaxLib
         }
 
         double headerWidth = (header.Length + hOffset) * (72D / 96D) * (headerStyle.FontSize / hFontFactor);
-        double columnWidth = (column.GetMaxDataLength(isMultilined, ExcelModelDefs.Configuration.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
+        double columnWidth = (column.GetMaxDataLength(isMultilined, ExcelLibConstants.Configuration.NumLengthSamples) + cOffset) * (72D / 96D) * column.Style.FontSize/ cFontFactor;
 
         var width = headerWidth >= columnWidth ? headerWidth : columnWidth;
 

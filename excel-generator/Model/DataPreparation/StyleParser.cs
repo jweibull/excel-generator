@@ -190,7 +190,7 @@ internal class StyleParser
         string key;
         ExcelFontDetail fontDetail;
         
-        var regex = new Regex(ExcelModelDefs.Configuration.ColorPattern);
+        var regex = new Regex(ExcelLibConstants.Configuration.ColorPattern);
         
         if (!String.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
         {
@@ -221,7 +221,7 @@ internal class StyleParser
         }
         else
         {
-            numFormatId = ExcelModelDefs.StyleContants.StartIndex + (UInt32)_numFormats.Count;
+            numFormatId = ExcelLibConstants.StyleContants.StartIndex + (UInt32)_numFormats.Count;
             ExcelNumFormat numFormat = new ExcelNumFormat(dataFormat, numFormatId);
             _numFormats.Add(dataFormat, numFormat);
         }
