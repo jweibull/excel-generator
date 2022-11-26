@@ -1,5 +1,7 @@
-﻿using DocumentFormat.OpenXml.Office2010.Word;
+﻿using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Office2010.Word;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -33,6 +35,9 @@ internal class StyleParser
 
     internal void ParseStyles(ExcelWorkbookModel workbookModel)
     {
+        //Insert a basic calibri size 11 font to work as main font
+        AddFontToDictionary(new ExcelStyleClasses() { Font = ExcelModelDefs.ExcelFonts.FontType.Calibri, FontSize = 11 }, 1);
+
         //Run all tables looking for styles
         foreach (var table in workbookModel.Tables)
         {

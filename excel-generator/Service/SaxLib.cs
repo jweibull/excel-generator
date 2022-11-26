@@ -682,7 +682,7 @@ public class SaxLib
 
             #region CellStyles
 
-            var cellStylesCount = styleParser.HyperlinkFormats.Count() + 1;
+            var cellStylesCount = 2;
 
             //Start CellStyleFormats element
             writer.WriteStartElement(new CellStyles() { Count = (UInt32)cellStylesCount });

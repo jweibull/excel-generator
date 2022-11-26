@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="BenchmarkDotNet.Artifacts\results\" />
     <Folder Include="output\" />
   </ItemGroup>
 

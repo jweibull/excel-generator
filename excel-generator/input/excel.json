@@ -19,7 +19,7 @@
     "watermark": {
       "text": "Rascunho",
       "fontColor": "66E63746",
-      "font": 3,
+      "font": 0,
       "rotationAngle": 45,
       "fontSize": 160
     },
@@ -28,10 +28,10 @@
         "name": "Summary",
         "tabIndex": 0,
         "sheetType": 0,
-        "theme": 11,
+        "theme": 1,
         "tabColor": "FF444444",
         "header": {
-          "data": [ "Some data", "Some data 1", "sheet links" ],
+          "data": [ "Some data", "sheet links" ],
           "style": {
             "font": 2,
             "fontSize": 14,
@@ -43,20 +43,6 @@
         "columns": [
           {
             "data": [
-              "1",
-              "2"
-            ],
-            "style": {
-              "font": 1,
-              "fontSize": 11,
-              "bold": false,
-              "italic": false
-            },
-            "maxWidth": 26,
-            "dataType": 1
-          },
-          {
-            "data": [
               "Hyperlinks Sheet",
               "Number Sheet"
             ],
@@ -66,7 +52,6 @@
               "bold": false,
               "italic": false
             },
-            "maxWidth": 26,
             "dataType": 0
           },
           {
@@ -78,7 +63,7 @@
               "font": 0,
               "fontSize": 11,
               "bold": false,
-              "italic": true,
+              "italic": false,
               "underline": true
             },
             "dataType": 5
@@ -89,10 +74,10 @@
         "name": "Custom Spreadsheet Name",
         "tabIndex": 1,
         "sheetType": 0,
-        "theme": 2,
+        "theme": 17,
         "tabColor": "FFEB8638",
         "header": {
-          "data": [ "MaxW25", "Regular Hyperlink", "Multiline Hyperlinks", "Font Fit check 1", "Font Fit check 2", "Font Fit check 3", "Font Fit check 4" ],
+          "data": [ "MaxW20", "Regular Hyperlink", "Multiline Hyperlinks", "Font Fit check" ],
           "rowHeight": 42,
           "style": {
             "font": 4,
@@ -134,7 +119,7 @@
               "italic": true,
               "underline": true
             },
-            "maxWidth": 0,
+            "maxWidth": 20,
             "dataType": 0,
             "dataFormat": "",
             "newLineString": "<br>"
@@ -232,105 +217,6 @@
             ],
             "style": {
               "font": 1,
-              "fontSize": 11,
-              "bold": false,
-              "italic": false,
-              "underline": false
-            },
-            "dataType": 4,
-            "dataFormat": ""
-          },
-          {
-            "data": [
-              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
-            ],
-            "style": {
-              "font": 2,
-              "fontSize": 11,
-              "bold": false,
-              "italic": false,
-              "underline": false
-            },
-            "dataType": 4,
-            "dataFormat": ""
-          },
-          {
-            "data": [
-              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
-            ],
-            "style": {
-              "font": 3,
-              "fontSize": 11,
-              "bold": false,
-              "italic": false,
-              "underline": false
-            },
-            "dataType": 4,
-            "dataFormat": ""
-          },
-          {
-            "data": [
-              "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-              "<a href=\"http://www.apple.com\">Apple</a>",
-              "<a href=\"http://www.github.com\">Github</a>",
-              "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>"
-            ],
-            "style": {
-              "font": 4,
               "fontSize": 11,
               "bold": false,
               "italic": false,
