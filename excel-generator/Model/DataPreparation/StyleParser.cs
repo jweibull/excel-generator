@@ -2,13 +2,16 @@
 using DocumentFormat.OpenXml.Office2010.Word;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using rbkApiModules.Utilities.Excel.Configurations;
+using rbkApiModules.Utilities.Excel.InputModel;
+using rbkApiModules.Utilities.Excel.PersistModel;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.DataPreparation;
 
 internal class StyleParser
 {
@@ -42,11 +45,11 @@ internal class StyleParser
         foreach (var table in workbookModel.Tables)
         {
             table.Header = CreateHeaderStyle(table.Header);
-
-            for (int columnNumber = 0; columnNumber < table.Columns.Length; columnNumber++)
+            var columns = table.Columns.ToArray();
+            for (int columnNumber = 0; columnNumber < columns.Length; columnNumber++)
             {
-                var column = table.Columns[columnNumber];
-                table.Columns[columnNumber] = CreateStylesForeachType(column.DataType, column);
+                var column = columns[columnNumber];
+                columns[columnNumber] = CreateStylesForeachType(column.DataType, column);
             }
         }
         //TODO Add Chart Fonts;
@@ -57,21 +60,21 @@ internal class StyleParser
         }
     }
 
-    private ExcelColumnModel CreateStylesForeachType(ExcelModelDefs.ExcelDataTypes.DataType type, ExcelColumnModel column)
+    private ExcelColumnModel CreateStylesForeachType(ExcelModelDefs.ExcelDataTypes type, ExcelColumnModel column)
     {
         switch (type)
         {
-            case ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink:
-            case ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink:
+            case ExcelModelDefs.ExcelDataTypes.Sheetlink:
+            case ExcelModelDefs.ExcelDataTypes.Hyperlink:
                 return CreateHyperlinkStyle(column);
                 
-            case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
+            case ExcelModelDefs.ExcelDataTypes.DateTime:
                 return CreateDatetimeStyle(column);
             
-            case ExcelModelDefs.ExcelDataTypes.DataType.Number:
+            case ExcelModelDefs.ExcelDataTypes.Number:
                 return CreateNumberStyle(column);
 
-            case ExcelModelDefs.ExcelDataTypes.DataType.Text:
+            case ExcelModelDefs.ExcelDataTypes.Text:
             default:
                 return CreateTextStyle(column);
         }
@@ -83,7 +86,7 @@ internal class StyleParser
 
         var key = AddFontToDictionary(header.Style, 1);
 
-        var styleKey = key + ExcelModelDefs.ExcelDataTypes.DataType.Text.ToString();
+        var styleKey = key + ExcelModelDefs.ExcelDataTypes.Text.ToString();
 
         AddStyleFormatToDictionary(styleKey, (UInt32)_fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 
@@ -159,7 +162,7 @@ internal class StyleParser
 
         var key = AddFontToDictionary(column.Style, 1);
 
-        var styleKey = key + ExcelModelDefs.ExcelDataTypes.DataType.Text.ToString();
+        var styleKey = key + ExcelModelDefs.ExcelDataTypes.Text.ToString();
         
         AddStyleFormatToDictionary(styleKey, _fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 
@@ -181,7 +184,7 @@ internal class StyleParser
 
         var key = AddFontToDictionary(styles, 1);
 
-        var styleKey = key + ExcelModelDefs.ExcelDataTypes.DataType.Text.ToString();
+        var styleKey = key + ExcelModelDefs.ExcelDataTypes.Text.ToString();
 
         AddStyleFormatToDictionary(key, (UInt32)_fonts[key].FontIndex, 0U, 0U, 0U, 0U, false, true);
 

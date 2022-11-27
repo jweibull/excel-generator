@@ -1,5 +1,7 @@
 ﻿
-namespace rbkApiModules.Utilities.Excel;
+using rbkApiModules.Utilities.Excel.Configurations;
+
+namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// Class representing a style sheet for the excel headers and column data

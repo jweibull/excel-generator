@@ -8,7 +8,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using DocumentFormat.OpenXml.ExtendedProperties;
-using static rbkApiModules.Utilities.Excel.ExcelModelDefs;
 using System.Text.RegularExpressions;
 using Dia2Lib;
 using Microsoft.Diagnostics.Runtime.DacInterface;

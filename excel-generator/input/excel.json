@@ -1,10 +1,12 @@
 {
   "workbookModel": {
     "fileName": "MyOutput",
-    "title": "Basniak's Awesome Table",
-    "author": "Basniak",
-    "company": "Basniak's awesome library'",
-    "comments": "Awesome Excel Generation",
+    "authoringMetadata": {
+      "title": "Basniak's Awesome Table",
+      "author": "Basniak",
+      "company": "Basniak's awesome library",
+      "comments": "Awesome Excel Generation",
+    },
     "globalColumnBehavior": {
       "date": {
         "format": "dd/MM/yyyy"
@@ -13,7 +15,7 @@
         "isHtml": true
       },
       "text": {
-        "newLineString":  ""
+        "newLineString": ""
       }
     },
     "watermark": {
@@ -382,6 +384,6 @@
         ]
       }
     ],
-        "charts": []
-      }
+    "charts": []
+  }
 }

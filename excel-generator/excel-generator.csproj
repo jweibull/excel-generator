@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Lib\Interfaces\" />
     <Folder Include="output\" />
   </ItemGroup>
 

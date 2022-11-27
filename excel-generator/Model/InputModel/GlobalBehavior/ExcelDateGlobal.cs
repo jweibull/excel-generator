@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel;
+﻿namespace rbkApiModules.Utilities.Excel.InputModel;
 
 public class ExcelDateGlobal
 {

@@ -1,9 +1,12 @@
-﻿using System;
+﻿using rbkApiModules.Utilities.Excel.Configurations;
+using rbkApiModules.Utilities.Excel.InputModel;
+using rbkApiModules.Utilities.Excel.PersistModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.DataPreparation;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.
@@ -58,7 +61,7 @@ internal class ExcelHyperlinkParser
 
     private void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column, string newLineString)
     {
-        column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
+        column.DataType = ExcelModelDefs.ExcelDataTypes.Text;
         var data = column.Data;
         if (!String.IsNullOrEmpty(newLineString))
         {
@@ -71,7 +74,7 @@ internal class ExcelHyperlinkParser
 
     private void PrepareMultilinedHrefHyperlinks(ExcelColumnModel column, string newLineString)
     {
-        column.DataType = ExcelModelDefs.ExcelDataTypes.DataType.Text;
+        column.DataType = ExcelModelDefs.ExcelDataTypes.Text;
         
         var data = column.Data;
 

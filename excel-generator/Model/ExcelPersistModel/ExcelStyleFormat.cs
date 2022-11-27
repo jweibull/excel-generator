@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.PersistModel;
 
 /// <summary>
 /// Class combining Fonts, Data Type and formats to be applied to Cells or Columns.

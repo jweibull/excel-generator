@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.
@@ -12,24 +12,11 @@ public class ExcelWorkbookModel
     /// Name of the excel file containing all the spreadsheets to be outputed
     /// </summary>
     public string FileName { get; set; } = "ExcelFile.xlsx";
-    /// <summary>
-    /// Authoring Metadata, Title
-    /// </summary>
-    public string Title { get; set; } = String.Empty;
-    /// <summary>
-    /// Authoring Metadata, Author name
-    /// </summary>
-    public string Author { get; set; } = String.Empty;
     
     /// <summary>
-    /// Authoring Metadata, Company name
+    /// Authoring metadata such as Author name, Date created, company and comments.
     /// </summary>
-    public string Company { get; set; } = String.Empty;
-    
-    /// <summary>
-    /// Authoring Metadata, Comments
-    /// </summary>
-    public string Comments { get; set; } = String.Empty;
+    public ExcelWorkbookMetadata AuthoringMetadata { get; set; } = new ExcelWorkbookMetadata();
 
     /// <summary>
     /// This class must contain all rules needed for finding specific data types when autodetect is true for a column.
@@ -39,23 +26,24 @@ public class ExcelWorkbookModel
     /// <summary>
     /// The data to generate a watermark image
     /// </summary>
-    public Watermark Watermark { get; set; }
+    public Watermark? Watermark { get; set; } = null;
     
     /// <summary>
     /// List of all spreadsheets for this workbook, with tabular data and styling.
     /// </summary>
-    public ExcelTableSheetModel[] Tables { get; set; } = new ExcelTableSheetModel[0]; 
-    
+    public List<ExcelTableSheetModel> Tables { get; set; } = new List<ExcelTableSheetModel>(); 
+
     /// <summary>
     /// List of all plot sheets for this workbook, with plot, their data and styling.
     /// </summary>
-    public ExcelChartSheetModel[] Charts { get; set; } = new ExcelChartSheetModel[0];
+    public List<ExcelChartSheetModel> Charts { get; set; } = new List<ExcelChartSheetModel>();
     
-    public IEnumerable<ExcelBaseSheetModel> AllSheets
+    public ExcelBaseSheetModel[] AllSheets
     {
         get
         {
             var allSheets = new List<ExcelBaseSheetModel>();
+
             if (Tables != null)
             {
                 allSheets.AddRange(Tables);
@@ -64,7 +52,8 @@ public class ExcelWorkbookModel
             {
                 allSheets.AddRange(Charts);
             }
-            return allSheets.OrderBy(x => x.TabIndex);
+
+            return allSheets.OrderBy(x => x.TabIndex).ToArray();
         }
     }
 }

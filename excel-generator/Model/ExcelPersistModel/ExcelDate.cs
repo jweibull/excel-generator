@@ -1,9 +1,10 @@
-﻿using System;
+﻿using rbkApiModules.Utilities.Excel.InputModel;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.PersistModel;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.

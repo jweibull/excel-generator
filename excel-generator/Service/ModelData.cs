@@ -1,4 +1,6 @@
-﻿namespace rbkApiModules.Utilities.Excel;
+﻿using rbkApiModules.Utilities.Excel.InputModel;
+
+namespace rbkApiModules.Utilities.Excel;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.

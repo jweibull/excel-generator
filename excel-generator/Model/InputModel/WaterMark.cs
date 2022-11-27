@@ -1,5 +1,7 @@
 ﻿
-namespace rbkApiModules.Utilities.Excel;
+using rbkApiModules.Utilities.Excel.Configurations;
+
+namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// Class holding all required data for generating a watermark image

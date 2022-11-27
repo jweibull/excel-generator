@@ -1,0 +1,54 @@
+﻿using rbkApiModules.Utilities.Excel.Configurations;
+using rbkApiModules.Utilities.Excel.InputModel;
+
+namespace rbkApiModules.Utilities.Excel;
+
+public class ExcelTableSheetBuilder
+{
+    public ExcelWorkbookBuilder Workbook => _builder as ExcelWorkbookBuilder;
+
+    private readonly ExcelTableSheetModel _sheet;
+    private readonly ExcelWorkbookBuilder _builder;
+
+    private ExcelTableSheetBuilder(ExcelWorkbookBuilder builder, ExcelTableSheetModel sheet)
+    {
+        _builder = builder;
+        _sheet = sheet;
+        _sheet.SheetType = ExcelModelDefs.ExcelSheetTypes.Table;
+    }
+
+    public static ExcelTableSheetBuilder AddSheet(ExcelWorkbookBuilder builder, ExcelTableSheetModel sheet)
+    {
+        return new ExcelTableSheetBuilder(builder, sheet);
+    }
+
+    public ExcelTableSheetBuilder SetTheme(ExcelModelDefs.ExcelThemes theme)
+    {
+        _sheet.Theme = theme;
+        return this;
+    }
+
+    public ExcelHeaderBuilder AddHeader(string[] data)
+    {
+        var header = new ExcelHeaderModel()
+        {
+            Data = data
+        };
+
+        _sheet.Header = header;
+
+        return ExcelHeaderBuilder.AddHeader(this, header);
+    }
+
+    public ExcelColumnBuilder AddColumn(string[] data)
+    {
+        var column = new ExcelColumnModel()
+        {
+            Data = data
+        };
+
+        _sheet.Columns.Add(column);
+
+        return ExcelColumnBuilder.AddColumn(this, column);
+    }
+}

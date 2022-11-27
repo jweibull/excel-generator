@@ -1,5 +1,7 @@
 ﻿
-namespace rbkApiModules.Utilities.Excel;
+using rbkApiModules.Utilities.Excel.Configurations;
+
+namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// Base sheet definition with tab name and color and the type of data to be displayed. Ex: Table Data, Charts, etc.
@@ -19,7 +21,7 @@ public class ExcelBaseSheetModel
     /// <summary>
     /// Data type to be exhibited on the sheet tab. Ex: Table Data, Plots, etc.
     /// </summary>
-    public ExcelModelDefs.ExcelSheetTypes.Type SheetType { get; set; } = ExcelModelDefs.ExcelSheetTypes.Type.Table;
+    public ExcelModelDefs.ExcelSheetTypes SheetType { get; set; } = ExcelModelDefs.ExcelSheetTypes.Table;
     /// <summary>
     /// Tab order in which this sheet should be created 
     /// </summary>

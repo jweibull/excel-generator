@@ -1,5 +1,5 @@
 ﻿
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// Class representing a full header row, data and styling.
@@ -19,7 +19,7 @@ public class ExcelHeaderModel
     /// <summary>
     /// Styles to be applied to the header row
     /// </summary>
-    public ExcelStyleClasses Style { get; set; }
+    public ExcelStyleClasses Style { get; set; } = new ExcelStyleClasses();
 
     #region Helper fields and methods
 

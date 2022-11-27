@@ -1,7 +1,9 @@
-﻿using System;
+﻿using rbkApiModules.Utilities.Excel.Configurations;
+using rbkApiModules.Utilities.Excel.PersistModel;
+using System;
 using System.Linq;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// Class with the data models and styling for a column data, to be displayed under a header title.
@@ -21,7 +23,7 @@ public class ExcelColumnModel
     /// <summary>
     /// The data sets Data Type. Ex: "0" for Text, "1" for Number, "2" for DateTime, etc.
     /// </summary>
-    public ExcelModelDefs.ExcelDataTypes.DataType DataType { get; set; } = ExcelModelDefs.ExcelDataTypes.DataType.Text;
+    public ExcelModelDefs.ExcelDataTypes DataType { get; set; } = ExcelModelDefs.ExcelDataTypes.Text;
 
     /// <summary>
     /// Data formating for a specific type. Ex: For Number Type: DataFormat = "0.00" Will format the number with 2 decimal precision.

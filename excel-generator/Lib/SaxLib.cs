@@ -9,6 +9,9 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using rbkApiModules.Utilities.Excel.InputModel;
+using rbkApiModules.Utilities.Excel.DataPreparation;
+using rbkApiModules.Utilities.Excel.Configurations;
 //using rbkApiModules.Infrastructure.Models;
 
 namespace rbkApiModules.Utilities.Excel;
@@ -58,7 +61,7 @@ public class SaxLib
 
                 var sheetModel = workbookModel.Tables[sheetNum - 1];
                 var allColumns = sheetModel.Columns;
-                var hyperlinkColumns = allColumns.Where(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink).ToList();
+                var hyperlinkColumns = allColumns.Where(x => x.DataType == ExcelModelDefs.ExcelDataTypes.Hyperlink).ToList();
                 try
                 {
                     foreach (var linkColumn in hyperlinkColumns)
@@ -73,7 +76,7 @@ public class SaxLib
                 
                 int numRows = allColumns.Select(x => x.Data.Length).Max() + sheetModel.StartRow;
 
-                GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, numRows, sheetPartId, parser, styleParser);
+                GenerateWorkSheetData(workSheetPart, sheetModel, allColumns.ToArray(), numRows, sheetPartId, parser, styleParser);
                 GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, sheetModel.StartRow, numRows);
             }
 
@@ -86,6 +89,7 @@ public class SaxLib
 
             document.Close();
         }
+
         return stream;
     }
 
@@ -102,22 +106,22 @@ public class SaxLib
                 "xmlns:dcterms=\"http://purl.org/dc/terms/\" " +
                 "xmlns:dcmitype=\"http://purl.org/dc/dcmitype/\" " +
                 "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">" +
-                $"<dc:description>{workbookModel.Comments}</dc:description>" +
-                $"<dc:title>{workbookModel.Title}</dc:title>" +
-                $"<dc:creator>{workbookModel.Author}</dc:creator>" +
+                $"<dc:description>{workbookModel.AuthoringMetadata.Comments}</dc:description>" +
+                $"<dc:title>{workbookModel.AuthoringMetadata.Title}</dc:title>" +
+                $"<dc:creator>{workbookModel.AuthoringMetadata.Author}</dc:creator>" +
                 $"<dcterms:created xsi:type=\"dcterms:W3CDTF\">{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ")}</dcterms:created>" +
                 "</cp:coreProperties>");
             writer.Flush();
             writer.Close();
         }
         
-        if (!String.IsNullOrEmpty(workbookModel.Company))
+        if (!String.IsNullOrEmpty(workbookModel.AuthoringMetadata.Company))
         {
             document.AddExtendedFilePropertiesPart();
             if (document.ExtendedFilePropertiesPart != null)
             {
                 document.ExtendedFilePropertiesPart.Properties = new Properties();
-                document.ExtendedFilePropertiesPart.Properties.Company = new Company(workbookModel.Company);
+                document.ExtendedFilePropertiesPart.Properties.Company = new Company(workbookModel.AuthoringMetadata.Company);
             }
         }
     }
@@ -339,7 +343,7 @@ public class SaxLib
             cell.DataType = CellValues.SharedString;
             cell.StyleIndex = styleParser.StyleIndexes[headers.StyleKey];
             writer.WriteStartElement(cell);
-            cellValue.Text = parser.GetValue(ExcelModelDefs.ExcelDataTypes.DataType.Text, headers.Data[columnNum - 1]);
+            cellValue.Text = parser.GetValue(ExcelModelDefs.ExcelDataTypes.Text, headers.Data[columnNum - 1]);
             writer.WriteElement(cellValue);
 
             writer.WriteEndElement();
@@ -388,17 +392,17 @@ public class SaxLib
         cellValue.Text = parser.GetValue(currentColumn.DataType, allColumns[columnIndex].Data[rowIndex]);
         switch (currentColumn.DataType)
         {
-            case ExcelModelDefs.ExcelDataTypes.DataType.Number:
+            case ExcelModelDefs.ExcelDataTypes.Number:
                 cell.DataType = CellValues.Number;
                 break;
             
-            case ExcelModelDefs.ExcelDataTypes.DataType.DateTime:
+            case ExcelModelDefs.ExcelDataTypes.DateTime:
                 cell.DataType = CellValues.Number;
                 break;
 
-            case ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink:
-            case ExcelModelDefs.ExcelDataTypes.DataType.Text:
-            default:
+            case ExcelModelDefs.ExcelDataTypes.Hyperlink:
+            case ExcelModelDefs.ExcelDataTypes.Text:
+            default:    
                 cell.DataType = CellValues.SharedString;
                 break;
         }
@@ -408,13 +412,13 @@ public class SaxLib
     {
         var rowShift = startRow + 1;
 
-        if (allColumns.Any(x => x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink || x.DataType == ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink))
+        if (allColumns.Any(x => x.DataType == ExcelModelDefs.ExcelDataTypes.Hyperlink || x.DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink))
         {
             writer.WriteStartElement(new Hyperlinks());
             
             for (int columnNum = 1; columnNum <= numColumns; columnNum++)
             {
-                if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.DataType.Hyperlink)
+                if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.Hyperlink)
                 {
                     var linkColumn = allColumns[columnNum - 1];
                     var hyperlink = new Hyperlink();
@@ -429,7 +433,7 @@ public class SaxLib
                         }
                     }
                 }
-                else if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.DataType.Sheetlink)
+                else if (allColumns[columnNum - 1].DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink)
                 {
                     var linkColumn = allColumns[columnNum - 1];
                     var hyperlink = new Hyperlink();
@@ -449,7 +453,7 @@ public class SaxLib
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelModelDefs.ExcelThemes.Theme theme, int startRow, int numRows)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelModelDefs.ExcelThemes theme, int startRow, int numRows)
     {
         var numColumns = headers.Data.Count();
 
@@ -749,7 +753,7 @@ public class SaxLib
         var cFontFactor = ExcelModelDefs.ExcelFonts.GetFontSizeFactor(column.Style.Font);
         var fontRatio = (double)column.Style.FontSize / (double)headerStyle.FontSize;
 
-        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DataType.DateTime)
+        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DateTime)
         {
             cOffset = 5;
         }

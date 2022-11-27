@@ -1,6 +1,7 @@
-﻿using System;
+﻿using rbkApiModules.Utilities.Excel.Configurations;
+using System;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace rbkApiModules.Utilities.Excel.PersistModel;
 
 /// <summary>
 /// Class describing a Font as it is written inside the XML file.
