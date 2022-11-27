@@ -21,13 +21,13 @@ public class ExcelHeaderBuilder
         return new ExcelHeaderBuilder(builder, header);
     }
 
-    public ExcelHeaderBuilder SetRowHeight(int height) 
+    public ExcelHeaderBuilder WithRowHeight(int height) 
     {
         _header.RowHeight = height;
         return this;
     }
 
-    public ExcelHeaderBuilder SetFont(ExcelModelDefs.ExcelFonts.FontType font, int fontSize, bool bold, bool italic, bool underlined, string? fontcolor)
+    public ExcelHeaderBuilder WithFont(ExcelModelDefs.ExcelFonts.FontType font, int fontSize, bool bold, bool italic, bool underlined, string? fontcolor = null)
     {
         _header.Style.Font = font;
         _header.Style.FontSize = fontSize;

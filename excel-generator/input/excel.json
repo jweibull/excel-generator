@@ -31,7 +31,7 @@
         "tabIndex": 0,
         "sheetType": 0,
         "theme": 1,
-        "tabColor": "FF444444",
+        "tabColor": "FF222222",
         "header": {
           "data": [ "Some data", "sheet links" ],
           "style": {

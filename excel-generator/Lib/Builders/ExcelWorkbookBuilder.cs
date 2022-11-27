@@ -34,44 +34,52 @@ public class ExcelWorkbookBuilder
         return ExcelTableSheetBuilder.AddSheet(this, sheet);
     }
 
+    public Stream Build()
+    {
+        var lib = new SaxLib();
+        var stream = lib.CreatePackage(_workbookModel);
+
+        return stream;
+    }
+
     #endregion
 
     #region Basic Workbook configuration
 
-    public ExcelWorkbookBuilder SetGlobalDateFormat(string format)
+    public ExcelWorkbookBuilder WithGlobalDateFormat(string format)
     {
         _workbookModel.GlobalColumnBehavior.Date.Format = format;
         return this;
     }
 
-    public ExcelWorkbookBuilder SetGlobalNewLineString(string newLineString)
+    public ExcelWorkbookBuilder WithGlobalNewLineString(string newLineString)
     {
         _workbookModel.GlobalColumnBehavior.Text.NewLineString = newLineString;
         return this;
     }
 
-    public ExcelWorkbookBuilder SetHyperlinkStyle(bool isHtml)
+    public ExcelWorkbookBuilder WithGlobalHtmlTagHyperlinks()
     {
-        _workbookModel.GlobalColumnBehavior.Hyperlink.IsHtml = isHtml;
+        _workbookModel.GlobalColumnBehavior.Hyperlink.IsHtml = true;
         return this;
     }
 
-    public ExcelWorkbookBuilder SetAuthor(string author)
+    public ExcelWorkbookBuilder WithAuthor(string author)
     {
         _workbookModel.AuthoringMetadata.Author = author;
         return this;
     }
-    public ExcelWorkbookBuilder SetTitle(string title)
+    public ExcelWorkbookBuilder WithTitle(string title)
     {
         _workbookModel.AuthoringMetadata.Title = title;
         return this;
     }
-    public ExcelWorkbookBuilder SetCompany(string company)
+    public ExcelWorkbookBuilder WithCompany(string company)
     {
         _workbookModel.AuthoringMetadata.Company = company;
         return this;
     }
-    public ExcelWorkbookBuilder SetComments(string comments)
+    public ExcelWorkbookBuilder WithComments(string comments)
     {
         _workbookModel.AuthoringMetadata.Comments = comments;
         return this;

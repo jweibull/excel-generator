@@ -22,9 +22,15 @@ public class ExcelTableSheetBuilder
         return new ExcelTableSheetBuilder(builder, sheet);
     }
 
-    public ExcelTableSheetBuilder SetTheme(ExcelModelDefs.ExcelThemes theme)
+    public ExcelTableSheetBuilder WithTheme(ExcelModelDefs.ExcelThemes theme)
     {
         _sheet.Theme = theme;
+        return this;
+    }
+
+    public ExcelTableSheetBuilder WithTabColor(string color)
+    {
+        _sheet.TabColor = color;
         return this;
     }
 
