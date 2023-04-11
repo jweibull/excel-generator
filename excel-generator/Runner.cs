@@ -38,6 +38,219 @@ public class Runner
         
     }
 
+    public void RunMockData()
+    {
+        var sheet1HeaderData = new string[60];
+        for (int i = 0; i < sheet1HeaderData.Length; i++) 
+        {
+            sheet1HeaderData[i] = "Lorem Ipsum";
+        }
+
+        var columnData = new string[200000];
+        for (int i = 0;i < columnData.Length; i++)
+        {
+            columnData[i] = "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...";
+        }
+
+        var filename = GetNextFilename();
+
+        var excel = ExcelWorkbookBuilder.StartWorkbook(Path.GetFileName(filename).Replace(Path.GetExtension(filename), ""))
+            .WithAuthor("Excel Lib")
+            .WithTitle("Excel Lib Test")
+            .WithCompany("Excel Lib")
+            .WithComments("Very nice comment goes here")
+            .WithGlobalDateFormat("dd/MM/yyyy")
+            .WithGlobalHtmlTagHyperlinks()
+            .AddTableSheet("Summary")
+                .WithTheme(Configurations.ExcelModelDefs.ExcelThemes.TableStyleLight1)
+                .WithTabColor("FF222222")
+                .AddHeader(sheet1HeaderData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.CalibriLight, 14, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(columnData)
+                    .WithFont(Configurations.ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
+                    .TableSheet
+                .Workbook
+            .Build();
+    }
+
     public void RunFluent()
     {
         // Sheet 1
