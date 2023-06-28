@@ -1,6 +1,6 @@
-﻿using rbkApiModules.Utilities.Excel.Configurations;
+﻿using TableExporter.Configurations;
 
-namespace rbkApiModules.Utilities.Excel.InputModel;
+namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class representing a style sheet for the excel headers and column data

@@ -1,6 +1,6 @@
-﻿using rbkApiModules.Utilities.Excel.InputModel;
+﻿using TableExporter.InputModel;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace TableExporter;
 
 public class ExcelWorkbookBuilder
 {

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace TableExporter;
 
 public class Runner
 {

@@ -1,7 +1,7 @@
-﻿using rbkApiModules.Utilities.Excel.DataPreparation;
+﻿using TableExporter.DataPreparation;
 using System.Text.RegularExpressions;
 
-namespace rbkApiModules.Utilities.Excel.PersistModel;
+namespace TableExporter.PersistModel;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.

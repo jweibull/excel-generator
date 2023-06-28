@@ -1,7 +1,7 @@
-﻿using rbkApiModules.Utilities.Excel.Configurations;
-using rbkApiModules.Utilities.Excel.InputModel;
+﻿using TableExporter.Configurations;
+using TableExporter.InputModel;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace TableExporter;
 
 public class ExcelColumnBuilder
 {

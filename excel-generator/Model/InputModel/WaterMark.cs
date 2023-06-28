@@ -1,7 +1,7 @@
 ﻿
-using rbkApiModules.Utilities.Excel.Configurations;
+using TableExporter.Configurations;
 
-namespace rbkApiModules.Utilities.Excel.InputModel;
+namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class holding all required data for generating a watermark image

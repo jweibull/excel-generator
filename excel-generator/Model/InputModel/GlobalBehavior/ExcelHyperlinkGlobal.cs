@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace TableExporter.InputModel;
 
 public class ExcelHyperlinkGlobal
 {

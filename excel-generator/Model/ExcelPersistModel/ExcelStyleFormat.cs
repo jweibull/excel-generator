@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.PersistModel;
+﻿namespace TableExporter.PersistModel;
 
 /// <summary>
 /// Class combining Fonts, Data Type and formats to be applied to Cells or Columns.

@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.DataPreparation;
+﻿namespace TableExporter.DataPreparation;
 
 internal class SharedStringCount
 {

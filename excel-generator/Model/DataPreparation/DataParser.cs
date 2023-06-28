@@ -1,8 +1,8 @@
-﻿using rbkApiModules.Utilities.Excel.Configurations;
-using rbkApiModules.Utilities.Excel.InputModel;
-using rbkApiModules.Utilities.Excel.PersistModel;
+﻿using TableExporter.Configurations;
+using TableExporter.InputModel;
+using TableExporter.PersistModel;
 
-namespace rbkApiModules.Utilities.Excel.DataPreparation;
+namespace TableExporter.DataPreparation;
 
 /// <summary>
 /// Helper class that parses data into dictionaries that can be stored on excel files as indexes.

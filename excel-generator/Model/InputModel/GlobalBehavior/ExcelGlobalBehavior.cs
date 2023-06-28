@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class describing the rules needed when auto detecting a data type on a column

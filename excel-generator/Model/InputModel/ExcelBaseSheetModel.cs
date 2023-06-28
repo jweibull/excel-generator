@@ -1,6 +1,6 @@
-﻿using rbkApiModules.Utilities.Excel.Configurations;
+﻿using TableExporter.Configurations;
 
-namespace rbkApiModules.Utilities.Excel.InputModel;
+namespace TableExporter.InputModel;
 
 /// <summary>
 /// Base sheet definition with tab name and color and the type of data to be displayed. Ex: Table Data, Charts, etc.

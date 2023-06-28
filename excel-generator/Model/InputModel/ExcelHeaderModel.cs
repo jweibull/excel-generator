@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class representing a full header row, data and styling.
@@ -8,7 +8,7 @@ public class ExcelHeaderModel
     /// <summary>
     /// The data list to be displayed at the header row
     /// </summary>
-    public string[] Data { get; set; }
+    public string[] Data { get; set; } = Array.Empty<string>();
 
     /// <summary>
     /// Sets the row height for the whole header row

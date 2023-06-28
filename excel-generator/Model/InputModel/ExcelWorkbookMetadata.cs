@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace TableExporter.InputModel;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.

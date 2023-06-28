@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class representing a single spreadsheet, holiding a Plot Chart, inside an excel workbook.

@@ -1,7 +1,7 @@
-﻿using rbkApiModules.Utilities.Excel.Configurations;
-using rbkApiModules.Utilities.Excel.PersistModel;
+﻿using TableExporter.Configurations;
+using TableExporter.PersistModel;
 
-namespace rbkApiModules.Utilities.Excel.InputModel;
+namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class with the data models and styling for a column data, to be displayed under a header title.

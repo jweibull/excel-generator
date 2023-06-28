@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace TableExporter.InputModel;
 
 /// <summary>
 /// Class for modeling an excel filter in case auto-filtering should be pre-define to a value

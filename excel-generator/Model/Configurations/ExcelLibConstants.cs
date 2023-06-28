@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.Configurations;
+﻿namespace TableExporter.Configurations;
 
 public static class ExcelLibConstants
 {

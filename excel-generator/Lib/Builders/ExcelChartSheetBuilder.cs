@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel;
+﻿namespace TableExporter;
     public  class ExcelChartSheetBuilder
     {
     }

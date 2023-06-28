@@ -1,4 +1,4 @@
-﻿namespace rbkApiModules.Utilities.Excel.PersistModel;
+﻿namespace TableExporter.PersistModel;
 
 /// <summary>
 /// Class describing a Font as it is written inside the XML file.

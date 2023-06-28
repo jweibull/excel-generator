@@ -1,9 +1,9 @@
-﻿using rbkApiModules.Utilities.Excel.Configurations;
-using rbkApiModules.Utilities.Excel.InputModel;
-using rbkApiModules.Utilities.Excel.PersistModel;
+﻿using TableExporter.Configurations;
+using TableExporter.InputModel;
+using TableExporter.PersistModel;
 using System.Text.RegularExpressions;
 
-namespace rbkApiModules.Utilities.Excel.DataPreparation;
+namespace TableExporter.DataPreparation;
 
 internal class StyleParser
 {

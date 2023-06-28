@@ -5,16 +5,11 @@ using x14 = DocumentFormat.OpenXml.Office2010.Excel;
 using x15 = DocumentFormat.OpenXml.Office2013.Excel;
 using DocumentFormat.OpenXml.ExtendedProperties;
 using System.Text.RegularExpressions;
-using System.IO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using rbkApiModules.Utilities.Excel.InputModel;
-using rbkApiModules.Utilities.Excel.DataPreparation;
-using rbkApiModules.Utilities.Excel.Configurations;
-//using rbkApiModules.Infrastructure.Models;
+using TableExporter.InputModel;
+using TableExporter.DataPreparation;
+using TableExporter.Configurations;
 
-namespace rbkApiModules.Utilities.Excel;
+namespace TableExporter;
 
 public class SaxLib
 {
@@ -86,8 +81,6 @@ public class SaxLib
             SetDocumentProperties(workbookModel, document);
 
             document.Save();
-
-            document.Close();
         }
 
         return stream;

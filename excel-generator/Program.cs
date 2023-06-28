@@ -1,4 +1,4 @@
-﻿using rbkApiModules.Utilities.Excel;
+﻿using TableExporter;
 
 var runner = new Runner();
 runner.Run();
