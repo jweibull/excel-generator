@@ -1,5 +1,4 @@
-﻿
-namespace rbkApiModules.Utilities.Excel.InputModel;
+﻿namespace rbkApiModules.Utilities.Excel.InputModel;
 
 /// <summary>
 /// Class representing a full header row, data and styling.

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace rbkApiModules.Utilities.Excel.DataPreparation;
+﻿namespace rbkApiModules.Utilities.Excel.DataPreparation;
 
 internal class SharedStringCount
 {

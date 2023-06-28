@@ -1,8 +1,7 @@
-﻿using BenchmarkDotNet.Running;
-
-using rbkApiModules.Utilities.Excel;
+﻿using rbkApiModules.Utilities.Excel;
 
 var runner = new Runner();
-//runner.Run();
-runner.RunMockData();
+runner.Run();
+//runner.RunFluent();
+//runner.RunMockData();
 

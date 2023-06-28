@@ -1,5 +1,4 @@
-﻿
-using rbkApiModules.Utilities.Excel.Configurations;
+﻿using rbkApiModules.Utilities.Excel.Configurations;
 
 namespace rbkApiModules.Utilities.Excel.InputModel;
 

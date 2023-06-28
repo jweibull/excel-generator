@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace rbkApiModules.Utilities.Excel.Configurations;
+﻿namespace rbkApiModules.Utilities.Excel.Configurations;
 
 public static class ExcelModelDefs
 {
