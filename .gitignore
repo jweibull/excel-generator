@@ -11,3 +11,10 @@
 /excel-generator/bin/Release/net6.0
 /.vs/excel-generator
 /excel-generator/bin/Debug/net7.0
+/.vs/TableExporter/FileContentIndex
+/.vs/TableExporter/v17/.futdcache.v2
+/.vs/TableExporter/v17/.suo
+/.vs/VSWorkspaceState.json
+/.vs/TableExporter/DesignTimeBuild
+/TableExporter/bin/Debug/net7.0
+/TableExporter/obj
