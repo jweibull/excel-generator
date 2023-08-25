@@ -740,7 +740,12 @@ public class TableExporterService : ITableExporterService
 
         if (column.DataType == ExcelModelDefs.ExcelDataTypes.DateTime)
         {
-            cOffset = 5;
+            cOffset += 5;
+        }
+
+        if (column.DataType == ExcelModelDefs.ExcelDataTypes.Number && column.DataFormat is not null)
+        {
+            cOffset += 10;
         }
 
         if (headerStyle.Bold)
