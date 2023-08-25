@@ -1,4 +1,4 @@
-﻿using TableExporter;
+﻿using TableExporterApp;
 
 var runner = new Runner();
 runner.Run();

@@ -1,6 +1,4 @@
-﻿using TableExporter.InputModel;
-
-namespace TableExporter;
+﻿namespace TableExporter;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.
