@@ -14,7 +14,7 @@
       "hyperlink": {
         "isHtml": true
       },
-      "newLineSeparator": null
+      "newLineSeparator": ""
     },
     "watermark": {
       "text": "Rascunho",
@@ -130,7 +130,7 @@
               "<a href=\"http://www.google.com\">Google</a>",
               "<a href=\"http://www.yahoo.com\">Yahoo</a>",
               "",
-              "<a href=\"http://www.microsoft.com\">Microsoft</a>",
+              "<a href=\"http://www.microsoft.com?param1=123456&param2=3 45 678\">Microsoft</a>",
               "<a href=\"http://www.apple.com\">Apple</a>",
               "<a href=\"http://www.github.com\">Github</a>",
               "<a href=\"http://www.google.com\">Google</a>",
@@ -161,7 +161,7 @@
             "data": [
               "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
               "<a href=\"http://www.google.com\">Google</a>",
-              "<a href=\"http://www.yahoo.com\">Yahoo</a>",
+              "<a href=\"http://www.yahoo.com?param1=12 34 56&param2=345678\">Yahoo</a>",
               "",
               "<a href=\"http://www.microsoft.com\">Microsoft</a>",
               "<a href=\"http://www.apple.com\">Apple</a>",

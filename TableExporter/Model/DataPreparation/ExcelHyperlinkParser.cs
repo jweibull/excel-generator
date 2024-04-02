@@ -171,26 +171,33 @@ internal static class ExcelHyperlinkParser
         var queryParts = HttpUtility.ParseQueryString(uri.Query);
 
         // Encode the query string parts
-        NameValueCollection encodedQueryParts = new NameValueCollection();
+        NameValueCollection encodedQueryParts = new();
         foreach (string key in queryParts)
         {
             encodedQueryParts.Add(key, WebUtility.UrlEncode(queryParts[key]));
         }
 
         // Reconstruct the encoded query string
-        StringBuilder encodedQueryString = new('?');
-        foreach (string key in encodedQueryParts)
+        StringBuilder encodedQueryString = new();
+        if (encodedQueryParts.AllKeys.Length > 0)
         {
-            //Only after the first QueryString has been inserted
-            if (encodedQueryString.Length > 1)
+            encodedQueryString.Append('?');
+            foreach (string key in encodedQueryParts)
             {
-                encodedQueryString.Append('&');
+                //Only after the first QueryString has been inserted
+                if (encodedQueryString.Length > 1)
+                {
+                    encodedQueryString.Append('&');
+                }
+                // Append the encoded key-value pair to the query string
+                encodedQueryString.Append($"{key}={encodedQueryParts[key]}");
             }
-            // Append the encoded key-value pair to the query string
-            encodedQueryString.Append($"{key}={encodedQueryParts[key]}");
         }
 
+        // Removes the backslash from host if there are query params to prevent something like wwww.host.com/?params
+        var absolutePath = uri.AbsolutePath.Length > 1 ? uri.AbsolutePath : String.Empty;
+        
         // Reconstruct and return the full URL
-        return $"{uri.Scheme}://{uri.Host}{uri.AbsolutePath}{encodedQueryString}";
+        return $"{uri.Scheme}://{uri.Host}{absolutePath}{encodedQueryString}";
     }
 }
