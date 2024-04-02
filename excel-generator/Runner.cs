@@ -105,6 +105,7 @@ public class Runner
             .WithComments("Very nice comment goes here")
             .WithGlobalDateFormat("dd/MM/yyyy")
             .WithGlobalHtmlTagHyperlinks()
+            .WithGlobalNewLineSeparator("")
             .AddTableSheet("Summary")
                 .WithTheme(ExcelModelDefs.ExcelThemes.TableStyleLight1)
                 .WithTabColor("FF222222")
@@ -130,7 +131,7 @@ public class Runner
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.Hyperlink)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, true, true)
                     .WithMaxWidth(20)
-                    .WithNewLineString("<br>")
+                    .WithNewLineSeparator("<br>")
                     .TableSheet
                 .AddColumn(sheet2Column2Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.AutoDetect)
@@ -138,7 +139,7 @@ public class Runner
                     .TableSheet
                 .AddColumn(sheet2Column3Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.AutoDetect)
-                    .WithNewLineString("<br>")
+                    .WithNewLineSeparator("<br>")
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Arial, 11, false, false, false)
                     .TableSheet
                 .Workbook

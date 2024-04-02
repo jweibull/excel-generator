@@ -50,11 +50,11 @@ public class ExcelWorkbookBuilder
         return this;
     }
 
-    //public ExcelWorkbookBuilder WithGlobalNewLineString(string newLineString)
-    //{
-    //    _workbookModel.GlobalColumnBehavior.NewLineSeparator = newLineString;
-    //    return this;
-    //}
+    public ExcelWorkbookBuilder WithGlobalNewLineSeparator(string newLineSeparator)
+    {
+        _workbookModel.GlobalColumnBehavior.NewLineSeparator = newLineSeparator;
+        return this;
+    }
 
     public ExcelWorkbookBuilder WithGlobalHtmlTagHyperlinks()
     {

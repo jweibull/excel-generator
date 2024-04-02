@@ -16,5 +16,10 @@ public class ExcelGlobalBehavior
     /// This behavior Will be overriden by column specific configurations.
     /// </summary>
     public ExcelHyperlinkGlobal Hyperlink { get; set; } = new ExcelHyperlinkGlobal();
+
+    /// <summary>
+    /// Globally sets wether columns have more than one line and which is the separator, for example the <br> tag or \n
+    /// </summary>
+    public string NewLineSeparator { get; set; } = String.Empty;
 }
 

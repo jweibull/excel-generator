@@ -5,7 +5,7 @@
 /// </summary>
 internal class ExcelSheetlinkParser
 {
-    internal void PrepareHyperlinks(ExcelColumnModel column, ExcelBaseSheetModel[] allSheets, bool isMultilined)
+    internal void PrepareSheetlinks(ExcelColumnModel column, ExcelBaseSheetModel[] allSheets, bool isMultilined)
     {
         
         if (isMultilined)

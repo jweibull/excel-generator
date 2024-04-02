@@ -46,7 +46,7 @@ public class ExcelColumnModel
     /// If a cell has multiple lines, then NewLineString must define the string which separates the lines: "\n", <br>, etc.
     /// If this is empty, then the cell doesn't have multiple lines
     /// </summary>
-    public string NewLineSeparator { get; set; } = "";
+    public string NewLineSeparator { get; set; } = String.Empty;
 
     #region Build Helper Section
 

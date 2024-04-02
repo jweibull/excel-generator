@@ -5,7 +5,7 @@
       "title": "Basniak's Awesome Table",
       "author": "Basniak",
       "company": "Basniak's awesome library",
-      "comments": "Awesome Excel Generation",
+      "comments": "Awesome Excel Generation"
     },
     "globalColumnBehavior": {
       "date": {
@@ -14,9 +14,7 @@
       "hyperlink": {
         "isHtml": true
       },
-      "text": {
-        "newLineString": ""
-      }
+      "newLineSeparator": null
     },
     "watermark": {
       "text": "Rascunho",
@@ -124,7 +122,7 @@
             "maxWidth": 20,
             "dataType": 0,
             "dataFormat": "",
-            "newLineString": "<br>"
+            "newLineSeparator": "<br>"
           },
           {
             "data": [
@@ -192,7 +190,7 @@
             },
             "dataType": 4,
             "dataFormat": "",
-            "newLineString": "<br>"
+            "newLineSeparator": "<br>"
           },
           {
             "data": [

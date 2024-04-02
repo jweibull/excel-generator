@@ -30,9 +30,9 @@ public class ExcelColumnBuilder
         return this;
     }
 
-    public ExcelColumnBuilder WithNewLineString(string newLineString)
+    public ExcelColumnBuilder WithNewLineSeparator(string newLineSeparator)
     {
-        _column.NewLineSeparator = newLineString;
+        _column.NewLineSeparator = newLineSeparator;
         return this;
     }
 
