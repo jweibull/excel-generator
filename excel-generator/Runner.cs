@@ -42,60 +42,6 @@ public class Runner
 
     public void RunFluent()
     {
-        // Sheet 1
-        var sheet1HeaderData = new string[] { "Some data", "sheet links" };
-
-        var sheet1Column1Data = new string[] { "Hyperlinks Sheet", "Number Sheet" };
-        var sheet1Column2Data = new string[] { "1", "2" };
-
-        // Sheet 2
-        var sheet2HeaderData = new string[] { "MaxW20", "Regular Hyperlink", "Multiline Hyperlinks" };
-
-        var sheet2Column1Data = new string[] { "string muito muito muito muito longa", "b", "Estou na Linha 1<br>Pulei pra linha 2", "d", "e",
-                "string muito muito muito muito longa", "b", "c", "d", "e", "string muito muito muito muito longa", "b", "c", "d", "e",
-                "string muito muito muito muito longa", "b", "c", "d", "e"
-        };
-        var sheet2Column2Data = new string[] { "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
-                "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>", "", "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-                "<a href=\"http://www.apple.com\">Apple</a>", "<a href=\"http://www.github.com\">Github</a>", "<a href=\"http://www.google.com\">Google</a>",
-                "<a href=\"http://www.yahoo.com\">Yahoo</a>", "<a href=\"http://www.microsoft.com\">Microsoft</a>", "<a href=\"http://www.apple.com\">Apple</a>",
-                "<a href=\"http://www.github.com\">Github</a>", "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-                "<a href=\"http://www.microsoft.com\">Microsoft</a>", "<a href=\"http://www.apple.com\">Apple</a>", "<a href=\"http://www.github.com\">Github</a>",
-                "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>", "<a href=\"http://www.microsoft.com\">Microsoft</a>"
-        };
-        var sheet2Column3Data = new string[] { "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a><br><a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=BDV  -52416011-SP- \">BDV  -52416011-SP- </a>",
-                "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>", "", "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-                "<a href=\"http://www.apple.com\">Apple</a>", "<a href=\"http://www.github.com\">Github</a>", "<a href=\"http://www.google.com\">Google</a>",
-                "<a href=\"http://www.yahoo.com\">Yahoo</a>", "<a href=\"http://www.microsoft.com\">Microsoft</a>", "<a href=\"http://www.apple.com\">Apple</a>",
-                "<a href=\"http://www.github.com\">Github</a>", "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-                "<a href=\"http://www.microsoft.com\">Microsoft</a>", "<a href=\"http://www.apple.com\">Apple</a>", "<a href=\"http://www.github.com\">Github</a>",
-                "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>", "<a href=\"http://www.microsoft.com\">Microsoft</a>"
-        };
-        var sheet2Column4Data = new string[] { "<a href=\"http://npaa7587.petrobras.biz/WebFacil3/resultBrTecEng.aspx?strCodDoc=ADV  -54236009-SP- \">ADV  -54236009-SP- </a>",
-                "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>", "", "<a href=\"http://www.microsoft.com\">Microsoft</a>",
-                "<a href=\"http://www.apple.com\">Apple</a>", "<a href=\"http://www.github.com\">Github</a>", "<a href=\"http://www.google.com\">Google</a>",
-                "<a href=\"http://www.yahoo.com\">Yahoo</a>", "<a href=\"http://www.microsoft.com\">Microsoft</a>", "<a href=\"http://www.apple.com\">Apple</a>",
-                "<a href=\"http://www.github.com\">Github</a>", "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>",
-                "<a href=\"http://www.microsoft.com\">Microsoft</a>", "<a href=\"http://www.apple.com\">Apple</a>", "<a href=\"http://www.github.com\">Github</a>",
-                "<a href=\"http://www.google.com\">Google</a>", "<a href=\"http://www.yahoo.com\">Yahoo</a>", "<a href=\"http://www.microsoft.com\">Microsoft</a>"
-        };
-
-
-        // Sheet 3
-        var sheet3HeaderData = new string[] { "Numbers", "Auto Sum Column", "Dates", "Dates Auto" };
-
-        var sheet3Column1Data = new string[] { "100", "2000", "30", "40000", "500.54", "6", "7", "8.563", "9", "10", "20000.34", "0.237" };
-
-        var sheet3Column2Data = new string[] { "10.10", "11.11", "9.76", "8.566", "30.45", "5.87", "6.34", "8.563", "9.23", "", "10.10", "11.11" };
-
-        var sheet3Column3Data = new string[] { "12/10/1977", "13/10/1977", "14/10/1977", "15/10/1977", "16/10/1977", "", "13/10/1977", "14/10/1977", "15/10/1977", "16/10/1977",
-                "12/11/1977", "13/11/1977"
-        };
-        var sheet3Column4Data = new string[] { "12/10/1977", "16/10/1977", "18/10/1977", "10/10/1977", "10/10/1977", "25/01/1965", "11/10/1977", "11/10/1977", "11/10/1977",
-                "11/10/1977", "11/11/1977", "11/11/1977"
-        };
-
-
         var filename = GetNextFilename();
 
         var excel = ExcelWorkbookBuilder.StartWorkbook(Path.GetFileName(filename).Replace(Path.GetExtension(filename), ""))
@@ -109,13 +55,13 @@ public class Runner
             .AddTableSheet("Summary")
                 .WithTheme(ExcelModelDefs.ExcelThemes.TableStyleLight1)
                 .WithTabColor("FF222222")
-                .AddHeader(sheet1HeaderData)
+                .AddHeader(DataWithLinks.Sheet1HeaderData)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.CalibriLight, 14, true, false, false)
                     .TableSheet
-                .AddColumn(sheet1Column1Data)
+                .AddColumn(DataWithLinks.Sheet1Column1Data)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, false, false)
                     .TableSheet
-                .AddColumn(sheet1Column2Data)
+                .AddColumn(DataWithLinks.Sheet1Column2Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.Sheetlink)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
                     .TableSheet
@@ -123,21 +69,21 @@ public class Runner
             .AddTableSheet("Custom Spreadsheet Name")
                 .WithTheme(ExcelModelDefs.ExcelThemes.TableStyleLight17)
                 .WithTabColor("FFEB8638")
-                .AddHeader(sheet2HeaderData)
+                .AddHeader(DataWithLinks.Sheet2HeaderData)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.CalibriLight, 14, true, false, false)
                     .WithRowHeight(30)
                     .TableSheet
-                .AddColumn(sheet2Column1Data)
+                .AddColumn(DataWithLinks.Sheet2Column1Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.Hyperlink)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, true, true)
                     .WithMaxWidth(20)
                     .WithNewLineSeparator("<br>")
                     .TableSheet
-                .AddColumn(sheet2Column2Data)
+                .AddColumn(DataWithLinks.Sheet2Column2Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.AutoDetect)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
                     .TableSheet
-                .AddColumn(sheet2Column3Data)
+                .AddColumn(DataWithLinks.Sheet2Column3Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.AutoDetect)
                     .WithNewLineSeparator("<br>")
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Arial, 11, false, false, false)
@@ -146,33 +92,106 @@ public class Runner
             .AddTableSheet("Spreadsheet 2")
                 .WithTheme(ExcelModelDefs.ExcelThemes.TableStyleLight7)
                 .WithTabColor("FF5A8F28")
-                .AddHeader(sheet3HeaderData)
+                .AddHeader(DataWithLinks.Sheet3HeaderData)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Arial, 14, true, false, false, "FF000000")
                     .WithRowHeight(25)
                     .TableSheet
-                .AddColumn(sheet3Column1Data)
+                .AddColumn(DataWithLinks.Sheet3Column1Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.Number)
                     .WithDataFormat("#,##0.00")
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, true, true, true)
                     .WithMaxWidth(20)
                     .TableSheet
-                .AddColumn(sheet3Column2Data)
+                .AddColumn(DataWithLinks.Sheet3Column2Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.Number)
                     .WithDataFormat("R$ #,##0.00")
                     .AddSubtotal()
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
                     .TableSheet
-                .AddColumn(sheet3Column3Data)
+                .AddColumn(DataWithLinks.Sheet3Column3Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.DateTime)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, false, false, false)
                     .TableSheet
-                .AddColumn(sheet3Column4Data)
+                .AddColumn(DataWithLinks.Sheet3Column4Data)
                     .WithDataType(ExcelModelDefs.ExcelDataTypes.AutoDetect)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.Calibri, 11, false, false, false)
                     .TableSheet
                 .Workbook
             .Build();
 
+
+        //Escrever em disco
+        using (var fileStream = File.Create(filename))
+        {
+            excel.Seek(0, SeekOrigin.Begin);
+            excel.CopyTo(fileStream);
+        }
+    }
+
+    public void RunEnviron()
+    {
+        var filename = GetNextFilename();
+        // Sheet 1
+        var sheet1HeaderData = EnvironData.Headers;
+
+        Console.WriteLine(EnvironData.Headers.Count());
+
+        var excel = ExcelWorkbookBuilder.StartWorkbook(Path.GetFileName(filename).Replace(Path.GetExtension(filename), ""))
+            .DisableAuthoringMetadata()
+            .WithTitle("Excel Lib Test")
+            .WithGlobalDateFormat("dd/MM/yyyy")
+            .WithGlobalHtmlTagHyperlinks()
+            .WithGlobalNewLineSeparator("")
+            .AddTableSheet("Cronos")
+                .AddHeader(sheet1HeaderData)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 14, true, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Grupo)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, true, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Subgrupo)
+                    .WithDataType(ExcelModelDefs.ExcelDataTypes.Sheetlink)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Percentual_atual)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Percentual_corrosao_simulado)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Percentual_corrosao_pos_pintura)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Plano)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Area_a_pintar)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Nomecor)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.Cor)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.RTIs_quitadas)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.RTIs_quitadas_A)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.RTIs_quitadas_B)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.RTIs_quitadas_C)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .AddColumn(EnvironData.RTIs_quitadas_D)
+                    .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
+                    .TableSheet
+                .Workbook
+
+            .Build();
 
         //Escrever em disco
         using (var fileStream = File.Create(filename))
