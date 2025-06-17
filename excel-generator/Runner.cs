@@ -466,7 +466,8 @@ public class Runner
     {
         string outputPath = Directory.GetCurrentDirectory();
         outputPath = Path.Combine(outputPath, "..", "..", "..", "output");
-                
+        Directory.CreateDirectory(outputPath);
+        
         var nameCounter = 1;
         var baseFilename = "output";
         var filename = baseFilename;
