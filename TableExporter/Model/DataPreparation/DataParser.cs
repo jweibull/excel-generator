@@ -1,4 +1,4 @@
-﻿using TableExporter.DataPreparation;
+using TableExporter.DataPreparation;
 
 namespace TableExporter;
 
@@ -97,7 +97,7 @@ internal class DataParser
                         break;
 
                     case ExcelModelDefs.ExcelDataTypes.Sheetlink:
-                        _sheetlinkParser.PrepareSheetlinks(column, workbookModel.AllSheets, column.IsMultilined);
+                        _sheetlinkParser.PrepareSheetlinks(column, workbookModel.GetAllSheets(), column.IsMultilined);
                         _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineSeparator);
                         break;
 
@@ -147,19 +147,19 @@ internal class DataParser
             table.SetStartRow(2);
         }
 
-        if (!String.IsNullOrEmpty(globalBehavior.NewLineSeparator) && !(column.DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink))
+        if (!string.IsNullOrEmpty(globalBehavior.NewLineSeparator) && !(column.DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink))
         {
             column.IsMultilined = true;
             column.NewLineSeparator = globalBehavior.NewLineSeparator;
         }
-        else if (!String.IsNullOrEmpty(column.NewLineSeparator) && !(column.DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink))
+        else if (!string.IsNullOrEmpty(column.NewLineSeparator) && !(column.DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink))
         {
             column.IsMultilined = true;
         }
 
-        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DateTime && String.IsNullOrEmpty(column.DataFormat))
+        if (column.DataType == ExcelModelDefs.ExcelDataTypes.DateTime && string.IsNullOrEmpty(column.DataFormat))
         {
-            if (!String.IsNullOrEmpty(globalBehavior.Date.Format))
+            if (!string.IsNullOrEmpty(globalBehavior.Date.Format))
             {
                 column.DataFormat = globalBehavior.Date.Format;
             }

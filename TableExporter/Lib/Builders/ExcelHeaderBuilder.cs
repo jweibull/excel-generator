@@ -24,7 +24,7 @@ public class ExcelHeaderBuilder
         return this;
     }
 
-    public ExcelHeaderBuilder WithFont(ExcelModelDefs.ExcelFonts.FontType font, int fontSize, bool bold, bool italic, bool underlined, string fontcolor = null)
+    public ExcelHeaderBuilder WithFont(ExcelModelDefs.ExcelFonts.FontType font, int fontSize, bool bold, bool italic, bool underlined, string? fontcolor = null)
     {
         _header.Style.Font = font;
         _header.Style.FontSize = fontSize;
@@ -32,7 +32,7 @@ public class ExcelHeaderBuilder
         _header.Style.Italic = italic;
         _header.Style.Underline = underlined;
         
-        if (!String.IsNullOrEmpty(fontcolor)) 
+        if (!string.IsNullOrEmpty(fontcolor)) 
         {
             _header.Style.FontColor = fontcolor;
         }

@@ -18,11 +18,11 @@ internal class ExcelDate
 
     internal bool IsDate(ExcelColumnModel column, string format)
     {
-        if (String.IsNullOrEmpty(format))
+        if (string.IsNullOrEmpty(format))
         {
             return false;
         }    
-        if (column.Data.Any(x => !String.IsNullOrEmpty(x) && x.Length != format.Length))
+        if (column.Data.Any(x => !string.IsNullOrEmpty(x) && x.Length != format.Length))
         {
             return false;
         }
@@ -46,7 +46,7 @@ internal class ExcelDate
         DateTime date;
         while (index < dates.Length)
         {
-            if (!String.IsNullOrEmpty(dates[index]) && !_oleADates.ContainsKey(dates[index]))
+            if (!string.IsNullOrEmpty(dates[index]) && !_oleADates.ContainsKey(dates[index]))
             {
                 if (DateTime.TryParseExact(dates[index], dataFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                 {

@@ -78,7 +78,7 @@ public class ExcelFontDetail
 
     public static ExcelFontDetail GetFontStyles(ExcelModelDefs.ExcelFonts.FontType font, bool bold, bool italic, bool underline, UInt32 fontIndex, int fontSize, int theme, string fontColor = "")
     {
-        if (String.IsNullOrEmpty(fontColor))
+        if (string.IsNullOrEmpty(fontColor))
         {
             switch ((int)font)
             {

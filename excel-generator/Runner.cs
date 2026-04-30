@@ -1,43 +1,40 @@
-﻿using Newtonsoft.Json;
 using TableExporter;
+using System.Text.Json;
 
 namespace TableExporterApp;
 
 public class Runner
 {
-    public void Run()
+    public async Task Run()
     {
 
         var tableExporter = new TableExporterService();
 
-        var serializer = new JsonSerializer();
-
-        ModelData? modelData;
-
         string inputPath = Directory.GetCurrentDirectory();
         inputPath = Path.Combine(inputPath, "..", "..", "..", "input", "excel.json");
 
-        using (StreamReader sr = new StreamReader(inputPath))
-        using (var jsonTextReader = new JsonTextReader(sr))
+        await using FileStream fs = File.OpenRead(inputPath);
+
+        var options = new JsonSerializerOptions
         {
-            modelData = serializer.Deserialize<ModelData>(jsonTextReader);
-        }
+            PropertyNameCaseInsensitive = true
+        };
+
+        ModelData? modelData = await JsonSerializer.DeserializeAsync<ModelData>(fs, options);
 
         if (modelData == null)
         {
-            throw new Exception("Data input was null.");
+            throw new InvalidOperationException("Data input was null.");
         }
 
         var filename = GetNextFilename();
 
         var stream = tableExporter.GenerateSpreadsheetAsBase64(modelData.WorkbookModel);
 
-        using (var fileStream = File.Create(filename))
-        {
-            stream.Seek(0, SeekOrigin.Begin);
-            stream.CopyTo(fileStream);
-        }
+        using var fileStream = new FileStream(filename, FileMode.Create);
         
+        stream.Seek(0, SeekOrigin.Begin);
+        await stream.CopyToAsync(fileStream);
     }
 
     public void RunFluent()
@@ -137,7 +134,7 @@ public class Runner
         Console.WriteLine(EnvironData.Headers.Count());
 
         var excel = ExcelWorkbookBuilder.StartWorkbook(Path.GetFileName(filename).Replace(Path.GetExtension(filename), ""))
-            .DisableAuthoringMetadata()
+            //.DisableAuthoringMetadata()
             .WithTitle("Excel Lib Test")
             .WithGlobalDateFormat("dd/MM/yyyy")
             .WithGlobalHtmlTagHyperlinks()

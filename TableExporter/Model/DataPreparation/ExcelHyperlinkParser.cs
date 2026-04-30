@@ -1,4 +1,4 @@
-﻿using System.Collections.Specialized;
+using System.Collections.Specialized;
 using System.Net;
 using System.Web;
 
@@ -9,6 +9,9 @@ namespace TableExporter.DataPreparation;
 /// </summary>
 internal static class ExcelHyperlinkParser
 {
+    private static readonly Regex HrefRegex = new(@"<a.*?href=['""]([^'""]+).*?</a>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex StripAnchorTagRegex = new(@"(</?[a|A][^>]*>|)", RegexOptions.Compiled);
+
     internal static void PrepareHyperlinks(ExcelColumnModel column, bool isHtml, bool isMultilined, string newLineString)
     {
         if (isHtml)
@@ -37,22 +40,11 @@ internal static class ExcelHyperlinkParser
 
     internal static bool IsHyperlink(ExcelColumnModel column, bool isHtml)
     {
-        string linkSample = null;
-        if (isHtml == true)
-        {
-            linkSample = column.Data.FirstOrDefault(x => !String.IsNullOrEmpty(x) && x.Contains("href") && x.Contains("http"));
-        }
-        else
-        {
-            linkSample = column.Data.FirstOrDefault(x => !String.IsNullOrEmpty(x) && x.Contains("http"));
-        }
+        string? linkSample = isHtml
+            ? column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x) && x.Contains("href", StringComparison.OrdinalIgnoreCase) && x.Contains("http", StringComparison.OrdinalIgnoreCase))
+            : column.Data.FirstOrDefault(x => !string.IsNullOrEmpty(x) && x.Contains("http", StringComparison.OrdinalIgnoreCase));
 
-        if (linkSample != null)
-        {
-            return true;
-        }
-
-        return false;
+        return linkSample != null;
     }
 
     private static void PrepareMultilinedRegularHyperlinks(ExcelColumnModel column, string newLineString)
@@ -60,7 +52,7 @@ internal static class ExcelHyperlinkParser
         column.DataType = ExcelModelDefs.ExcelDataTypes.Text;
         var data = column.Data;
 
-        if (!String.IsNullOrEmpty(newLineString))
+        if (!string.IsNullOrEmpty(newLineString))
         {
             for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
             {
@@ -84,7 +76,7 @@ internal static class ExcelHyperlinkParser
 
         var data = column.Data;
 
-        var hasNewLineSeparator = !String.IsNullOrEmpty(newLineString);
+        var hasNewLineSeparator = !string.IsNullOrEmpty(newLineString);
 
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
@@ -95,7 +87,7 @@ internal static class ExcelHyperlinkParser
                 hyperlink = Regex.Replace(hyperlink, newLineString, Environment.NewLine, RegexOptions.IgnoreCase);
             }
 
-            var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]([^\'""]+).*?<\/a>", RegexOptions.IgnoreCase);
+            var matches = HrefRegex.Matches(hyperlink);
 
             foreach (Match match in matches.Cast<Match>())
             {
@@ -116,7 +108,7 @@ internal static class ExcelHyperlinkParser
         {
             var excelHyperlink = new ExcelHyperlink() { Hyperlink = String.Empty };
 
-            if (!String.IsNullOrEmpty(data[itemIndex]))
+            if (!string.IsNullOrEmpty(data[itemIndex]))
             {
                 excelHyperlink.Hyperlink = EncodeHyperlink(data[itemIndex]);
             }
@@ -135,13 +127,13 @@ internal static class ExcelHyperlinkParser
         for (int itemIndex = 0; itemIndex < data.Length; itemIndex++)
         {
             var excelHyperlink = new ExcelHyperlink() { Hyperlink = String.Empty };
-            if (!String.IsNullOrEmpty(data[itemIndex]))
+            if (!string.IsNullOrEmpty(data[itemIndex]))
             {
                 var hyperlink = data[itemIndex];
 
-                string text = Regex.Replace(hyperlink, "(</?[a|A][^>]*>|)", "");
+                string text = StripAnchorTagRegex.Replace(hyperlink, "");
 
-                var matches = Regex.Matches(hyperlink, @"<a.*?href=[\'""]([^\'""]+).*?<\/a>", RegexOptions.IgnoreCase);
+                var matches = HrefRegex.Matches(hyperlink);
 
                 foreach (Match match in matches.Cast<Match>())
                 {
@@ -165,8 +157,10 @@ internal static class ExcelHyperlinkParser
     /// </summary>
     private static string EncodeHyperlink(string hyperlink)
     {
-        // Parse the URL and Query String
-        var uri = new Uri(hyperlink);
+        if (!Uri.TryCreate(hyperlink, UriKind.Absolute, out var uri) || uri == null)
+        {
+            return hyperlink;
+        }
 
         var queryParts = HttpUtility.ParseQueryString(uri.Query);
 

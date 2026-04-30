@@ -109,7 +109,7 @@ internal class StyleParser
 
         var styleKey = key + column.DataType.ToString();
 
-        if (!String.IsNullOrEmpty(column.DataFormat))
+        if (!string.IsNullOrEmpty(column.DataFormat))
         {
             var numFormatId = AddNumFormatToDictionary(column.DataFormat);
             styleKey = styleKey + numFormatId.ToString();
@@ -187,7 +187,7 @@ internal class StyleParser
         
         var regex = new Regex(ExcelLibConstants.Configuration.ColorPattern);
         
-        if (!String.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
+        if (!string.IsNullOrEmpty(styles.FontColor) && regex.IsMatch(styles.FontColor))
         {
             key = styles.Font.ToString() + styles.FontSize.ToString() + styles.FontColor + styles.Bold.ToString() + styles.Italic.ToString() + styles.Underline.ToString();
         }

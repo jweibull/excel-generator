@@ -1,4 +1,4 @@
-﻿namespace TableExporter;
+namespace TableExporter;
 
 /// <summary>
 /// The Main Workbook Model container. Holds all data and metadata.
@@ -23,7 +23,7 @@ public class ExcelWorkbookModel
     /// <summary>
     /// The data to generate a watermark image
     /// </summary>
-    public Watermark Watermark { get; set; } = null;
+    public Watermark? Watermark { get; set; } = null;
     
     /// <summary>
     /// List of all spreadsheets for this workbook, with tabular data and styling.
@@ -34,23 +34,13 @@ public class ExcelWorkbookModel
     /// List of all plot sheets for this workbook, with plot, their data and styling.
     /// </summary>
     public List<ExcelChartSheetModel> Charts { get; set; } = new List<ExcelChartSheetModel>();
-    
-    public ExcelBaseSheetModel[] AllSheets
-    {
-        get
-        {
-            var allSheets = new List<ExcelBaseSheetModel>();
 
-            if (Tables != null)
-            {
-                allSheets.AddRange(Tables);
-            }
-            if (Charts != null)
-            {
-                allSheets.AddRange(Charts);
-            }
-
-            return allSheets.OrderBy(x => x.TabIndex).ToArray();
-        }
-    }
+    /// <summary>
+    /// Returns all table and chart sheets ordered by tab index.
+    /// </summary>
+    public ExcelBaseSheetModel[] GetAllSheets() =>
+        Tables.Cast<ExcelBaseSheetModel>()
+            .Concat(Charts)
+            .OrderBy(x => x.TabIndex)
+            .ToArray();
 }

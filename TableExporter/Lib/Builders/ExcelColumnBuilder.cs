@@ -1,4 +1,4 @@
-﻿namespace TableExporter;
+namespace TableExporter;
 
 public class ExcelColumnBuilder
 {
@@ -44,9 +44,9 @@ public class ExcelColumnBuilder
 
     public ExcelColumnBuilder AddSubtotal()
     {
-        if (!(_column.DataType == ExcelModelDefs.ExcelDataTypes.Number))
+        if (_column.DataType != ExcelModelDefs.ExcelDataTypes.Number)
         {
-            throw new Exception("Can't apply subtotal on a non numeric column");
+            throw new InvalidOperationException("Subtotal can only be applied to numeric columns.");
         }
 
         _column.HasSubtotal = true;
@@ -54,7 +54,7 @@ public class ExcelColumnBuilder
         return this;
     }
     
-    public ExcelColumnBuilder WithFont(ExcelModelDefs.ExcelFonts.FontType font, int fontSize, bool bold, bool italic, bool underlined, string fontcolor = null)
+    public ExcelColumnBuilder WithFont(ExcelModelDefs.ExcelFonts.FontType font, int fontSize, bool bold, bool italic, bool underlined, string? fontcolor = null)
     {
         _column.Style.Font = font;
         _column.Style.FontSize = fontSize;
@@ -62,7 +62,7 @@ public class ExcelColumnBuilder
         _column.Style.Italic = italic;
         _column.Style.Underline = underlined;
 
-        if (!String.IsNullOrEmpty(fontcolor))
+        if (!string.IsNullOrEmpty(fontcolor))
         {
             _column.Style.FontColor = fontcolor;
         }

@@ -100,7 +100,7 @@ public class TableExporterService : ITableExporterService
             writer.Close();
         }
         
-        if (!String.IsNullOrEmpty(workbookModel.AuthoringMetadata.Company))
+        if (!string.IsNullOrEmpty(workbookModel.AuthoringMetadata.Company))
         {
             document.AddExtendedFilePropertiesPart();
             if (document.ExtendedFilePropertiesPart != null)
@@ -144,7 +144,7 @@ public class TableExporterService : ITableExporterService
     {
         foreach (var link in linkColumn.HyperLinkData)
         {
-            if (!String.IsNullOrEmpty(link.Hyperlink))
+            if (!string.IsNullOrEmpty(link.Hyperlink))
             {
                 var id = $"lId{partIdSequencer++}";
                 workSheetPart.AddHyperlinkRelationship(new Uri(link.Hyperlink, UriKind.Absolute), true, id);
@@ -183,7 +183,7 @@ public class TableExporterService : ITableExporterService
                         
             writer.WriteStartElement(new Worksheet());
 
-            if (!String.IsNullOrEmpty(sheetModel.TabColor))
+            if (!string.IsNullOrEmpty(sheetModel.TabColor))
             {
                WriteSheetTabColorSection(writer, sheetModel);
             }
@@ -410,7 +410,7 @@ public class TableExporterService : ITableExporterService
             
                     for (int rowNum = 2; rowNum <= linkColumn.HyperLinkData.Length + 1; rowNum++)
                     {
-                        if (!String.IsNullOrEmpty(linkColumn.HyperLinkData[rowNum - rowShift].Hyperlink))
+                        if (!string.IsNullOrEmpty(linkColumn.HyperLinkData[rowNum - rowShift].Hyperlink))
                         {
                             hyperlink.Reference =$"{GetColumnName(columnNum)}{rowNum}";
                             hyperlink.Id = linkColumn.HyperLinkData[rowNum - rowShift].LinkId;
@@ -425,7 +425,7 @@ public class TableExporterService : ITableExporterService
 
                     for (int rowNum = 2; rowNum <= linkColumn.SheetlinkData.Length + 1; rowNum++)
                     {
-                        if (!String.IsNullOrEmpty(linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink))
+                        if (!string.IsNullOrEmpty(linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink))
                         {
                             hyperlink.Reference = $"{GetColumnName(columnNum)}{rowNum}";
                             hyperlink.Location = linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink;
@@ -536,7 +536,7 @@ public class TableExporterService : ITableExporterService
                     writer.WriteElement(new Underline());
                 }
                 writer.WriteElement(new FontSize() { Val = font.FontSize });
-                if (String.IsNullOrEmpty(font.FontColor))
+                if (string.IsNullOrEmpty(font.FontColor))
                 {
                     writer.WriteElement(new Color() { Theme = font.Theme });
                 }
