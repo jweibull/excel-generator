@@ -1,8 +1,8 @@
 ﻿using TableExporterApp;
 
 var runner = new Runner();
-//runner.Run();
-runner.RunEnviron();
-//runner.RunFluent();
-//runner.RunMockData();
+//await runner.Run();
+await runner.RunEnviron();
+//await runner.RunFluent();
+//await runner.RunMockData();
 

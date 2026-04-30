@@ -5,17 +5,17 @@
 /// </summary>
 internal class ExcelSharedString
 {
-    private readonly Dictionary<string, string> _sharedStringsToIndex;
+    private readonly Dictionary<string, int> _sharedStringsToIndex;
     private int _sharedStringsTotalCount;
     
     internal ExcelSharedString()
     {
-        _sharedStringsToIndex = new Dictionary<string, string>();
+        _sharedStringsToIndex = new Dictionary<string, int>();
     }
     
-    internal Dictionary <string, string> SharedStringsToIndex { get { return _sharedStringsToIndex; } }
+    internal Dictionary <string, int> SharedStringsToIndex { get { return _sharedStringsToIndex; } }
 
-    internal string GetValue(string key)
+    internal int GetValue(string key)
     {
         return _sharedStringsToIndex[key];
     }
@@ -42,7 +42,7 @@ internal class ExcelSharedString
             else
             {
                 count++;
-                _sharedStringsToIndex.Add(sharedStrings[itemIndex], _sharedStringsToIndex.Count().ToString());
+                _sharedStringsToIndex.Add(sharedStrings[itemIndex], _sharedStringsToIndex.Count);
             }
         }
         _sharedStringsTotalCount += count;

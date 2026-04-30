@@ -37,7 +37,7 @@ public class Runner
         await stream.CopyToAsync(fileStream);
     }
 
-    public void RunFluent()
+    public async Task RunFluent()
     {
         var filename = GetNextFilename();
 
@@ -125,7 +125,7 @@ public class Runner
         }
     }
 
-    public void RunEnviron()
+    public async Task RunEnviron()
     {
         var filename = GetNextFilename();
         // Sheet 1
@@ -147,7 +147,6 @@ public class Runner
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, true, false, false)
                     .TableSheet
                 .AddColumn(EnvironData.Subgrupo)
-                    .WithDataType(ExcelModelDefs.ExcelDataTypes.Sheetlink)
                     .WithFont(ExcelModelDefs.ExcelFonts.FontType.TimesNewRoman, 11, false, false, false)
                     .TableSheet
                 .AddColumn(EnvironData.Percentual_atual)
@@ -198,7 +197,7 @@ public class Runner
         }
     }
 
-    public void RunMockData()
+    public async Task RunMockData()
     {
         var sheet1HeaderData = new string[80];
         for (int i = 0; i < sheet1HeaderData.Length; i++)

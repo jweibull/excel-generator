@@ -32,11 +32,10 @@ internal class StyleParser
         foreach (var table in workbookModel.Tables)
         {
             table.Header = CreateHeaderStyle(table.Header);
-            var columns = table.Columns.ToArray();
-            for (int columnNumber = 0; columnNumber < columns.Length; columnNumber++)
+            for (int columnNumber = 0; columnNumber < table.Columns.Count; columnNumber++)
             {
-                var column = columns[columnNumber];
-                columns[columnNumber] = CreateStylesForeachType(column.DataType, column);
+                var column = table.Columns[columnNumber];
+                table.Columns[columnNumber] = CreateStylesForeachType(column.DataType, column);
             }
         }
         //TODO Add Chart Fonts;
@@ -236,7 +235,7 @@ internal class StyleParser
     {
         if (!_styleFormats.ContainsKey(styleKey))
         {
-            var styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)_styleFormats.Count() + 1);
+            var styleFormat = new ExcelStyleFormat(fontIdx, numFormatIdx, cellStyleIdx, fillIdx, borderIdx, (UInt32)_styleFormats.Count + 1);
             styleFormat.ApplyFont = applyFont;
             styleFormat.ApplyNumFormat = applyNumFormat;
             _styleFormats.Add(styleKey, styleFormat);

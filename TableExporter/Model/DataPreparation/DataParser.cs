@@ -23,9 +23,9 @@ internal class DataParser
         return _sharedString.GetSharedStringCount();
     }
 
-    internal string[] GetSharedStrings()
+    internal IEnumerable<string> GetSharedStrings()
     {
-        return _sharedString.SharedStringsToIndex.Keys.ToArray();
+        return _sharedString.SharedStringsToIndex.Keys;
     }
 
     internal string GetValue(ExcelModelDefs.ExcelDataTypes type, string key)
@@ -35,7 +35,7 @@ internal class DataParser
             case ExcelModelDefs.ExcelDataTypes.Text:
             case ExcelModelDefs.ExcelDataTypes.Hyperlink:
             case ExcelModelDefs.ExcelDataTypes.Sheetlink:
-                return _sharedString.GetValue(key);
+                return _sharedString.GetValue(key).ToString();
 
             case ExcelModelDefs.ExcelDataTypes.DateTime:
                 return _excelDate.GetValue(key);
@@ -71,9 +71,11 @@ internal class DataParser
 
     internal void PrepareData(ExcelWorkbookModel workbookModel)
     {
+        var allSheets = workbookModel.GetAllSheets();
+
         foreach (var table in workbookModel.Tables)
         {
-            if (table.Header.Data.Length != table.Columns.Count())
+            if (table.Header.Data.Length != table.Columns.Count)
             {
                 throw new Exception("Length of Headers and number of columns must match");
             }
@@ -97,7 +99,7 @@ internal class DataParser
                         break;
 
                     case ExcelModelDefs.ExcelDataTypes.Sheetlink:
-                        _sheetlinkParser.PrepareSheetlinks(column, workbookModel.GetAllSheets(), column.IsMultilined);
+                        _sheetlinkParser.PrepareSheetlinks(column, allSheets, column.IsMultilined);
                         _sharedString.AddToSharedStringDictionary(column.Data, column.IsMultilined, column.NewLineSeparator);
                         break;
 

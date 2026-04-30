@@ -36,7 +36,7 @@ public class TableExporterService : ITableExporterService
             var partId = 1;
             var linksId = 1;
             List<string> sheetPartIds = new List<string>();
-            var numSheets = workbookModel.Tables.Count();
+            var numSheets = workbookModel.Tables.Count;
 
             for (int sheetNum = 1; sheetNum <= numSheets; sheetNum++)
             {
@@ -48,12 +48,15 @@ public class TableExporterService : ITableExporterService
 
                 var sheetModel = workbookModel.Tables[sheetNum - 1];
                 var allColumns = sheetModel.Columns;
-                var hyperlinkColumns = allColumns.Where(x => x.DataType == ExcelModelDefs.ExcelDataTypes.Hyperlink).ToList();
                 try
                 {
-                    foreach (var linkColumn in hyperlinkColumns)
+                    for (var columnIndex = 0; columnIndex < allColumns.Count; columnIndex++)
                     {
-                        linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
+                        var linkColumn = allColumns[columnIndex];
+                        if (linkColumn.DataType == ExcelModelDefs.ExcelDataTypes.Hyperlink)
+                        {
+                            linksId = GenerateHyperlinkParts(workSheetPart, linkColumn, linksId);
+                        }
                     }
                 }
                 catch
@@ -63,8 +66,9 @@ public class TableExporterService : ITableExporterService
                 
                 int numRows = allColumns.Select(x => x.Data.Length).Max() + sheetModel.StartRow;
 
-                GenerateWorkSheetData(workSheetPart, sheetModel, allColumns.ToArray(), numRows, sheetPartId, parser, styleParser);
-                GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, sheetModel.StartRow, numRows);
+                var columnNames = BuildColumnNames(allColumns.Count);
+                GenerateWorkSheetData(workSheetPart, sheetModel, allColumns, columnNames, numRows, sheetPartId, parser, styleParser);
+                GenerateTableParts(sheetTablesPart, (UInt32)sheetNum, sheetModel.Header, sheetModel.Theme, sheetModel.StartRow, numRows, columnNames);
             }
 
             // Create the worksheet and sheets list to end the package
@@ -174,12 +178,12 @@ public class TableExporterService : ITableExporterService
         }
     }
 
-    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, ExcelColumnModel[] allColumns, int numRows, string sheetPartId, DataParser parser, StyleParser styleParser)
+    private void GenerateWorkSheetData(WorksheetPart workSheetPart, ExcelTableSheetModel sheetModel, List<ExcelColumnModel> allColumns, string[] columnNames, int numRows, string sheetPartId, DataParser parser, StyleParser styleParser)
     {
         using (var writer = OpenXmlWriter.Create(workSheetPart))
         {
             var headers = sheetModel.Header;
-            var numColumns = allColumns.Count();
+            var numColumns = allColumns.Count;
                         
             writer.WriteStartElement(new Worksheet());
 
@@ -196,18 +200,18 @@ public class TableExporterService : ITableExporterService
 
             if(sheetModel.StartRow > 1)
             {
-                WriteSheetDataSubtotalRow(writer, sheetModel.StartRow, numColumns, numRows, allColumns, styleParser);
+                WriteSheetDataSubtotalRow(writer, sheetModel.StartRow, numColumns, numRows, allColumns, columnNames, styleParser);
             }
             
             WriteSheetDataHeaderRow(writer, sheetModel.StartRow, numColumns, headers, parser, styleParser);
 
-            WriteSheetDataColumns(writer, sheetModel.StartRow, numColumns, numRows, allColumns, parser, styleParser);
+            WriteSheetDataColumns(writer, sheetModel.StartRow, numColumns, numRows, allColumns, columnNames, parser, styleParser);
 
             // write the end SheetData element
             writer.WriteEndElement();
 
             //HyperlinksInfo
-            WriteLinksSection(writer, sheetModel.StartRow, numColumns, allColumns);
+            WriteLinksSection(writer, sheetModel.StartRow, numColumns, allColumns, columnNames);
 
             // Table Info
             writer.WriteStartElement(new TableParts() { Count = 1 });
@@ -265,7 +269,7 @@ public class TableExporterService : ITableExporterService
         writer.WriteEndElement();
     }
 
-    private void WriteSheetColumnDescriptionSection(OpenXmlWriter writer, int numColumns, ExcelHeaderModel headers, ExcelColumnModel[] allColumns)
+    private void WriteSheetColumnDescriptionSection(OpenXmlWriter writer, int numColumns, ExcelHeaderModel headers, List<ExcelColumnModel> allColumns)
     {
         writer.WriteStartElement(new Columns());
 
@@ -281,7 +285,7 @@ public class TableExporterService : ITableExporterService
         writer.WriteEndElement();
     }
 
-    private void WriteSheetDataSubtotalRow(OpenXmlWriter writer, int startRow, int numColumns, int numRows, ExcelColumnModel[] allColumns, StyleParser styleParser)
+    private void WriteSheetDataSubtotalRow(OpenXmlWriter writer, int startRow, int numColumns, int numRows, List<ExcelColumnModel> allColumns, string[] columnNames, StyleParser styleParser)
     {
         Cell cell = new Cell();
         CellFormula cellFormula = new CellFormula();
@@ -292,12 +296,12 @@ public class TableExporterService : ITableExporterService
         {
             if (allColumns[columnNum - 1].HasSubtotal)
             {
-                cell.CellReference = $"{GetColumnName(columnNum)}{startRow-1}";
+                var columnName = columnNames[columnNum - 1];
+                cell.CellReference = $"{columnName}{startRow-1}";
                 cell.DataType = CellValues.SharedString;
                 cell.StyleIndex = styleParser.StyleIndexes[allColumns[columnNum - 1].StyleKey];
                 writer.WriteStartElement(cell);
 
-                var columnName = GetColumnName(columnNum);
                 cellFormula.Text = $"SUBTOTAL(9, {columnName}{startRow+1}:{columnName}${numRows})";
                 writer.WriteElement(cellFormula);
 
@@ -337,7 +341,7 @@ public class TableExporterService : ITableExporterService
         writer.WriteEndElement();
     }
 
-    private void WriteSheetDataColumns(OpenXmlWriter writer, int startRow, int numColumns, int numRows, ExcelColumnModel[] allColumns, DataParser parser, StyleParser styleParser)
+    private void WriteSheetDataColumns(OpenXmlWriter writer, int startRow, int numColumns, int numRows, List<ExcelColumnModel> allColumns, string[] columnNames, DataParser parser, StyleParser styleParser)
     {
         Row row = new Row();
         Cell cell = new Cell();
@@ -356,9 +360,9 @@ public class TableExporterService : ITableExporterService
                 var columnIndex = columnNum - 1;
                 var rowIndex = rowNum - rowShift;
                 var currentColumn = allColumns[columnIndex];
-                if (allColumns.Length > (columnIndex) && allColumns[columnIndex].Data.Length > (rowIndex))
+                if (allColumns.Count > columnIndex && allColumns[columnIndex].Data.Length > rowIndex)
                 {
-                    cell.CellReference = $"{GetColumnName(columnNum)}{rowNum}";
+                    cell.CellReference = $"{columnNames[columnIndex]}{rowNum}";
                     cell.StyleIndex = styleParser.StyleIndexes[currentColumn.StyleKey];
 
                     SetCellValue(currentColumn, cell, cellValue, allColumns, rowIndex, columnIndex, parser, styleParser);
@@ -372,7 +376,7 @@ public class TableExporterService : ITableExporterService
         }
     }
 
-    private void SetCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, ExcelColumnModel[] allColumns, int rowIndex, int columnIndex, DataParser parser, StyleParser styleParser)
+    private void SetCellValue(ExcelColumnModel currentColumn, Cell cell, CellValue cellValue, List<ExcelColumnModel> allColumns, int rowIndex, int columnIndex, DataParser parser, StyleParser styleParser)
     {
         cellValue.Text = parser.GetValue(currentColumn.DataType, allColumns[columnIndex].Data[rowIndex]);
         switch (currentColumn.DataType)
@@ -393,11 +397,22 @@ public class TableExporterService : ITableExporterService
         }
     }
 
-    private void WriteLinksSection(OpenXmlWriter writer, int startRow, int numColumns, ExcelColumnModel[] allColumns)
+    private void WriteLinksSection(OpenXmlWriter writer, int startRow, int numColumns, List<ExcelColumnModel> allColumns, string[] columnNames)
     {
         var rowShift = startRow + 1;
 
-        if (allColumns.Any(x => x.DataType == ExcelModelDefs.ExcelDataTypes.Hyperlink || x.DataType == ExcelModelDefs.ExcelDataTypes.Sheetlink))
+        var hasLinks = false;
+        for (var i = 0; i < allColumns.Count; i++)
+        {
+            var dataType = allColumns[i].DataType;
+            if (dataType == ExcelModelDefs.ExcelDataTypes.Hyperlink || dataType == ExcelModelDefs.ExcelDataTypes.Sheetlink)
+            {
+                hasLinks = true;
+                break;
+            }
+        }
+
+        if (hasLinks)
         {
             writer.WriteStartElement(new Hyperlinks());
             
@@ -412,7 +427,7 @@ public class TableExporterService : ITableExporterService
                     {
                         if (!string.IsNullOrEmpty(linkColumn.HyperLinkData[rowNum - rowShift].Hyperlink))
                         {
-                            hyperlink.Reference =$"{GetColumnName(columnNum)}{rowNum}";
+                            hyperlink.Reference =$"{columnNames[columnNum - 1]}{rowNum}";
                             hyperlink.Id = linkColumn.HyperLinkData[rowNum - rowShift].LinkId;
                             writer.WriteElement(hyperlink);
                         }
@@ -427,7 +442,7 @@ public class TableExporterService : ITableExporterService
                     {
                         if (!string.IsNullOrEmpty(linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink))
                         {
-                            hyperlink.Reference = $"{GetColumnName(columnNum)}{rowNum}";
+                            hyperlink.Reference = $"{columnNames[columnNum - 1]}{rowNum}";
                             hyperlink.Location = linkColumn.SheetlinkData[rowNum - rowShift].Sheetlink;
                             writer.WriteElement(hyperlink);
                         }
@@ -438,13 +453,13 @@ public class TableExporterService : ITableExporterService
         }
     }
 
-    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelModelDefs.ExcelThemes theme, int startRow, int numRows)
+    private void GenerateTableParts(TableDefinitionPart sheetTablesPart, UInt32 tableId, ExcelHeaderModel headers, ExcelModelDefs.ExcelThemes theme, int startRow, int numRows, string[] columnNames)
     {
-        var numColumns = headers.Data.Count();
+        var numColumns = headers.Data.Length;
 
         using (var writer = OpenXmlWriter.Create(sheetTablesPart))
         {
-            var reference = $"A{startRow}:{GetColumnName(numColumns)}{numRows}";
+            var reference = $"A{startRow}:{columnNames[numColumns - 1]}{numRows}";
             var tableName = $"Table{tableId}";
             var table = new Table()
             {
@@ -635,7 +650,7 @@ public class TableExporterService : ITableExporterService
             
             // Add all alignment and apply numberformat features
             
-            var cellXfsCount = styleParser.StyleFormats.Count() + 1;
+            var cellXfsCount = styleParser.StyleFormats.Count + 1;
 
             //Start CellStyleFormats section
             writer.WriteStartElement(new CellFormats() { Count = (UInt32)cellXfsCount });
@@ -677,7 +692,7 @@ public class TableExporterService : ITableExporterService
             writer.WriteStartElement(new CellStyles() { Count = (UInt32)cellStylesCount });
 
             writer.WriteElement(new CellStyle() { Name = "Normal", FormatId = (UInt32)0, BuiltinId = (UInt32)0 });
-            if (styleParser.HyperlinkFormats.Count() > 0)
+            if (styleParser.HyperlinkFormats.Count > 0)
             {
                 writer.WriteElement(new CellStyle() { Name = "Hyperlink", FormatId = (UInt32)1, BuiltinId = (UInt32)8 });
             }
@@ -771,6 +786,17 @@ public class TableExporterService : ITableExporterService
         }
 
         return width;
+    }
+
+    private string[] BuildColumnNames(int count)
+    {
+        var columnNames = new string[count];
+        for (var i = 0; i < count; i++)
+        {
+            columnNames[i] = GetColumnName(i + 1);
+        }
+
+        return columnNames;
     }
 
     //A simple helper to get the column name from the column index. This is not well tested!
